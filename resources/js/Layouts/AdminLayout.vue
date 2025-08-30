@@ -70,6 +70,8 @@ const overlayStyles = computed(() => {
   }
   return { display: 'none' }
 })
+
+//asdasd 
 </script>
 
 <template>
@@ -129,7 +131,7 @@ const overlayStyles = computed(() => {
         </div>
       </div>
     </div>
-
+  
     <div class="flex-grow-1 bg-light right" :style="rightContentStyles">
       <div class="sidebar-overlay" :style="overlayStyles" @click="closeSidebar"></div>
 
