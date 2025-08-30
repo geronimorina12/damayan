@@ -17,7 +17,7 @@ class AdminSeeder extends Seeder
     {
         FacadesDB::table('users')->insert([
             'name' => 'Rina Geronimo',
-            'email' => 'jobelgolde43@gmail.com',
+            'email' => 'geronimorina76@gmail.com',
             'email_verified_at' => now(), 
             'password' => Hash::make('iamrina123'),
             'role' => 'admin',

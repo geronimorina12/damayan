@@ -25,7 +25,6 @@ function submit() {
     <Head title="Add Official" />
   <div class="main-container">
     <AdminLayout>
-    <HeaderComponent />
     <div class="container border-0 pt-2">
       <div class="card-body px-3 ">
         <h3 class=" fw-light">Add official</h3>
