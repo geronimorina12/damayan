@@ -57,46 +57,11 @@ const roles = [
     {
         name: "Collector",
         description: "Jurisdiction-based",
-        users: colectorCount.value + (colectorCount.value > 1 ? " users" : " user"),
+        users: 4,
         access: "Status updates",
         icon: "bi bi-people",
     },
-    {
-        name: "president",
-        description: "Full access",
-        users: presidentCount.value + (presidentCount.value > 1 ? " users" : " user"),
-        access: "Full modules",
-        icon: "bi bi-person",
-    }
-    ,
-    {
-        name: "Vice President",
-        description: "Full access",
-        users: vicePresidentCount.value + (vicePresidentCount.value > 1 ? " users" : " user"),
-        access: "Full modules",
-        icon: "bi bi-person",
-    },
-    {
-        name: "Secretary",
-        description: "Full access",
-        users: secretaryCount.value + (secretaryCount.value > 1 ? " users" : " user"),
-        access: "Full modules",
-        icon: "bi bi-person",
-    },
-    {
-        name: "Purok Leader",
-        description: "Jurisdiction-based",
-        users: purokLeaderCount.value + (purokLeaderCount.value > 1 ? " users" : " user"),
-        access: "Status updates",
-        icon: "bi bi-people",
-    },
-    {
-        name: "Treasurer",
-        description: "Jurisdiction-based",
-        users: treasurerCount.value + (treasurerCount.value > 1 ? " users" : " user"),
-        access: "Status updates",
-        icon: "bi bi-people",
-    },
+    
 ];
 const viewFunc = () => {
     if (!selectedRole.value) {

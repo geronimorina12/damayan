@@ -58,6 +58,8 @@ Route::prefix('contribution')->name('contributions.')->middleware('auth')->group
 //reports
 Route::prefix('reports')->name('reports.')->middleware('auth')->group(function (){
     Route::get('/view-reports', [ReportController::class, 'index'])->name('index');
+    Route::get('/add-collector-route', [ReportController::class, 'addCollector'])->name('addCollector');
+     Route::post('/add-collector', [ReportController::class, 'storeCollector'])->name('storeCollector');
 });
 
 // Official

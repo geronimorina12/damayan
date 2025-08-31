@@ -24,9 +24,14 @@ watch(() => props.contributions, (newContributions) => {
         <AdminLayout>
 
                 <div class="container-fluid px-0 report-container">
-                    <div class="head container">
-                    <h5 class="mb-0 mx-3">Report</h5>
-                </div>
+                    <div class="head container d-flex flex-row justify-content-between align-items-center">
+                        <div><h5 class="mb-0 mx-3">Report</h5></div>
+                        <div>
+                            <Link :href="route('reports.addCollector')" class="btn btn-primary">
+                                Add Collector
+                            </Link>
+                        </div>
+                     </div>
                 <div class="container">
                     <ContributionReportForAdmin :contributions="getContributions"/>
                     <RecentContributionForAdmin :recent="getContributions" />

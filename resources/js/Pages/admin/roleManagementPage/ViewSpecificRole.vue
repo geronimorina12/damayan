@@ -32,7 +32,6 @@ const formatDate = (dateString) => {
 <template>
   <Head title="Role Management" />
   <AdminLayout>
-    <HeaderComponent />
     <div class="container mt-4">
       <h2 class="mb-3">Users</h2>
       <div class="table-responsive table-striped" v-if="getUsers.length > 0">
