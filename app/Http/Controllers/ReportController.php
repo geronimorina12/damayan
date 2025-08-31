@@ -13,7 +13,7 @@ class ReportController extends Controller
      public function index()
     {
 
-        $collectors = User::where('role', 'collector')->select('id', 'name', 'purok')->get();
+    $collectors = User::where('role', 'collector')->select('id', 'name', 'purok')->get();
 
     // Load all contributions with needed fields
     $contributions = ContributionModel::select('collector', 'status', 'amount', 'created_at')->get();

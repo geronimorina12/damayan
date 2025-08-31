@@ -1,81 +1,32 @@
 <script setup>
-import { defineProps, ref, watch, computed } from 'vue';
+import { defineProps } from 'vue';
 
 const props = defineProps({
-    activeStatus: {
-        type: String,
-        default: 'paid' // ✅ default to paid
-    },
-    contributionsIds: {
-        type: Array,
-        default: () => []
-    },
-    members: {
-        type: Array,
-        default: () => []
-    }
-});
-
-let getActiveStatus = ref('paid'); 
-let getContributionsIds = ref([]);
-let getMembers = ref([]);
-
-// Watchers
-watch(() => props.activeStatus, (newStatus) => {
-    getActiveStatus.value = newStatus;
-}, { immediate: true });
-
-watch(() => props.contributionsIds, (newIds) => {
-    getContributionsIds.value = newIds;
-}, { immediate: true });
-
-watch(() => props.members, (newMembers) => {
-    getMembers.value = newMembers;
-}, { immediate: true });
-
-// Toggle Status
-const toggleStatusFunc = (status) => {
-    getActiveStatus.value = status;
-};
-
-// Computed filtered members
-const filteredMembers = computed(() => {
-    if (getActiveStatus.value === 'paid') {
-        // Show only members with contribution IDs (paid)
-        return getMembers.value.filter(m => 
-            getContributionsIds.value.includes(m.id)
-        );
-    } else if (getActiveStatus.value === 'not_paid') {
-        // Show only members NOT in contribution IDs (unpaid)
-        return getMembers.value.filter(m => 
-            !getContributionsIds.value.includes(m.id)
-        );
-    }
-    return getMembers.value;
+    activeStatus: { type: String, default: 'paid' },
+    contributionsIds: { type: Array, default: () => [] },
+    members: { type: Array, default: () => [] }
 });
 </script>
 
 <template>
     <div>
-        <!-- STATUS TOGGLE -->
+        <!-- STATUS TOGGLE (still here to switch parent filter) -->
         <div class="container-fluid d-flex gap-3 align-items-center mb-3">
             <h5 
                 class="choice" 
-                :class="{'text-success': getActiveStatus == 'paid'}"
-                @click="toggleStatusFunc('paid')">
+                :class="{'text-success': activeStatus == 'paid'}">
                 PAID
             </h5>
             <h5 
                 class="choice" 
-                :class="{'text-success': getActiveStatus == 'not_paid'}"
-                @click="toggleStatusFunc('not_paid')">
+                :class="{'text-success': activeStatus == 'not_paid'}">
                 UNPAID
             </h5>
         </div>
 
         <!-- MEMBERS TABLE -->
         <div class="table-responsive table-container">
-            <table class="table" v-if="filteredMembers.length > 0">
+            <table class="table" v-if="members.length > 0">
                 <thead>
                     <tr>
                         <th class="bg-light">ID</th>
@@ -87,19 +38,15 @@ const filteredMembers = computed(() => {
                 </thead>
 
                 <tbody>
-                    <tr v-for="member in filteredMembers" :key="member.id">
+                    <tr v-for="member in members" :key="member.id">
                         <td class="bg-light">{{ member.id }}</td>
                         <td class="bg-light">
                             {{ member.first_name }} {{ member.middle_name }} {{ member.last_name }}
                         </td>
-                        <td class="bg-light">
-                            {{ member.contact_number }}
-                        </td>
-                        <td class="bg-light">
-                            {{ member.purok }}
-                        </td>
+                        <td class="bg-light">{{ member.contact_number }}</td>
+                        <td class="bg-light">{{ member.purok }}</td>
                         <td class="bg-light text-center">
-                            <i class="bi bi-check-circle text-success fs-5" v-if="getContributionsIds.includes(member.id)"></i>
+                            <i class="bi bi-check-circle text-success fs-5" v-if="contributionsIds.includes(member.id)"></i>
                             <i class="bi bi-ban text-danger fs-5" v-else></i>
                         </td>
                     </tr>
@@ -112,6 +59,7 @@ const filteredMembers = computed(() => {
         </div>
     </div>
 </template>
+
 
 <style lang="css" scoped>
 .choice {

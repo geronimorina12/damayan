@@ -1,6 +1,6 @@
 <script setup>
 import { ref, onMounted, onUnmounted, computed } from 'vue'
-import { Link, router } from '@inertiajs/vue3'
+import { Link, router, usePage } from '@inertiajs/vue3'
 import HeaderComponent from '@/Components/dashboard/HeaderComponent.vue'
 
 const toggleSidebar = ref(true)
@@ -70,6 +70,10 @@ const overlayStyles = computed(() => {
   }
   return { display: 'none' }
 })
+
+const currentRoute = usePage().url;
+const user = usePage().props.auth?.user;
+
 </script>
 
 <template>
@@ -84,27 +88,51 @@ const overlayStyles = computed(() => {
       <div class="nav flex-column">
         <hr class="hr">
         <Link :href="route('collectorProfile.profile')" class="nav-link text-dark d-flex align-items-center py-0" @click="closeSidebar">
-          <i class="bi bi-person-circle me-2"></i> User
+          <i class="bi bi-person-circle me-2"></i> {{ user.name || 'User' }}
         </Link>
         <hr class="hr">
 
-        <Link href="/dashboard" class="nav-link text-dark d-flex align-items-center" @click="closeSidebar">
+        <Link href="/dashboard" 
+        class="nav-link text-dark d-flex align-items-center"
+         @click="closeSidebar"
+         :class="{ active: currentRoute === '/dashboard' }"
+         >
           <i class="bi bi-house-door me-2"></i> Dashboard
         </Link>
 
-        <Link :href="route('collector.viewMembersAsCollector')" class="nav-link text-dark d-flex align-items-center" @click="closeSidebar">
+        <Link 
+        :href="route('collector.viewMembersAsCollector')" 
+        class="nav-link text-dark d-flex align-items-center" 
+        @click="closeSidebar"
+        :class="{ active: currentRoute.includes('/view-members-as-collector') }"
+        >
           <i class="bi bi-people me-2"></i> All Members
         </Link>
 
-        <Link :href="route('collectorContribution.index')" class="nav-link text-dark d-flex align-items-center" @click="closeSidebar">
+        <Link 
+        :href="route('collectorContribution.index')" 
+        class="nav-link text-dark d-flex align-items-center" 
+        @click="closeSidebar"
+        :class="{ active: currentRoute.includes('/view-contribution-as-collector') }"
+        >
           <i class="bi bi-cash-coin me-2"></i> Contribution
         </Link>
 
-        <Link :href="route('officials.index')" class="nav-link text-dark d-flex align-items-center" @click="closeSidebar">
+        <Link 
+        :href="route('officials.index')" 
+        class="nav-link text-dark d-flex align-items-center" 
+        @click="closeSidebar"
+        :class="{ active: currentRoute.includes('/view-officials') }"
+        >
           <i class="bi bi-people me-2"></i> Officials
         </Link>
 
-        <Link :href="route('collector.viewReportAsCollector')" class="nav-link text-dark d-flex align-items-center" @click="closeSidebar">
+        <Link 
+        :href="route('collector.viewReportAsCollector')" 
+        class="nav-link text-dark d-flex align-items-center" 
+        @click="closeSidebar"
+        :class="{ active: currentRoute.includes('/view-report-as-collector') }"
+        >
           <i class="bi bi-file-earmark-text me-2"></i> Reports
         </Link>
 
@@ -127,6 +155,9 @@ const overlayStyles = computed(() => {
 </template>
 
 <style scoped>
+.sidebar .nav-link.active {
+  background: rgba(156, 151, 151, 0.3);
+}
 .nav-link:hover {
   background-color: rgba(255, 255, 255, 0.2);
   border-radius: 4px;

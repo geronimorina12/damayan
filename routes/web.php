@@ -103,10 +103,10 @@ Route::prefix('role')->name('role.')->middleware('auth')->group(function () {
 //Collector
 Route::prefix('collector')->name('collector.')->middleware('auth')->group(function () {
     Route::get('/collector-dashboard', [CollectorController::class, 'index'])->name('collectorDashboard');
-    Route::get('view-members-as-collector', [MemberControllerForCollector::class, 'index'])->name('viewMembersAsCollector');
-    Route::get('view-report-as-collector', [ReportForCollector::class, 'index'])->name('viewReportAsCollector');
-    Route::get('toggle-status-as-collector/{status}/{purok}', [ReportForCollector::class, 'toggleStatus'])->name('toggleStatus');
-    Route::get('toggle-purok-as-collector/{status}/{purok}', [ReportForCollector::class, 'togglePurok'])->name('togglePurok');
+    Route::get('/view-members-as-collector', [MemberControllerForCollector::class, 'index'])->name('viewMembersAsCollector');
+    Route::get('/view-report-as-collector', [ReportForCollector::class, 'index'])->name('viewReportAsCollector');
+    Route::get('/toggle-status-as-collector/{status}/{purok}', [ReportForCollector::class, 'toggleStatus'])->name('toggleStatus');
+    Route::get('/toggle-purok-as-collector/{status}/{purok}', [ReportForCollector::class, 'togglePurok'])->name('togglePurok');
 });
 Route::prefix('collector-contribution')->name('collectorContribution.')->middleware('auth')->group(function (){
     Route::get('/view-contribution-as-collector', [ContributionControllerForCollector::class, 'index'])->name('index');
