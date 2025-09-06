@@ -45,6 +45,13 @@ class SmsNotificationController extends Controller
         ]);
 
         if($request->type == 'deathReport'){
+           // Get all member IDs from members table
+            $membersId = memberModel::pluck('id')->toArray(); // pluck gives a flat array directly
+
+            // Delete contributions where member_id is in $membersId
+            ContributionModel::whereIn('member_id', $membersId)->delete();
+
+
             SmsNotificationSaved::create([
                 'message' => $request->deathReport,
                 'type' => $request->type

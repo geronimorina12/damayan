@@ -4,7 +4,7 @@ import { router } from '@inertiajs/vue3';
 const props = defineProps({
     activePurok: {
         type: String,
-        default: () => ''
+        default: () => 'all'
     },
     activeStatus: {
         type: String,
@@ -12,7 +12,7 @@ const props = defineProps({
     }
 })
 let getActiveStatus = ref('');
-let getActivePurok = ref('');
+let getActivePurok = ref('all');
 watch(
     () => props.activePurok,
     (newData) => {

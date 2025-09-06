@@ -92,7 +92,6 @@ async function copyText(text) {
   <div>
     <AdminLayout>
       <Head title="Sms notification" />
-      <HeaderComponent />
 
       <div class="container">
         <h4 class="mb-4 fw-bold sticky-header text-start ps-2 pt-3">SMS Notification</h4>

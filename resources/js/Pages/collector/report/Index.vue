@@ -8,14 +8,14 @@ import PurokComponentForCollectorReport from '@/Components/dashboard/contributio
 
 const props = defineProps({
     contributions: { type: Array, default: () => [] },
-    activePurok: { type: String, default: () => '' },
+    activePurok: { type: String, default: () => 'all' },
     activeStatus: { type: String, default: () => 'paid' },
     contributionsIds: { type: Array, default: () => [] },
     members: { type: Array, default: () => [] }
 });
 
 let getContributions = ref([]);
-let getActivePurok = ref('');
+let getActivePurok = ref('all');
 let getAmmount = ref(0);
 let getActiveStatus = ref('paid');
 let getContributionsIds = ref([]);
@@ -38,7 +38,6 @@ watch(() => props.activeStatus, (newStatus) => {
 }, { immediate: true });
 
 watch(() => props.contributionsIds, (newContributionsIds) => {
-    console.log("Raw contributionsIds:", toRaw(newContributionsIds));
     getContributionsIds.value = Array.isArray(newContributionsIds) ? [...newContributionsIds] : [];
 }, { immediate: true });
 

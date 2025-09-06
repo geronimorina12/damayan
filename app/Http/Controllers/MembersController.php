@@ -11,7 +11,7 @@ use Inertia\Inertia;
 
 class MembersController extends Controller
 {
-    public function viewMemberInfo($id){ //imudo ang specific member info basi sa id
+    public function viewMemberInfo($id){ //imudon ang specific member info basi sa id
         $mem = memberModel::with('beneficiaries')->find($id);
         if(!$mem){ //check if member exists return error kapag d mahanap sa database
             return response()->json(['error: ' => 'cannot find member'], 404);
