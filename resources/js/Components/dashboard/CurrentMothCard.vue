@@ -20,7 +20,7 @@ watch(
   },
   { immediate: true }
 );
-    
+
 const updateChart = () => {
   if (!barChartInstance) return;
 

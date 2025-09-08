@@ -134,7 +134,7 @@ const toggleStatus = (status) => {
   font-weight: bold;
 }
 .table-container {
-  max-height: 400px;
+  max-height: 600px;
   overflow-y: auto;
   overflow-x: auto;
 }

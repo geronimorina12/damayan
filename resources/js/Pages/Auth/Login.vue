@@ -37,7 +37,7 @@ const submit = () => {
     <div class="main-container d-flex align-items-center justify-content-center">
         <div class="card p-4 " style="width: 100%; max-width: 400px;">
             <div class="text-center mb-4">
-                <img src="../../../images/logo.png" alt="Logo" class="logo" />
+                <img src="../../../images/logo1.png" alt="Logo" class="logo" />
             </div>
 
             <form @submit.prevent="submit" class="form p-3">

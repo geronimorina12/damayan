@@ -167,7 +167,6 @@ const formatDate = (dateString) => {
                                 class="form-control"
                                 placeholder="Contact no."
                                 v-model="form.contact_number"
-                                required
                                 pattern="[0-9]*"
                                 inputmode="numeric"
                             />

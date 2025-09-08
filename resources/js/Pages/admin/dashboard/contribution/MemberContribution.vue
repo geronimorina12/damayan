@@ -129,7 +129,7 @@ function formatAmount(value) {
 
 .scrollable-tbody {
   display: block;
-  max-height: 400px;
+  max-height: 700px;
   overflow-y: auto;
 }
 

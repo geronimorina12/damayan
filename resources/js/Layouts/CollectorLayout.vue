@@ -81,8 +81,8 @@ const user = usePage().props.auth?.user;
     <!-- Sidebar -->
     <div class="sidebar text-white p-3 d-flex flex-column" :style="sidebarStyles">
       <div class="text-center mb-4 logo-container" @click="() => router.push(route('dashboard'))">
-        <img src="../../images/logo.png" alt="Logo" class="img-fluid rounded-circle mb-2 logo" />
-        <h5 class="fw-bold text-dark">PROTECT DAMAYAN SYSTEM</h5>
+        <img src="../../images/logo1.png" alt="Logo" class="img-fluid rounded-circle mb-2 logo" />
+        <h5 class="fw-bold text-dark">PROTEC DAMAYAN SYSTEM</h5>
       </div>
 
       <div class="nav flex-column">
@@ -179,7 +179,7 @@ const user = usePage().props.auth?.user;
 .logo {
   position: relative;
   width: 60%;
-  height: 120px;
+  height: 140px;
   margin: auto;
 }
 .logo-container {

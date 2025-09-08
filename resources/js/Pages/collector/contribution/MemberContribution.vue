@@ -90,7 +90,7 @@ const unPaidFunc = (memberId) => {
         <PurokComponentForCollector :activePurok="getSelectedPurok"/>
 
         <div class="table-wrapper mt-3" v-if="getMember.length > 0">
-          <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+          <div class="table-responsive" style="max-height: 600px; min-height: 800px; overflow-y: auto;">
             <table class="table table-bordered table-hover align-middle text-center mb-0">
               <thead class="table-light">
                 <tr>

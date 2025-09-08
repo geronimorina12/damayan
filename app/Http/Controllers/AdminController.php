@@ -27,7 +27,7 @@ class AdminController extends Controller
             'purok' => 'required|max:255',
             'age' => 'required|integer',
             'middle_name' => 'required|string|max:255',
-            'status' => 'required|in:Single,Married,Widowed,Divorced,Separated,Live-in,Annulled',
+            'status' => 'required|in:Single,Married,Widowed,Divorced,Separated,Live-in,Annulled,active,inactive',
             'occupation' => 'required|string|max:255',
             'gender' => 'required|in:Male,Female',
             'beneficiaries' => 'nullable|array',

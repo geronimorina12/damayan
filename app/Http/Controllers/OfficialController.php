@@ -68,5 +68,6 @@ class OfficialController extends Controller
         }
         $official->delete();    
         return redirect()->back()->with(['success' => 'official deleted!'], 201);
+        // TODO ma kadto sa archieve 
     }
 }
