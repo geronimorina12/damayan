@@ -58,6 +58,8 @@ Route::prefix('contribution')->name('contributions.')->middleware('auth')->group
 //reports
 Route::prefix('reports')->name('reports.')->middleware('auth')->group(function (){
     Route::get('/view-reports', [ReportController::class, 'index'])->name('index');
+    Route::get('/add-collector-route', [ReportController::class, 'addCollector'])->name('addCollector');
+     Route::post('/add-collector', [ReportController::class, 'storeCollector'])->name('storeCollector');
 });
 
 // Official
@@ -103,10 +105,10 @@ Route::prefix('role')->name('role.')->middleware('auth')->group(function () {
 //Collector
 Route::prefix('collector')->name('collector.')->middleware('auth')->group(function () {
     Route::get('/collector-dashboard', [CollectorController::class, 'index'])->name('collectorDashboard');
-    Route::get('view-members-as-collector', [MemberControllerForCollector::class, 'index'])->name('viewMembersAsCollector');
-    Route::get('view-report-as-collector', [ReportForCollector::class, 'index'])->name('viewReportAsCollector');
-    Route::get('toggle-status-as-collector/{status}/{purok}', [ReportForCollector::class, 'toggleStatus'])->name('toggleStatus');
-    Route::get('toggle-purok-as-collector/{status}/{purok}', [ReportForCollector::class, 'togglePurok'])->name('togglePurok');
+    Route::get('/view-members-as-collector', [MemberControllerForCollector::class, 'index'])->name('viewMembersAsCollector');
+    Route::get('/view-report-as-collector', [ReportForCollector::class, 'index'])->name('viewReportAsCollector');
+    Route::get('/toggle-status-as-collector/{status}/{purok}', [ReportForCollector::class, 'toggleStatus'])->name('toggleStatus');
+    Route::get('/toggle-purok-as-collector/{status}/{purok}', [ReportForCollector::class, 'togglePurok'])->name('togglePurok');
 });
 Route::prefix('collector-contribution')->name('collectorContribution.')->middleware('auth')->group(function (){
     Route::get('/view-contribution-as-collector', [ContributionControllerForCollector::class, 'index'])->name('index');

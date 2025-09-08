@@ -25,7 +25,7 @@ class ReportForCollector extends Controller
         $contributionsIds = ContributionModel::pluck('member_id')->toArray(); 
         return Inertia::render('collector/report/Index', [
             'contributions' => $contributions,
-            'activePurok' => 'purok1',
+            'activePurok' => 'all',
             'membersCount' => $members->count(),
             'activeStatus' => 'all', // wala na status filter, default to "all"
             'contributionsIds' => $contributionsIds,

@@ -90,12 +90,10 @@ class RoleController extends Controller
         
         if($role == 'vise president') $role = 'vise_president';
         if($role == 'purok leader') $role = 'purok_leader';
-        dd(['role' => $role]);
         $users = User::where('role', $role)->get();
         if($users->isEmpty()) {
            $users = OfficialModel::where('position', $role)->get();
         }
-        dd(['user' => $users]);
         return Inertia::render('admin/roleManagementPage/ViewSpecificRole', [
             'users' => $users,
             'role' => $role,
