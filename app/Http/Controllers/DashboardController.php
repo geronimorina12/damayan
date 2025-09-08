@@ -20,7 +20,7 @@ class DashboardController extends Controller
         return redirect()->route('login');
       }
 
-
+      // Carbon = library san laravel para sa date and time manipulation
       $month = Carbon::now()->month;
       $year = Carbon::now()->year;
 

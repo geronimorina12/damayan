@@ -12,7 +12,7 @@ const toggleSidebar = () => {
       <button class="me-2" @click="toggleSidebar">
         <i class="bi bi-list fs-2"></i>
       </button>
-      <h4 class="mb-0 title">PROTECT DAMAYAN SYSTEM</h4>
+      <h4 class="mb-0 title">PROTEC DAMAYAN SYSTEM</h4>
     </div>
   </div>
 </template>
