@@ -1,63 +1,49 @@
-  <script setup>
-  import { ref, defineProps, computed } from 'vue'
-  import { router, Head, Link } from '@inertiajs/vue3'
-  import AdminLayout from '@/Layouts/AdminLayout.vue'
-  import { watch } from 'vue'
+<script setup>
+import { ref, defineProps, watch } from 'vue'
+import { router, Head } from '@inertiajs/vue3'
+import AdminLayout from '@/Layouts/AdminLayout.vue'
 
-  const props = defineProps({
-    deathReport: {
-      type: Object,
-      default: () => ({})
+const props = defineProps({
+  deathReport: { type: Object, default: () => ({}) },
+  scheduleContribution: { type: Object, default: () => ({}) },
+  reminders: { type: Object, default: () => ({}) },
+  fundUpdates: { type: Object, default: () => ({}) }
+})
+
+const getDeathReport = ref({})
+const getScheduleContribution = ref({})
+const getReminders = ref({})
+const getFundUpdates = ref({})
+
+watch(() => props.deathReport, (data) => { getDeathReport.value = data }, { immediate: true })
+watch(() => props.scheduleContribution, (data) => { getScheduleContribution.value = data }, { immediate: true })
+watch(() => props.reminders, (data) => { getReminders.value = data }, { immediate: true })
+watch(() => props.fundUpdates, (data) => { getFundUpdates.value = data }, { immediate: true })
+
+function save(type) {
+  let payload = { type }
+
+  if (type === 'deathReport') {
+    payload.deathReport = getDeathReport.value.message
+  } else if (type === 'scheduleContribution') {
+    payload.scheduleContribution = getScheduleContribution.value.message
+  } else if (type === 'reminders') {
+    payload.reminders = getReminders.value.message
+  } else if (type === 'fundUpdates') {
+    payload.fundUpdates = getFundUpdates.value.message
+  }
+
+  router.post(route('smsNotification.send'), payload, {
+    onSuccess: () => {
+      alert('Message saved and sent successfully!')
     },
-    scheduleContribution: {
-      type: Object,
-      default: () => ({})
-    },
-    reminders: {
-      type: Object,
-      default: () => ({})
-    },
-    fundUpdates: {
-      type: Object,
-      default: () => ({})
+    onError: (errors) => {
+      console.error(errors)
+      alert('Error sending SMS. Check logs for details.')
     }
   })
-
-  const getDeathReport = ref([]);
-  const getScheduleContribution = ref([]);
-  const getReminders = ref([]);
-  const getFundUpdates = ref([]);
-
-  watch(
-    () => props.deathReport,
-    (data) => {
-      getDeathReport.value = data;
-    }, 
-    {immediate: true}
-  )
-    watch(
-    () => props.scheduleContribution,
-    (data) => {
-     getScheduleContribution.value = data;
-    }, 
-    {immediate: true}
-  )
-    watch(
-    () => props.reminders,
-    (data) => {
-      getReminders.value = data;
-    }, 
-    {immediate: true}
-  )
-    watch(
-    () => props.fundUpdates,
-    (data) => {
-      getFundUpdates.value = data;
-    }, 
-    {immediate: true}
-  )
-
-  </script>
+}
+</script>
 
 
   <template>
@@ -85,7 +71,6 @@
                 </div>
               </div>
 
-              //TODO iba dapat ang route name para sa send to all selected sa send
 
             </div>
 
