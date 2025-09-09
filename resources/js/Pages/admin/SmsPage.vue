@@ -62,13 +62,20 @@ function save(type) {
               <textarea v-model="getDeathReport.message" id="deathReport" class="form-control"></textarea>
 
               <div class="container-fluid d-flex flex-row align-items-center gap-3 justify-content-end mt-3">
-                <div>
-                  <button class="save-btn text-uppercase" @click="save('deathReport')">send to all selected</button>
-                </div>
+               <button
+                class="save-btn text-uppercase"
+                @click="router.visit(route('smsNotification.selectDeceased'))"
+              >
+                send to all selected
+              </button>
 
-                <div>
-                  <button class="save-btn text-uppercase" @click="save('deathReport')">send</button>
-                </div>
+              <button
+                class="save-btn text-uppercase"
+                @click="router.visit(route('smsNotification.selectDeceased'))"
+              >
+                send
+              </button>
+
               </div>
 
 

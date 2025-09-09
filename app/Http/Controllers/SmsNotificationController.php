@@ -46,12 +46,13 @@ class SmsNotificationController extends Controller
         'reminders' => 'nullable|string',
         'fundUpdates' => 'nullable|string',
         'type' => 'required|string|in:deathReport,scheduleContribution,reminders,fundUpdates',
+        'dead_person_name' => 'nullable|string' // For death report only
     ]);
 
     $message = null;
 
     // Fetch all members with contact numbers
-    $members = MemberModel::whereNotNull('contact_no')->get();
+    $members = MemberModel::whereNotNull('contact_number')->get();
     if ($members->isEmpty()) {
         Log::warning("No members found with contact numbers for {$request->type} notification.");
         return redirect()->back()->with('error', 'No members with contact numbers.');
@@ -81,7 +82,7 @@ class SmsNotificationController extends Controller
                 'type' => $request->type
             ]);
 
-            $this->sendAndLog($customMessage, $member->contact_no, $notification->id);
+            $this->sendAndLog($customMessage, $member->contact_number, $notification->id);
         }
 
         return redirect()->back()->with('success', 'Schedule contribution notifications sent.');
@@ -104,9 +105,12 @@ class SmsNotificationController extends Controller
     ]);
 
     // Send SMS and log results
-    foreach ($members as $member) {
-        $this->sendAndLog($message, $member->contact_no, $notification->id);
-    }
+    // foreach ($members as $member) {
+        
+    //     $this->sendAndLog($message, $member->contact_number, $notification->id);
+    // } comment muna, mao ya ang gagamiton sa pag send sa sms
+
+     $this->sendAndLog($message, "09811986323", $notification->id); //for testing only
 
     return redirect()->back()->with('success', 'Notification saved and SMS sent to all members.');
 }
@@ -116,17 +120,28 @@ class SmsNotificationController extends Controller
  */
 private function sendAndLog(string $message, string $number, int $notificationId): void
 {
-    try {
-        $success = SmsNotificationSender::send($message, [$number]);
+    // try {
+    //     $success = SmsNotificationSender::send($message, [$number]);
 
-        if ($success) {
-            Log::info("SMS sent successfully to {$number} | Notification ID: {$notificationId}");
-        } else {
-            Log::error("SMS failed to send to {$number} | Notification ID: {$notificationId}");
-        }
-    } catch (\Exception $e) {
-        Log::error("Exception when sending SMS to {$number}: " . $e->getMessage());
-    }
+    //     if ($success) {
+    //         Log::info("SMS sent successfully to {$number} | Notification ID: {$notificationId}");
+    //     } else {
+    //         Log::error("SMS failed to send to {$number} | Notification ID: {$notificationId}");
+    //     }
+    // } catch (\Exception $e) {
+    //     Log::error("Exception when sending SMS to {$number}: " . $e->getMessage());
+    // }
+
+    
 }
+
+public function selectDeceased()
+{
+     $members = memberModel::select('id', 'first_name', 'last_name', 'age')->get()->toArray();
+    return inertia('admin/SelectDeceased', [
+        'members' => $members
+    ]);
+}
+
 
 }
