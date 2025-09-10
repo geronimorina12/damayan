@@ -19,7 +19,7 @@ import AdminLayout from '@/Layouts/AdminLayout.vue';
             </div>
             <hr>
             <div class="list">
-                <Link :href="route('smsNotification.index')" class="link text-decoration-none fs-5">SMS Notification</Link>
+                <Link :href="route('smsNotification.smsPage')" class="link text-decoration-none fs-5">SMS Notification</Link>
             </div>
             <hr>
         </div>

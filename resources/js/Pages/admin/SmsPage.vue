@@ -1,6 +1,6 @@
 <script setup>
 import { ref, defineProps, watch } from 'vue'
-import { router, Head } from '@inertiajs/vue3'
+import { router, Head, Link } from '@inertiajs/vue3'
 import AdminLayout from '@/Layouts/AdminLayout.vue'
 
 const props = defineProps({
@@ -66,11 +66,19 @@ function sendFundUpdates() {
             </div>
             <textarea v-model="getDeathReport.message" id="deathReport" class="form-control"></textarea>
 
-            <div class="container-fluid d-flex flex-row align-items-center gap-3 justify-content-end mt-3">
-              <Link :href="route('smsNotification.selectDeceased')" class="save-btn text-uppercase">
+             <div class="container-fluid d-flex flex-row align-items-center gap-3 justify-content-end mt-3">
+                <div>
+                 <Link :href="route('smsNotification.selectDeceased')" class="save-btn text-uppercase text-decoration-none">
+                send to all selected
+              </Link>
+                </div>
+                <div>
+                  <Link :href="route('smsNotification.selectDeceased')" class="save-btn text-uppercase text-decoration-none">
                 send
               </Link>
-            </div>
+                </div>
+              </div>
+
           </div>
 
           <!-- Schedule Contribution -->
@@ -80,11 +88,14 @@ function sendFundUpdates() {
             </div>
             <textarea v-model="getScheduleContribution.message" id="scheduleContribution" class="form-control"></textarea>
 
-            <div class="container-fluid d-flex flex-row align-items-center gap-3 justify-content-end mt-3">
-              <button class="save-btn text-uppercase" @click="sendScheduleContribution">
-                send
-              </button>
-            </div>
+               <div class="container-fluid d-flex flex-row align-items-center gap-3 justify-content-end mt-3">
+                <div>
+                  <button class="save-btn text-uppercase" @click="sendScheduleContribution">send to all selected</button>
+                </div>
+                <div>
+                  <button class="save-btn text-uppercase" @click="sendScheduleContribution">send</button>
+                </div>
+              </div>
           </div>
 
           <!-- Reminders -->
@@ -95,10 +106,13 @@ function sendFundUpdates() {
             <textarea v-model="getReminders.message" id="reminders" class="form-control"></textarea>
 
             <div class="container-fluid d-flex flex-row align-items-center gap-3 justify-content-end mt-3">
-              <button class="save-btn text-uppercase" @click="sendReminders">
-                send
-              </button>
-            </div>
+              <div>
+                <button class="save-btn text-uppercase" @click="sendReminders">send to all selected</button>
+              </div>
+              <div>
+                <button class="save-btn text-uppercase" @click="sendReminders">send</button>
+              </div>
+                 </div>
           </div>
 
           <!-- Fund Updates -->
@@ -109,9 +123,12 @@ function sendFundUpdates() {
             <textarea v-model="getFundUpdates.message" id="fundUpdates" class="form-control"></textarea>
 
             <div class="container-fluid d-flex flex-row align-items-center gap-3 justify-content-end mt-3">
-              <button class="save-btn text-uppercase" @click="sendFundUpdates">
-                send
-              </button>
+               <div>
+                  <button class="save-btn text-uppercase" @click="sendFundUpdates">send to all selected</button>
+                </div>
+                <div>
+                  <button class="save-btn text-uppercase" @click="sendFundUpdates">send</button>
+                </div>
             </div>
           </div>
 
