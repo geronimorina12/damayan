@@ -129,10 +129,14 @@ Route::prefix('activityLog')->name('activityLog.')->middleware('auth')->group(fu
 });
 
 Route::prefix('smsNotification')->name('smsNotification.')->middleware('auth')->group(function () {
-    Route::get('/sms-notification', [SmsNotificationController::class, 'index'])->name('index'); // Para sa settings > sms notifications
-    Route::get('/sms-page', [SmsNotificationController::class, 'smsPage'])->name('smsPage'); // Para sms na route (yung sa sidenav)
     Route::post('/add-death-report', [SmsNotificationController::class, 'addDeathReport'])->name('addDeathReport');
-    Route::post('/send', [SmsNotificationController::class, 'send'])->name('send'); // For sending SMS
+    Route::post('/send-schedule-contribution', [SmsNotificationController::class, 'sendScheduleContribution'])->name('sendScheduleContribution');
+    Route::post('/send-reminders', [SmsNotificationController::class, 'sendReminders'])->name('sendReminders');
+    Route::post('/send-fund-updates', [SmsNotificationController::class, 'sendFundUpdates'])->name('sendFundUpdates');
+
+    Route::get('/sms-notification', [SmsNotificationController::class, 'index'])->name('index');
+    Route::get('/sms-page', [SmsNotificationController::class, 'smsPage'])->name('smsPage');
     Route::get('/death-report/select', [SmsNotificationController::class, 'selectDeceased'])->name('selectDeceased');
 });
+
 require __DIR__.'/auth.php';

@@ -6,38 +6,38 @@ import AdminLayout from '@/Layouts/AdminLayout.vue'
 const props = defineProps({
   members: { type: Array, default: () => [] }
 })
+
 const selectedMember = ref(null)
 const searchQuery = ref('')
 const message = ref('')
 
 const filteredMembers = computed(() => {
-  let membersArray = [];
+  let membersArray = []
 
   if (Array.isArray(props.members)) {
-    membersArray = props.members;
+    membersArray = props.members
   } else if (typeof props.members === 'object' && props.members !== null) {
     membersArray = Object.entries(props.members).map(([name, age]) => {
-      const nameParts = name.split(' ');
-      const firstName = nameParts[0];
-      const lastName = nameParts.length > 1 ? nameParts.slice(1).join(' ') : '';
+      const nameParts = name.split(' ')
+      const firstName = nameParts[0]
+      const lastName = nameParts.length > 1 ? nameParts.slice(1).join(' ') : ''
       return {
         id: name,
         first_name: firstName,
         last_name: lastName,
         age: age
-      };
-    });
+      }
+    })
   } else {
-    console.error("The 'members' prop is neither an array nor a valid object as expected.");
-    return [];
+    console.error("The 'members' prop is neither an array nor a valid object as expected.")
+    return []
   }
-  
-  if (!searchQuery.value) {
-    return membersArray;
-  }
-  
-  const searchLower = searchQuery.value.toLowerCase()
 
+  if (!searchQuery.value) {
+    return membersArray
+  }
+
+  const searchLower = searchQuery.value.toLowerCase()
   return membersArray.filter(member => {
     const fullName = `${member.first_name} ${member.last_name}`.toLowerCase()
     return fullName.includes(searchLower)
@@ -53,7 +53,8 @@ function sendDeathReport() {
 
   router.post(route('smsNotification.send'), {
     type: 'deathReport',
-    dead_person_name: `${selectedMember.value.first_name} ${selectedMember.value.last_name}`
+    dead_person_name: `${selectedMember.value.first_name} ${selectedMember.value.last_name}`,
+    member_id: selectedMember.value.id 
   }, {
     onSuccess: () => {
       message.value = 'Death report sent successfully!'
@@ -75,7 +76,7 @@ function sendDeathReport() {
       <h4 class="fw-bold mb-3">Select Deceased Member (Namatay)</h4>
 
       <div class="container-fluid d-flex flex-row justify-content-between align-items-center mb-3">
-        <div class="">
+        <div>
           <input
             type="text"
             v-model="searchQuery"
@@ -85,16 +86,16 @@ function sendDeathReport() {
         </div>
 
         <div>
-            <button class="btn btn-success mt-3" @click="sendDeathReport">
-          Send Death Report SMS
-        </button>
+          <button class="btn btn-success mt-3" @click="sendDeathReport">
+            Send Death Report SMS
+          </button>
         </div>
       </div>
 
       <div v-if="message" class="alert alert-info" role="alert">
         {{ message }}
       </div>
-      
+
       <div class="table-scroll-container">
         <div class="table-responsive">
           <table class="table table-bordered table-hover">

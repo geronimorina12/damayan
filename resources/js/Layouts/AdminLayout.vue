@@ -120,7 +120,7 @@ const overlayStyles = computed(() => {
           <i class="bi bi-archive me-2"></i> Archived
         </Link>
 
-        <Link :href="route('smsNotification.smsPage')" class="nav-link text-dark d-flex align-items-center"
+        <Link :href="route('smsNotification.index')" class="nav-link text-dark d-flex align-items-center"
           @click="closeSidebar"
           :class="{ active: currentRoute.includes('/smsNotification') }"
         >
