@@ -84,7 +84,7 @@ function sendFundUpdates() {
 
             <div class="container-fluid d-flex flex-row align-items-center gap-3 justify-content-end mt-3">
               <div>
-                <Link :href="route('smsNotification.selectToAllSelected', {type: 'deathReport', message: getDeathReport.message})" class="save-btn text-uppercase text-decoration-none">
+                <Link :href="route('smsNotification.sendToAllSelected', {type: 'deathReport', message: getDeathReport.message})" class="save-btn text-uppercase text-decoration-none">
                 send to all selected
               </Link>
 
@@ -105,7 +105,7 @@ function sendFundUpdates() {
             <textarea v-model="getScheduleContribution.message" id="scheduleContribution" class="form-control"></textarea>
 
             <div class="container-fluid d-flex flex-row align-items-center gap-3 justify-content-end mt-3">
-              <Link :href="route('smsNotification.selectToAllSelected', {type: 'scheduleContribution', message: getScheduleContribution.message})" class="save-btn text-uppercase text-decoration-none">
+              <Link :href="route('smsNotification.sendToAllSelected', {type: 'scheduleContribution', message: getScheduleContribution.message})" class="save-btn text-uppercase text-decoration-none">
                 send to all selected
               </Link>
               <div>
@@ -123,7 +123,7 @@ function sendFundUpdates() {
 
             <div class="container-fluid d-flex flex-row align-items-center gap-3 justify-content-end mt-3">
               <div>
-                <Link :href="route('smsNotification.selectToAllSelected', {type: 'reminders', message: getReminders.message})" class="save-btn text-uppercase text-decoration-none">
+                <Link :href="route('smsNotification.sendToAllSelected', {type: 'reminders', message: getReminders.message})" class="save-btn text-uppercase text-decoration-none">
                   send to all selected
                 </Link>
               </div>
@@ -142,7 +142,7 @@ function sendFundUpdates() {
 
             <div class="container-fluid d-flex flex-row align-items-center gap-3 justify-content-end mt-3">
               <div>
-                <Link :href="route('smsNotification.selectToAllSelected', {type: 'fundUpdates', message: getFundUpdates.message})" class="save-btn text-uppercase text-decoration-none">
+                <Link :href="route('smsNotification.sendToAllSelected', {type: 'fundUpdates', message: getFundUpdates.message})" class="save-btn text-uppercase text-decoration-none">
                   send to all selected
                 </Link>
               </div>

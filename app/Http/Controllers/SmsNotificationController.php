@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\ContributionModel;
-use App\Models\MemberModel;
+use App\Models\memberModel;
 use App\Models\SmsNotificationSaved;
 use App\Services\SmsNotificationSender;
 use Illuminate\Http\Request;
@@ -16,7 +16,7 @@ class SmsNotificationController extends Controller
     {
         $deathReport = SmsNotificationSaved::where('type', 'deathReport')->latest()->first();
         $disbursed = ContributionModel::sum('amount');
-        $members = MemberModel::select('id', 'first_name', 'last_name')->get()->toArray();
+        $members = memberModel::select('id', 'first_name', 'last_name')->get()->toArray();
 
         return Inertia::render('admin/smsNotification/Index', [
             'deathReport' => $deathReport,
@@ -37,10 +37,10 @@ class SmsNotificationController extends Controller
             'scheduleContribution' => $scheduleContribution,
             'reminders' => $reminders,
             'fundUpdates' => $fundUpdates,
-            'members' => MemberModel::select('id', 'first_name', 'last_name')->get()->toArray(),
+            'members' => memberModel::select('id', 'first_name', 'last_name')->get()->toArray(),
         ]);
     }
-        public function selectToAllSelected($type, $message)
+        public function sendToAllSelected($type, $message)
         {
             $members = memberModel::select('id', 'first_name', 'last_name', 'age')->get();
 
@@ -60,13 +60,13 @@ class SmsNotificationController extends Controller
             'message' => 'required|string'
         ]);
 
-        $members = MemberModel::whereNotNull('contact_number')->get();
+        $members = memberModel::whereNotNull('contact_number')->get();
         if ($members->isEmpty()) {
             return redirect()->back()->with('error', 'No members with contact numbers.');
         }
 
         // delete contributions for all members
-        $memberIds = MemberModel::pluck('id')->toArray();
+        $memberIds = memberModel::pluck('id')->toArray();
         ContributionModel::whereIn('member_id', $memberIds)->delete();
 
         $message = $request->input('message');
@@ -92,7 +92,7 @@ class SmsNotificationController extends Controller
             'message' => 'required|string'
         ]);
 
-        $members = MemberModel::whereNotNull('contact_number')->get();
+        $members = memberModel::whereNotNull('contact_number')->get();
         if ($members->isEmpty()) {
             return redirect()->back()->with('error', 'No members with contact numbers.');
         }
@@ -120,7 +120,7 @@ class SmsNotificationController extends Controller
             'message' => 'required|string'
         ]);
 
-        $members = MemberModel::whereNotNull('contact_number')->get();
+        $members = memberModel::whereNotNull('contact_number')->get();
         if ($members->isEmpty()) {
             return redirect()->back()->with('error', 'No members with contact numbers.');
         }
@@ -148,7 +148,7 @@ class SmsNotificationController extends Controller
             'message' => 'required|string'
         ]);
 
-        $members = MemberModel::whereNotNull('contact_number')->get();
+        $members = memberModel::whereNotNull('contact_number')->get();
         if ($members->isEmpty()) {
             return redirect()->back()->with('error', 'No members with contact numbers.');
         }
@@ -187,7 +187,7 @@ class SmsNotificationController extends Controller
 
     public function selectDeceased()
     {
-        $members = MemberModel::select('id', 'first_name', 'last_name', 'age')->get()->toArray();
+        $members = memberModel::select('id', 'first_name', 'last_name', 'age')->get()->toArray();
 
         return Inertia::render('admin/SelectDeceased', [
             'members' => $members

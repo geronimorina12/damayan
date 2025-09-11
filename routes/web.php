@@ -15,6 +15,7 @@ use App\Http\Controllers\OfficialController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ReportForCollector;
 use App\Http\Controllers\RoleController;
+use App\Http\Controllers\SelectMemberController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\SmsNotificationController;
 use App\Http\Controllers\SmsNotificationSavedController;
@@ -138,8 +139,16 @@ Route::prefix('smsNotification')->name('smsNotification.')->middleware('auth')->
     Route::get('/sms-notification', [SmsNotificationController::class, 'index'])->name('index');
     Route::get('/sms-page', [SmsNotificationController::class, 'smsPage'])->name('smsPage');
     Route::get('/death-report/select', [SmsNotificationController::class, 'selectDeceased'])->name('selectDeceased');
-    Route::get('/select-to-all-selected/{type}', [SmsNotificationController::class, 'selectToAllSelected'])->name('selectToAllSelected');
+    Route::get('/send-to-all-selected/{type}/{message}', [SmsNotificationController::class, 'sendToAllSelected'])->name('sendToAllSelected');
 });
+
+Route::prefix('smsSelectMember')->name('smsSelectMember.')->middleware('auth')->group(function () {
+    Route::post('/add-death-report', [SelectMemberController::class, 'addDeathReport'])->name('deathReport');
+    Route::post('/send-schedule-contribution', [SelectMemberController::class, 'sendScheduleContribution'])->name('scheduleContribution');
+    Route::post('/send-reminders', [SelectMemberController::class, 'sendReminders'])->name('reminders');
+    Route::post('/send-fund-updates', [SelectMemberController::class, 'sendFundUpdates'])->name('fundUpdates');
+});
+
 // save only the message to the database not send in sms
 Route::post('smsNotificationSaved/add-death-report', [SmsNotificationSavedController::class, 'send'])->name('smsNotificationSaved.send');
 require __DIR__.'/auth.php';

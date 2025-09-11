@@ -139,16 +139,16 @@ class SelectMemberController extends Controller
      */
     private function sendAndLog(string $message, string $number, int $notificationId): void
     {
-        try {
-            $success = SmsNotificationSender::send($message, [$number]);
+        // try {
+        //     $success = SmsNotificationSender::send($message, [$number]);
 
-            if ($success) {
-                Log::info("SMS sent successfully to {$number} | Notification ID: {$notificationId}");
-            } else {
-                Log::error("SMS failed to send to {$number} | Notification ID: {$notificationId}");
-            }
-        } catch (\Exception $e) {
-            Log::error("Exception when sending SMS to {$number}: " . $e->getMessage());
-        }
+        //     if ($success) {
+        //         Log::info("SMS sent successfully to {$number} | Notification ID: {$notificationId}");
+        //     } else {
+        //         Log::error("SMS failed to send to {$number} | Notification ID: {$notificationId}");
+        //     }
+        // } catch (\Exception $e) {
+        //     Log::error("Exception when sending SMS to {$number}: " . $e->getMessage());
+        // }
     }
 }
