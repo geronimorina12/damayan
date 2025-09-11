@@ -67,7 +67,7 @@ function showSuggestion(type) {
 
 function save(type) {
   form.type = type
-  form.post(route('smsNotification.addDeathReport'), {
+  form.post(route('smsNotificationSaved.send'), {
     preserveScroll: true,
     onSuccess: () => alert("Notification saved."),
     onError: () => alert('An error occurred, please try again.')

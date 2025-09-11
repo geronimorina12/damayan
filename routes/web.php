@@ -17,6 +17,7 @@ use App\Http\Controllers\ReportForCollector;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\SmsNotificationController;
+use App\Http\Controllers\SmsNotificationSavedController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -138,5 +139,6 @@ Route::prefix('smsNotification')->name('smsNotification.')->middleware('auth')->
     Route::get('/sms-page', [SmsNotificationController::class, 'smsPage'])->name('smsPage');
     Route::get('/death-report/select', [SmsNotificationController::class, 'selectDeceased'])->name('selectDeceased');
 });
-
+// save only the message to the database not send in sms
+Route::post('smsNotificationSaved/add-death-report', [SmsNotificationSavedController::class, 'send'])->name('smsNotificationSaved.send');
 require __DIR__.'/auth.php';
