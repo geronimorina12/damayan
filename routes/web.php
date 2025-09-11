@@ -138,6 +138,7 @@ Route::prefix('smsNotification')->name('smsNotification.')->middleware('auth')->
     Route::get('/sms-notification', [SmsNotificationController::class, 'index'])->name('index');
     Route::get('/sms-page', [SmsNotificationController::class, 'smsPage'])->name('smsPage');
     Route::get('/death-report/select', [SmsNotificationController::class, 'selectDeceased'])->name('selectDeceased');
+    Route::get('/select-to-all-selected/{type}', [SmsNotificationController::class, 'selectToAllSelected'])->name('selectToAllSelected');
 });
 // save only the message to the database not send in sms
 Route::post('smsNotificationSaved/add-death-report', [SmsNotificationSavedController::class, 'send'])->name('smsNotificationSaved.send');

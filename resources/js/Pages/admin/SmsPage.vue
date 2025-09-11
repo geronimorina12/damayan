@@ -7,25 +7,41 @@ const props = defineProps({
   deathReport: { type: Object, default: () => ({}) },
   scheduleContribution: { type: Object, default: () => ({}) },
   reminders: { type: Object, default: () => ({}) },
-  fundUpdates: { type: Object, default: () => ({}) }
+  fundUpdates: { type: Object, default: () => ({}) },
+  members: { type: Array, default: () => [] },
 })
 
 const getDeathReport = ref({})
 const getScheduleContribution = ref({})
 const getReminders = ref({})
 const getFundUpdates = ref({})
+const getMembers = ref([]);
 
 watch(() => props.deathReport, (data) => { getDeathReport.value = data }, { immediate: true })
 watch(() => props.scheduleContribution, (data) => { getScheduleContribution.value = data }, { immediate: true })
 watch(() => props.reminders, (data) => { getReminders.value = data }, { immediate: true })
 watch(() => props.fundUpdates, (data) => { getFundUpdates.value = data }, { immediate: true })
+watch(() => props.members, (data) => { getMembers.value = data }, { immediate: true })
 
 // Separated functions kada sms
 
+const sendDeathReport = () => {
+  router.post(route('smsNotification.addDeathReport'), {
+    message: getDeathReport.value.message
+  }, {
+    onSuccess: () => {
+      alert('Death report sent successfully.')
+    },
+    onError: (errors) => {
+      console.error(errors)
+      alert('Failed to send death report.')
+    }
+  })
+}
 
 function sendScheduleContribution() {
   router.post(route('smsNotification.sendScheduleContribution'), {
-    scheduleContribution: getScheduleContribution.value.message,
+    message: getScheduleContribution.value.message,
   }, {
     onSuccess: () => alert('Schedule Contribution sent successfully!'),
     onError: () => alert('Error sending Schedule Contribution')
@@ -34,7 +50,7 @@ function sendScheduleContribution() {
 
 function sendReminders() {
   router.post(route('smsNotification.sendReminders'), {
-    reminders: getReminders.value.message,
+    message: getReminders.value.message,
   }, {
     onSuccess: () => alert('Reminders sent successfully!'),
     onError: () => alert('Error sending Reminders')
@@ -43,7 +59,7 @@ function sendReminders() {
 
 function sendFundUpdates() {
   router.post(route('smsNotification.sendFundUpdates'), {
-    fundUpdates: getFundUpdates.value.message,
+    message: getFundUpdates.value.message,
   }, {
     onSuccess: () => alert('Fund Updates sent successfully!'),
     onError: () => alert('Error sending Fund Updates')
@@ -66,19 +82,19 @@ function sendFundUpdates() {
             </div>
             <textarea v-model="getDeathReport.message" id="deathReport" class="form-control"></textarea>
 
-             <div class="container-fluid d-flex flex-row align-items-center gap-3 justify-content-end mt-3">
-                <div>
-                 <Link :href="route('smsNotification.selectDeceased')" class="save-btn text-uppercase text-decoration-none">
+            <div class="container-fluid d-flex flex-row align-items-center gap-3 justify-content-end mt-3">
+              <div>
+                <Link :href="route('smsNotification.selectToAllSelected', {type: 'deathReport', message: getDeathReport.message})" class="save-btn text-uppercase text-decoration-none">
                 send to all selected
               </Link>
-                </div>
-                <div>
-                  <Link :href="route('smsNotification.selectDeceased')" class="save-btn text-uppercase text-decoration-none">
-                send
-              </Link>
-                </div>
-              </div>
 
+              </div>
+              <div>
+                <button @click="sendDeathReport" class="save-btn text-uppercase text-decoration-none">
+                  send
+                </button>
+              </div>
+            </div>
           </div>
 
           <!-- Schedule Contribution -->
@@ -88,14 +104,14 @@ function sendFundUpdates() {
             </div>
             <textarea v-model="getScheduleContribution.message" id="scheduleContribution" class="form-control"></textarea>
 
-               <div class="container-fluid d-flex flex-row align-items-center gap-3 justify-content-end mt-3">
-                <div>
-                  <button class="save-btn text-uppercase" @click="sendScheduleContribution">send to all selected</button>
-                </div>
-                <div>
-                  <button class="save-btn text-uppercase" @click="sendScheduleContribution">send</button>
-                </div>
+            <div class="container-fluid d-flex flex-row align-items-center gap-3 justify-content-end mt-3">
+              <Link :href="route('smsNotification.selectToAllSelected', {type: 'scheduleContribution', message: getScheduleContribution.message})" class="save-btn text-uppercase text-decoration-none">
+                send to all selected
+              </Link>
+              <div>
+                <button class="save-btn text-uppercase" @click="sendScheduleContribution">send</button>
               </div>
+            </div>
           </div>
 
           <!-- Reminders -->
@@ -107,12 +123,14 @@ function sendFundUpdates() {
 
             <div class="container-fluid d-flex flex-row align-items-center gap-3 justify-content-end mt-3">
               <div>
-                <button class="save-btn text-uppercase" @click="sendReminders">send to all selected</button>
+                <Link :href="route('smsNotification.selectToAllSelected', {type: 'reminders', message: getReminders.message})" class="save-btn text-uppercase text-decoration-none">
+                  send to all selected
+                </Link>
               </div>
               <div>
                 <button class="save-btn text-uppercase" @click="sendReminders">send</button>
               </div>
-                 </div>
+            </div>
           </div>
 
           <!-- Fund Updates -->
@@ -123,12 +141,14 @@ function sendFundUpdates() {
             <textarea v-model="getFundUpdates.message" id="fundUpdates" class="form-control"></textarea>
 
             <div class="container-fluid d-flex flex-row align-items-center gap-3 justify-content-end mt-3">
-               <div>
-                  <button class="save-btn text-uppercase" @click="sendFundUpdates">send to all selected</button>
-                </div>
-                <div>
-                  <button class="save-btn text-uppercase" @click="sendFundUpdates">send</button>
-                </div>
+              <div>
+                <Link :href="route('smsNotification.selectToAllSelected', {type: 'fundUpdates', message: getFundUpdates.message})" class="save-btn text-uppercase text-decoration-none">
+                  send to all selected
+                </Link>
+              </div>
+              <div>
+                <button class="save-btn text-uppercase" @click="sendFundUpdates">send</button>
+              </div>
             </div>
           </div>
 
