@@ -139,6 +139,7 @@ class SelectMemberController extends Controller
      */
     private function sendAndLog(string $message, string $number, int $notificationId): void
     {
+            Log::info("FAKE SMS (TEST MODE) to {$number} | Notification ID: {$notificationId} | Message: {$message}");
         // try {
         //     $success = SmsNotificationSender::send($message, [$number]);
 

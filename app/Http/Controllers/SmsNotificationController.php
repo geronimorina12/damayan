@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\ContributionModel;
 use App\Models\memberModel;
 use App\Models\SmsNotificationSaved;
+use App\Models\User;
 use App\Services\SmsNotificationSender;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -43,9 +44,11 @@ class SmsNotificationController extends Controller
         public function sendToAllSelected($type, $message)
         {
             $members = memberModel::select('id', 'first_name', 'last_name', 'age')->get();
+            $users = User::select(['id', 'name'])->get();
 
+            $all = collect($members)->merge($users)->sortBy('name')->values()->all();
             return Inertia::render('admin/smsNotification/SendToAllSelected', [
-                'members' => $members,
+                'members' => $all,
                 'type' => $type,
                 'message' => $message,
             ]);
@@ -172,6 +175,7 @@ class SmsNotificationController extends Controller
      */
     private function sendAndLog(string $message, string $number, int $notificationId): void
     {
+            Log::info("FAKE SMS (TEST MODE) to {$number} | Notification ID: {$notificationId} | Message: {$message}");
         // try {
         //     $success = SmsNotificationSender::send($message, [$number]);
 

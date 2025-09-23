@@ -62,7 +62,7 @@ class AdminController extends Controller
             ]);
         }
     }
-        return response()->json(['message: ' => 'member create']);
+        return redirect()->back()->with(['message' => 'member create']);
     }
 
     public function addBeneficiary(Request $request){
