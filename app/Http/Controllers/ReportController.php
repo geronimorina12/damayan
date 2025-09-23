@@ -3,10 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\ContributionModel;
+use App\Models\DeathReportModel;
 use App\Models\memberModel;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 
@@ -16,10 +18,11 @@ class ReportController extends Controller
     {
 
     $collectors = User::where('role', 'collector')->select('id', 'name', 'purok')->get();
-
+    
     // Load all contributions with needed fields
     $contributions = ContributionModel::select('collector', 'status', 'amount', 'created_at')->get();
-
+    $memberContributions = ContributionModel::with('memberContribution')->get();
+    $deathReports = DeathReportModel::all();
     $collectorStats = $collectors->map(function ($collector) use ($contributions) {
         // Filter contributions by matching collector name
         $matchedContributions = $contributions->where('collector', $collector->name);
@@ -41,6 +44,8 @@ class ReportController extends Controller
 
         return Inertia::render('admin/dashboard/report/ReportHome', [
             'contributions' => $collectorStats,
+            'memberContributions' => $memberContributions,
+            'deathReports' => $deathReports,
         ]);
     }
 

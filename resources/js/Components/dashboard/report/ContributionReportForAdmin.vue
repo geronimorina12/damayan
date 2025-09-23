@@ -35,9 +35,8 @@ watch(
 
 <template>
     <div>
-        <div class="mb-4 mt-5" v-if="getContributions.length > 0">
+        <div class="mb-4" v-if="getContributions.length > 0">
             <div class="container">
-                <h5 class="fw-light">Contributions Report</h5>
                 <table
                     class="table table-responsive table-bordered table-striped"
                 >

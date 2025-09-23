@@ -36,7 +36,10 @@ const form = useForm({
   scheduleContribution: '',
   reminders: '',
   fundUpdates: '',
-  type: ''
+  type: '',
+  deceasedName: '',
+  dateOfDeath: '',
+  memberId: null,
 })
 
 const modalTitle = ref('')
@@ -67,6 +70,9 @@ function showSuggestion(type) {
 
 function save(type) {
   form.type = type
+  form.deceasedName = deathInput.value ? `${deathInput.value.first_name} ${deathInput.value.last_name}` : ''
+  form.dateOfDeath = startOfContribution.value || ''
+  form.memberId = deathInput.value ? deathInput.value.id : null
   form.post(route('smsNotificationSaved.send'), {
     preserveScroll: true,
     onSuccess: () => alert("Notification saved."),

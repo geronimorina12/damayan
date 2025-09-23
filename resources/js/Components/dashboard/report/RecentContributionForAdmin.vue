@@ -11,7 +11,6 @@ watch(
     () => props.recent,
     (data) => {
         getRecent.value = data;
-        console.log("data: ", getRecent.value);
     },
     { immediate: true }
 );
@@ -25,7 +24,6 @@ const formatDate = (dateString) => {
 <template>
     <div>
         <div class="container" v-if="getRecent.length > 0">
-            <h5 class="fw-light">Recent Contributions</h5>
             <table class="table table-bordered table-striped">
                 <thead class="table-light">
                     <tr>

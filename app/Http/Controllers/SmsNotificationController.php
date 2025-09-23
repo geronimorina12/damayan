@@ -78,6 +78,7 @@ class SmsNotificationController extends Controller
             'message' => $message,
             'type' => 'deathReport',
         ]);
+        
 
         foreach ($members as $member) {
             $this->sendAndLog($message, $member->contact_number, $notification->id);
