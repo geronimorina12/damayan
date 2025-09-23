@@ -26,7 +26,7 @@ const togglePurok = (purok) => {
 
 <template>
     <div>
-        <div class="d-flex justify-content-between text-muted small">
+        <div class="d-flex align-items-center gap-2 text-muted small">
             <span
                 class="purok all-members-text"
                 :class="{ 'fw-bold active': getActivePurok == 'all' }"

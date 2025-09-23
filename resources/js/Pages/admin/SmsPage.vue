@@ -85,7 +85,7 @@
                 </div>
               </div>
 
-              //TODO iba dapat ang route name para sa send to all selected sa send
+              
 
             </div>
 
