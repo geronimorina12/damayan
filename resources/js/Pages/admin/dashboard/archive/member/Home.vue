@@ -7,13 +7,26 @@ const props = defineProps({
   members: {
     type: Array,
     default: () => []
+  },
+  deceasedMembers: {
+    type: Array,
+    default: () => []
   }
 })
 let getMembers = ref([]);
+const getDeceasedMembers = ref([]);
 watch(
   () => props.members,
   (newMember) => {
     getMembers.value = newMember;
+  },
+  {immediate: true}
+)
+
+watch(
+  () => props.deceasedMembers,
+  (newDeceasedMembers) => {
+    getDeceasedMembers.value = newDeceasedMembers;
   },
   {immediate: true}
 )
@@ -28,7 +41,10 @@ watch(
         })
       }
     }
-
+const formatDate = (dateString) => {
+    const options = { year: "numeric", month: "long", day: "numeric" };
+    return new Date(dateString).toLocaleDateString(undefined, options);
+};
 </script>
 
 <template>
@@ -41,7 +57,7 @@ watch(
            <div class="container-fluid d-flex flex-row justify-content-between px-0 align-items-center">
                 <div>
                      <div>
-                       <h5 class="fw-semibold">Archived</h5>
+                       <h5 class="fw-semibold fs-3">Archived</h5>
                     </div>
                 </div>
                 <div>
@@ -50,7 +66,9 @@ watch(
            </div>
      </div>
 
-    <div class="table-responsive" v-if="getMembers.length">
+    <div class="container" v-if="getMembers.length">
+       <p class="text-muted">Members</p>
+    <div class="table-responsive" >
       <table class="table table-bordered align-middle text-center">
         <thead class="table-light">
           <tr>
@@ -95,8 +113,33 @@ watch(
       </table>
     </div>
 
-    <div class="container text-center mt-3">
+    </div>
+    <div class="container text-center mt-3" v-else>
         <h5 class="text-dark fw-light">No Member's Archive Data.</h5>
+    </div>
+
+
+    <div class="container mt-3">
+      <p class="text-muted">Deceased Members</p>
+
+    <div class="table-responsive" v-if="getDeceasedMembers.length != 0">
+      <table class="table">
+        <thead class="table-light">
+          <tr>
+            <th>ID</th>
+            <th><i class="bi bi-person"></i> NAME</th>
+            <th>DECEASED DATE</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="(member, index) in getDeceasedMembers" :key="index">
+            <td>{{ index + 1 }}</td>
+            <td>{{ member?.deceased_name }}</td>
+            <td>{{ formatDate(member?.date_of_death) }}</td>
+          </tr>
+        </tbody>
+      </table>
+      </div>
     </div>
   </div>
     </AdminLayout>

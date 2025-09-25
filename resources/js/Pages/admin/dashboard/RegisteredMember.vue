@@ -1,10 +1,11 @@
 <script setup>
-import { ref, defineProps, watch, onMounted, onUnmounted, nextTick } from 'vue'
+import { ref, defineProps, watch, onMounted, onUnmounted, nextTick, computed } from 'vue'
 import { router, Head, Link } from '@inertiajs/vue3'
 import AdminLayout from '@/Layouts/AdminLayout.vue'
 import Header from '@/Components/dashboard/admin/registeredMember/Header.vue'
 import Alert from '@/Components/dashboard/admin/registeredMember/Alert.vue'
 import AddNewMember from '@/Components/dashboard/admin/registeredMember/members/AddNewMember.vue'
+
 const props = defineProps({
   members: {
     type: Object, // will contain data, links, meta
@@ -19,6 +20,7 @@ const activeMemberId = ref(null)
 const actionButtonRefs = ref({})
 const statusChangeAlert = ref(false)
 const passNameToAlert = ref('')
+const searchQuery = ref("")   // 🔍 search input
 
 // Watch members from props
 watch(
@@ -28,6 +30,19 @@ watch(
   },
   { immediate: true }
 )
+
+// Computed: filter members based on searchQuery
+const filteredMembers = computed(() => {
+  if (!searchQuery.value) return getMembers.value
+  return getMembers.value.filter((member) => {
+    const fullName = `${member.first_name} ${member.middle_name || ''} ${member.last_name}`.toLowerCase()
+    return (
+      fullName.includes(searchQuery.value.toLowerCase()) ||
+      (member.contact_number || '').toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+      (member.purok || '').toLowerCase().includes(searchQuery.value.toLowerCase())
+    )
+  })
+})
 
 const trashMember = (id) => {
   if (confirm('Are you sure you want to trash this member?')) {
@@ -107,8 +122,6 @@ const goToPage = (url) => {
     router.get(url, {}, { preserveScroll: true, preserveState: true })
   }
 }
-
-
 </script>
 
 <template>
@@ -124,6 +137,17 @@ const goToPage = (url) => {
       />
 
       <div class="container table-container">
+        
+        <!-- 🔍 Search Bar -->
+        <div class="mb-3">
+          <input 
+            type="text" 
+            class="form-control" 
+            placeholder="Search members by name, contact, or purok..." 
+            v-model="searchQuery"
+          />
+        </div>
+
         <div class="table-responsive">
           <table class="table table-bordered align-middle text-center">
             <thead class="table-light">
@@ -139,7 +163,7 @@ const goToPage = (url) => {
               </tr>
             </thead>
             <tbody>
-              <tr v-for="(member, index) in getMembers" :key="index">
+              <tr v-for="(member, index) in filteredMembers" :key="index">
                 <td>{{ member.id }}</td>  
                 <td class="text-start">{{ member?.first_name }} {{ member?.middle_name }} {{ member?.last_name }}</td>
                 <td>{{ member.gender || 'N/A' }}</td>
@@ -177,6 +201,9 @@ const goToPage = (url) => {
                   </div>
                 </td>
               </tr>
+              <tr v-if="filteredMembers.length === 0">
+                <td colspan="8" class="text-center text-muted">No members found</td>
+              </tr>
             </tbody>
           </table>
         </div>
@@ -184,7 +211,6 @@ const goToPage = (url) => {
 
       <!-- Pagination -->
       <div class="pagination-controls d-flex justify-content-center mt-3 mb-5 pb-5 pt-3">
-        
         <button
           v-for="(link, index) in props.members.links"
           :key="index"
@@ -193,14 +219,6 @@ const goToPage = (url) => {
           @click="goToPage(link.url)"
           v-html="link.label"
         />
-
-        <!-- <button
-          class="btn btn-outline-primary ms-2"
-          :disabled="!props.members.next_page_url"
-          @click="goToPage(props.members.next_page_url)"
-        >
-          Next
-        </button> -->
       </div>
     </div>
 
@@ -234,7 +252,6 @@ const goToPage = (url) => {
       </div>
     </div>
 
-
     <!-- Add new member modal -->
     <div class="modal fade" id="addNewMember" tabindex="-1" aria-labelledby="addNewMemberLabel" aria-hidden="true">
       <div class="modal-dialog" style="max-width: 800px;">
@@ -253,9 +270,9 @@ const goToPage = (url) => {
         </div>
       </div>
     </div>
-
   </AdminLayout>
 </template>
+
 
 <style scoped>
 .main-section {
