@@ -123,7 +123,7 @@ function goToPage(url) {
             </table>
 
             <!-- Pagination Controls -->
-                      <div class="pagination-controls d-flex justify-content-between mt-3">
+                      <div class="pagination-controls d-flex align-items-center gap-2 mt-3">
               <button
                 class="btn btn-outline-primary"
                 :disabled="!props.member.prev_page_url"
@@ -133,7 +133,7 @@ function goToPage(url) {
               </button>
 
               <button
-                class="btn btn-outline-primary ms-auto"
+                class="btn btn-outline-primary"
                 :disabled="!props.member.next_page_url"
                 @click="goToPage(props.member.next_page_url)"
               >
