@@ -2,6 +2,8 @@
 import { ref, defineProps, watch } from 'vue'
 import { router, Head, Link } from '@inertiajs/vue3'
 import AdminLayout from '@/Layouts/AdminLayout.vue'
+import DeceasedMember from '@/Components/dashboard/admin/archive/DeceasedMember.vue'
+import Official from '@/Components/dashboard/admin/archive/Official.vue'
 
 const props = defineProps({
   members: {
@@ -11,14 +13,20 @@ const props = defineProps({
   deceasedMembers: {
     type: Array,
     default: () => []
+  },
+  officials: {
+    type: Array,
+    default: () => []
   }
 })
 let getMembers = ref([]);
 const getDeceasedMembers = ref([]);
+let getOfficials = ref([]);
+
 watch(
-  () => props.members,
-  (newMember) => {
-    getMembers.value = newMember;
+  () => props.officials,
+  (newData) => {
+    getOfficials.value = newData;
   },
   {immediate: true}
 )
@@ -27,9 +35,33 @@ watch(
   () => props.deceasedMembers,
   (newDeceasedMembers) => {
     getDeceasedMembers.value = newDeceasedMembers;
+    filterAliveMembers();
   },
-  {immediate: true}
-)
+  { immediate: true }
+);
+
+watch(
+  () => props.members,
+  (newMembers) => {
+    filterAliveMembers(newMembers);
+  },
+  { immediate: true }
+);
+
+function filterAliveMembers(membersList = props.members) {
+  if (!membersList) {
+    getMembers.value = [];
+    return;
+  }
+
+  getMembers.value = membersList.filter((m) => {
+    const fullName = `${m.first_name} ${m.last_name}`.toLowerCase();
+    return !getDeceasedMembers.value.some(
+      (d) => d.deceased_name.toLowerCase() === fullName
+    );
+  });
+}
+
 
  const deletePermanently = (id) => {
       if (confirm('Are you sure you want to delete this member permanently?')) {
@@ -41,10 +73,17 @@ watch(
         })
       }
     }
-const formatDate = (dateString) => {
-    const options = { year: "numeric", month: "long", day: "numeric" };
-    return new Date(dateString).toLocaleDateString(undefined, options);
-};
+
+const undoMember = (id) => {
+  if (confirm('Are you sure you want to undo this member?')) {
+    router.post(route('archive.undo', { id: id }), {
+      onSuccess: () => {
+        alert('Member restored successfully...');
+      },
+      onError: (err) => console.log('An error occurred while restoring data.', err)
+    });
+  }
+}
 </script>
 
 <template>
@@ -60,14 +99,11 @@ const formatDate = (dateString) => {
                        <h5 class="fw-semibold fs-3">Archived</h5>
                     </div>
                 </div>
-                <div>
-                    <Link :href="route('officialArchive.viewOfficials')" class="btn btn-success">Officials</Link>
-                </div>
            </div>
      </div>
 
+       <p class="text-muted ms-2">Members</p>
     <div class="container" v-if="getMembers.length">
-       <p class="text-muted">Members</p>
     <div class="table-responsive" >
       <table class="table table-bordered align-middle text-center">
         <thead class="table-light">
@@ -90,23 +126,19 @@ const formatDate = (dateString) => {
             <td>{{ member.age }}</td>
             <td>{{ member.contact_number }}</td>
             <td>{{ member.purok }}</td>
-            <td>
-              <div class="form-check form-switch d-inline-flex justify-content-center">
-                <input class="form-check-input" type="checkbox"
-              :checked="member.status === 'active'"
-              title="can't modify"
-              disabled
-              />
-
-              </div>
-            </td>
+            <td>{{ member.status }}</td>
             <td>
               <Link :href="route('archive.view', {id: member?.id})" class="btn btn-sm btn-outline-dark me-1" title="view info.">
                 <i class="bi bi-eye"></i>
               </Link>
-              <button class="btn btn-sm btn-outline-dark" @click="deletePermanently(member.id)" title="delete permanently">
+              <button class="btn btn-sm btn-outline-dark me-1" @click="deletePermanently(member.id)" title="delete permanently">
                 <i class="bi bi-trash"></i>
               </button>
+
+              <button class="btn btn-sm btn-outline-dark" @click="undoMember(member.id)" title="undo delete">
+                <i class="bi bi-arrow-counterclockwise"></i>
+              </button>
+
             </td>
           </tr>
         </tbody>
@@ -119,28 +151,8 @@ const formatDate = (dateString) => {
     </div>
 
 
-    <div class="container mt-3">
-      <p class="text-muted">Deceased Members</p>
-
-    <div class="table-responsive" v-if="getDeceasedMembers.length != 0">
-      <table class="table">
-        <thead class="table-light">
-          <tr>
-            <th>ID</th>
-            <th><i class="bi bi-person"></i> NAME</th>
-            <th>DECEASED DATE</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="(member, index) in getDeceasedMembers" :key="index">
-            <td>{{ index + 1 }}</td>
-            <td>{{ member?.deceased_name }}</td>
-            <td>{{ formatDate(member?.date_of_death) }}</td>
-          </tr>
-        </tbody>
-      </table>
-      </div>
-    </div>
+    <DeceasedMember :deceasedMembers="getDeceasedMembers" />
+    <Official :officials="getOfficials" />
   </div>
     </AdminLayout>
 </template>

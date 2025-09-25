@@ -8,6 +8,7 @@ use App\Http\Controllers\ContributionController;
 use App\Http\Controllers\ContributionControllerForCollector;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DeathReport;
 use App\Http\Controllers\MemberControllerForCollector;
 use App\Http\Controllers\MembersController;
 use App\Http\Controllers\OfficialArchive;
@@ -79,6 +80,7 @@ Route::prefix('archive')->name('archive.')->middleware('auth')->group(function (
     Route::get('/view-archive', [ArchiveController::class, 'index'])->name('index');
     Route::get('/view-info/{id}', [ArchiveController::class, 'view'])->name('view');
     Route::delete('/delete-permanently/{id}', [ArchiveController::class, 'deletePermanently'])->name('deleteMember');
+    Route::post('/undo/{id}', [ArchiveController::class, 'undo'])->name('undo');
 });
 //!!! Hiwalay ang Member tas Official archive kay since magka-iba 
 //ang data tas table san duwa
@@ -151,4 +153,9 @@ Route::prefix('smsSelectMember')->name('smsSelectMember.')->middleware('auth')->
 
 // save only the message to the database not send in sms
 Route::post('smsNotificationSaved/add-death-report', [SmsNotificationSavedController::class, 'send'])->name('smsNotificationSaved.send');
+
+Route::prefix('deathReport')->name('deathReport.')->middleware('auth')->group(function (){
+    Route::post('/undo/{id}', [DeathReport::class, 'undo'])->name('undo');
+    Route::delete('/delete-permanently/{id}', [DeathReport::class, 'deletePermanently'])->name('deletePermanently');
+});
 require __DIR__.'/auth.php';
