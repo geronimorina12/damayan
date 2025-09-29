@@ -25,4 +25,9 @@ class OfficialArchive extends Controller
         $member->forceDelete();
         return redirect()->back()->with(['success' => 'Member deleted successfully...'], 201);
     }
+    public function restoreOfficial($id){
+        $official = OfficialModel::onlyTrashed()->findOrFail($id);
+        $official->restore();
+        return redirect()->back()->with(['success' => 'Official restored successfully...'], 201);
+    }
 }

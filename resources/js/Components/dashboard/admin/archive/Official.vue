@@ -31,6 +31,17 @@ const formatDate = (date) => {
   const option = {year: 'numeric'}
   return new Date(date).toLocaleDateString(undefined, option);
 }
+
+const restoreOfficial = (id) => {
+  if (confirm('Are you sure you want to restore this official?')) {
+    router.post(route('officialArchived.restoreOfficial', {id: id}), {
+      onSuccess: () => {
+        alert('Official restored successfully...')
+      },
+      onError: (err) => console.log('An error occured while restoring data.', err)
+    })
+  }
+}
 </script>
 
 <template>
@@ -79,9 +90,14 @@ const formatDate = (date) => {
               <!-- <Link :href="route('officialArchive.view', {id: official?.id})" class="btn btn-sm btn-outline-dark me-1" title="view info.">
                 <i class="bi bi-eye"></i>
               </Link> -->
-              <button class="btn btn-sm btn-outline-dark" @click="deletePermanently(official.id)" title="delete permanently">
+              <button class="btn btn-sm btn-outline-dark me-2" @click="deletePermanently(official.id)" title="delete permanently">
                 <i class="bi bi-trash"></i>
               </button>
+
+              <button class="btn btn-sm btn-outline-dark" @click="restoreOfficial(official.id)" title="restore">
+                <i class="bi bi-arrow-clockwise"></i>
+              </button>
+
             </td>
           </tr>
         </tbody>

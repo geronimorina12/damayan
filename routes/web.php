@@ -158,4 +158,7 @@ Route::prefix('deathReport')->name('deathReport.')->middleware('auth')->group(fu
     Route::post('/undo/{id}', [DeathReport::class, 'undo'])->name('undo');
     Route::delete('/delete-permanently/{id}', [DeathReport::class, 'deletePermanently'])->name('deletePermanently');
 });
+Route::prefix('officialArchived')->name('officialArchived.')->middleware('auth')->group(function (){
+    Route::post('/restore/{id}', [OfficialArchive::class, 'restoreOfficial'])->name('restoreOfficial');
+});
 require __DIR__.'/auth.php';

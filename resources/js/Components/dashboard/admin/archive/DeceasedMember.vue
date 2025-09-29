@@ -9,6 +9,7 @@ const props = defineProps({
   }
 });
 const getDeceasedMembers = ref(props.deceasedMembers || []);
+console.log(getDeceasedMembers);
 const formatDate = (dateString) => {
     const options = { year: "numeric", month: "long", day: "numeric" };
     return new Date(dateString).toLocaleDateString(undefined, options);
@@ -39,8 +40,8 @@ const undo = (id) => {
   <div>
     <div class="container mt-3">
 
-    <div class="table-responsive" v-if="getDeceasedMembers.length != 0">
       <p class="text-muted">Deceased Members</p>
+    <div class="table-responsive" v-if="getDeceasedMembers.length != 0">
 
       <table class="table">
         <thead class="table-light">
@@ -68,6 +69,10 @@ const undo = (id) => {
           </tr>
         </tbody>
       </table>
+      </div>
+
+      <div class="container text-center fs-5" v-else>
+        No Deceased Members Found.
       </div>
     </div>
   </div>

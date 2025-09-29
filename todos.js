@@ -4,7 +4,7 @@
         "registered members ✅": "Ma add san search function, pagination , modal ang add member",
         "contribution ✅": "paggination",
         "report ✅": "gawing tab, view report tas pwede ma download as pdf",
-        "archieve" : "undo",
+        "archieve ✅" : "undo",
         "sms ✅": "kapag nag send san tigbak ma sulod sa database tsaka sabay ang date"
     }
 ]
