@@ -10,7 +10,7 @@ class MemberControllerForCollector extends Controller
 {
     public function index()
     {
-        $members = memberModel::all();
+        $members = memberModel::paginate(10);
         return Inertia::render('collector/dashboard/RegisteredMember', [
             'members' => $members,
         ]);
