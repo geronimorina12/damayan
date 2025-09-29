@@ -15,7 +15,7 @@ class ContributionController extends Controller
     public function index(){
         $mem = memberModel::with('contributions')
         ->orderBy('first_name', 'asc')
-        ->get();
+        ->paginate(10);
         $selectedPurok = 'all';
         $collectors = User::select('id', 'name', 'purok')
         ->where('role', 'collector')

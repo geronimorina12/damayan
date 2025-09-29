@@ -1,37 +1,55 @@
 <script setup>
-import { ref, defineProps, watch, onMounted, onUnmounted, nextTick } from 'vue'
+import { ref, defineProps, watch, onMounted, onUnmounted, nextTick, computed } from 'vue'
 import { router, Head, Link } from '@inertiajs/vue3'
 import AdminLayout from '@/Layouts/AdminLayout.vue'
 import Header from '@/Components/dashboard/admin/registeredMember/Header.vue'
 import Alert from '@/Components/dashboard/admin/registeredMember/Alert.vue'
+import AddNewMember from '@/Components/dashboard/admin/registeredMember/members/AddNewMember.vue'
+
 const props = defineProps({
   members: {
-    type: Array,
-    default: () => []
+    type: Object, // will contain data, links, meta
+    default: () => ({ data: [], links: [], prev_page_url: null, next_page_url: null })
   }
 })
 
-let getMembers = ref([]);
-const showActionsPopup = ref(false);
-const popupPosition = ref({ top: '0px', left: '0px' });
-const activeMemberId = ref(null);
-const actionButtonRefs = ref({}); 
-const statusChangeAlert = ref(false);
-const passNameToAlert = ref('');
+let getMembers = ref([])
+const showActionsPopup = ref(false)
+const popupPosition = ref({ top: '0px', left: '0px' })
+const activeMemberId = ref(null)
+const actionButtonRefs = ref({})
+const statusChangeAlert = ref(false)
+const passNameToAlert = ref('')
+const searchQuery = ref("")   // 🔍 search input
+
+// Watch members from props
 watch(
   () => props.members,
   (newMember) => {
-    getMembers.value = newMember;
+    getMembers.value = newMember.data || []
   },
   { immediate: true }
 )
 
+// Computed: filter members based on searchQuery
+const filteredMembers = computed(() => {
+  if (!searchQuery.value) return getMembers.value
+  return getMembers.value.filter((member) => {
+    const fullName = `${member.first_name} ${member.middle_name || ''} ${member.last_name}`.toLowerCase()
+    return (
+      fullName.includes(searchQuery.value.toLowerCase()) ||
+      (member.contact_number || '').toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+      (member.purok || '').toLowerCase().includes(searchQuery.value.toLowerCase())
+    )
+  })
+})
+
 const trashMember = (id) => {
   if (confirm('Are you sure you want to trash this member?')) {
-    router.delete(route('deleteMember', { id: id }), {
+    router.delete(route('deleteMember', { id }), {
       onSuccess: () => {
-        alert('Member trashed');
-        showActionsPopup.value = false; 
+        alert('Member trashed')
+        showActionsPopup.value = false
       },
     })
   }
@@ -43,70 +61,67 @@ const toggleMemberStatus = (member) => {
     status: newStatus
   }, {
     onSuccess: () => {
-      member.status = newStatus;
-      statusChangeAlert.value = newStatus === 'active' ? true : false;
-      passNameToAlert.value = `${member.first_name} ${member.middle_name} ${member.last_name}`;
+      member.status = newStatus
+      statusChangeAlert.value = newStatus === 'active'
+      passNameToAlert.value = `${member.first_name} ${member.middle_name} ${member.last_name}`
     }
   })
 }
 
 const togglePopup = (event, memberId) => {
- 
   if (showActionsPopup.value && activeMemberId.value === memberId) {
-    showActionsPopup.value = false;
-    activeMemberId.value = null;
-    return;
+    showActionsPopup.value = false
+    activeMemberId.value = null
+    return
   }
 
-  activeMemberId.value = memberId;
-  showActionsPopup.value = true;
+  activeMemberId.value = memberId
+  showActionsPopup.value = true
 
   nextTick(() => {
-    const buttonRect = event.currentTarget.getBoundingClientRect();
-    const popupElement = document.querySelector('.actions-popup'); 
+    const buttonRect = event.currentTarget.getBoundingClientRect()
+    const popupElement = document.querySelector('.actions-popup')
+    if (!popupElement) return
 
-    if (!popupElement) return; 
+    const popupWidth = popupElement.offsetWidth
+    const viewportWidth = window.innerWidth || document.documentElement.clientWidth
 
-    const popupWidth = popupElement.offsetWidth;
-    const viewportWidth = window.innerWidth || document.documentElement.clientWidth;
-
-   
-    let newLeft = buttonRect.right + window.scrollX + 10;
-
-   
+    let newLeft = buttonRect.right + window.scrollX + 10
     if (newLeft + popupWidth > viewportWidth) {
-     
-      newLeft = buttonRect.left + window.scrollX - popupWidth - 10; 
-     
-      if (newLeft < 0) {
-          newLeft = 10;
-      }
+      newLeft = buttonRect.left + window.scrollX - popupWidth - 10
+      if (newLeft < 0) newLeft = 10
     }
 
     popupPosition.value = {
       top: `${buttonRect.top + window.scrollY}px`,
       left: `${newLeft}px`
-    };
-  });
-};
+    }
+  })
+}
 
 const closePopup = (event) => {
-
   if (showActionsPopup.value && event.target &&
       !event.target.closest('.actions-popup') &&
       !event.target.closest('.three-dots-button')) {
-    showActionsPopup.value = false;
-    activeMemberId.value = null;
+    showActionsPopup.value = false
+    activeMemberId.value = null
   }
-};
+}
 
 onMounted(() => {
-  document.addEventListener('click', closePopup);
-});
+  document.addEventListener('click', closePopup)
+})
 
 onUnmounted(() => {
-  document.removeEventListener('click', closePopup);
-});
+  document.removeEventListener('click', closePopup)
+})
+
+// pagination navigation
+const goToPage = (url) => {
+  if (url) {
+    router.get(url, {}, { preserveScroll: true, preserveState: true })
+  }
+}
 </script>
 
 <template>
@@ -117,11 +132,22 @@ onUnmounted(() => {
       <Header />
       <!-- Alert for status changes -->
       <Alert 
-      :status="statusChangeAlert"
-      :name="passNameToAlert"
+        :status="statusChangeAlert"
+        :name="passNameToAlert"
       />
 
       <div class="container table-container">
+        
+        <!-- 🔍 Search Bar -->
+        <div class="mb-3">
+          <input 
+            type="text" 
+            class="form-control" 
+            placeholder="Search members by name, contact, or purok..." 
+            v-model="searchQuery"
+          />
+        </div>
+
         <div class="table-responsive">
           <table class="table table-bordered align-middle text-center">
             <thead class="table-light">
@@ -137,8 +163,8 @@ onUnmounted(() => {
               </tr>
             </thead>
             <tbody>
-              <tr v-for="(member, index) in getMembers" :key="index">
-                <td>{{ index + 1 }}</td>  
+              <tr v-for="(member, index) in filteredMembers" :key="index">
+                <td>{{ member.id }}</td>  
                 <td class="text-start">{{ member?.first_name }} {{ member?.middle_name }} {{ member?.last_name }}</td>
                 <td>{{ member.gender || 'N/A' }}</td>
                 <td>{{ member.age }}</td>
@@ -175,12 +201,28 @@ onUnmounted(() => {
                   </div>
                 </td>
               </tr>
+              <tr v-if="filteredMembers.length === 0">
+                <td colspan="8" class="text-center text-muted">No members found</td>
+              </tr>
             </tbody>
           </table>
         </div>
       </div>
+
+      <!-- Pagination -->
+      <div class="pagination-controls d-flex justify-content-center mt-3 mb-5 pb-5 pt-3">
+        <button
+          v-for="(link, index) in props.members.links"
+          :key="index"
+          class="btn"
+          :class="link.active ? 'btn-primary' : 'btn-outline-primary'"
+          @click="goToPage(link.url)"
+          v-html="link.label"
+        />
+      </div>
     </div>
 
+    <!-- Popup menu -->
     <div
       v-if="showActionsPopup"
       class="actions-popup card shadow"
@@ -209,8 +251,28 @@ onUnmounted(() => {
         </button>
       </div>
     </div>
+
+    <!-- Add new member modal -->
+    <div class="modal fade" id="addNewMember" tabindex="-1" aria-labelledby="addNewMemberLabel" aria-hidden="true">
+      <div class="modal-dialog" style="max-width: 800px;">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h1 class="modal-title fs-5" id="addNewMemberLabel">Add New Member</h1>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <AddNewMember />
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-primary">Save changes</button>
+          </div>
+        </div>
+      </div>
+    </div>
   </AdminLayout>
 </template>
+
 
 <style scoped>
 .main-section {
@@ -226,7 +288,6 @@ onUnmounted(() => {
   vertical-align: middle;
 }
 
-
 .action-buttons-small {
   display: none;
 }
@@ -239,6 +300,28 @@ onUnmounted(() => {
   position: absolute;
   z-index: 1000;
   min-width: 150px;
+}
+
+.main-section {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.table-container {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.pagination-controls {
+  position: sticky;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: #fff;
+  padding: 10px;
+  border-top: 1px solid #dee2e6;
+  z-index: 100;
 }
 
 

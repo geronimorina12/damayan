@@ -1,0 +1,59 @@
+[33m2a0650b[m[33m ([m[1;36mHEAD[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m HEAD@{0}: pull origin main --rebase (start): checkout 2a0650b58a58b78b7242bbbde98920f1d425a164
+[33maccf75c[m[33m ([m[1;32mmain[m[33m)[m HEAD@{1}: commit: Adding downloadale pdf using html2pdf
+[33m71f8273[m[33m ([m[1;31morigin/main2[m[33m, [m[1;32mmain3[m[33m, [m[1;32mmain2[m[33m)[m HEAD@{2}: pull origin main: updating HEAD
+[33m71f8273[m[33m ([m[1;31morigin/main2[m[33m, [m[1;32mmain3[m[33m, [m[1;32mmain2[m[33m)[m HEAD@{3}: checkout: moving from main2 to main
+[33m71f8273[m[33m ([m[1;31morigin/main2[m[33m, [m[1;32mmain3[m[33m, [m[1;32mmain2[m[33m)[m HEAD@{4}: merge main: Fast-forward
+[33m3145311[m HEAD@{5}: checkout: moving from main to main2
+[33m71f8273[m[33m ([m[1;31morigin/main2[m[33m, [m[1;32mmain3[m[33m, [m[1;32mmain2[m[33m)[m HEAD@{6}: checkout: moving from main3 to main
+[33m71f8273[m[33m ([m[1;31morigin/main2[m[33m, [m[1;32mmain3[m[33m, [m[1;32mmain2[m[33m)[m HEAD@{7}: checkout: moving from main to main3
+[33m71f8273[m[33m ([m[1;31morigin/main2[m[33m, [m[1;32mmain3[m[33m, [m[1;32mmain2[m[33m)[m HEAD@{8}: commit: Add view report button in report page
+[33m5ba351d[m HEAD@{9}: commit (merge): Merge branch 'main' of https://github.com/geronimorina12/damayan
+[33me3f419c[m[33m ([m[1;31morigin/feature/sms[m[33m, [m[1;32mfeature/sms[m[33m)[m HEAD@{10}: merge feature/sms: Fast-forward
+[33m402513f[m HEAD@{11}: checkout: moving from feature/sms to main
+[33me3f419c[m[33m ([m[1;31morigin/feature/sms[m[33m, [m[1;32mfeature/sms[m[33m)[m HEAD@{12}: commit: .
+[33m3145311[m HEAD@{13}: checkout: moving from main2 to feature/sms
+[33m3145311[m HEAD@{14}: merge feature/sms: Fast-forward
+[33m7725a1d[m HEAD@{15}: checkout: moving from feature/sms to main2
+[33m3145311[m HEAD@{16}: commit: .
+[33m7725a1d[m HEAD@{17}: checkout: moving from main2 to feature/sms
+[33m7725a1d[m HEAD@{18}: merge feature/sms: Fast-forward
+[33m81cf248[m HEAD@{19}: checkout: moving from feature/sms to main2
+[33m7725a1d[m HEAD@{20}: commit: Adding a send to all selected page
+[33md0b60d3[m[33m ([m[1;32mfeature/sms-backup[m[33m)[m HEAD@{21}: checkout: moving from feature/sms-backup to feature/sms
+[33md0b60d3[m[33m ([m[1;32mfeature/sms-backup[m[33m)[m HEAD@{22}: checkout: moving from feature/sms to feature/sms-backup
+[33md0b60d3[m[33m ([m[1;32mfeature/sms-backup[m[33m)[m HEAD@{23}: commit: Adding SmsNotificationSavedController for saving sms message in database
+[33m81cf248[m HEAD@{24}: checkout: moving from main2 to feature/sms
+[33m81cf248[m HEAD@{25}: merge feature/sms: Fast-forward
+[33mcf9da3f[m HEAD@{26}: checkout: moving from main to main2
+[33m402513f[m HEAD@{27}: checkout: moving from feature/sms to main
+[33m81cf248[m HEAD@{28}: commit: Applying separate function to every sms category
+[33mf0bb0bd[m HEAD@{29}: checkout: moving from main2 to feature/sms
+[33mcf9da3f[m HEAD@{30}: checkout: moving from feature/sms to main2
+[33mf0bb0bd[m HEAD@{31}: commit: Modifying sms
+[33mcf9da3f[m HEAD@{32}: checkout: moving from main2 to feature/sms
+[33mcf9da3f[m HEAD@{33}: merge feature/sms: Fast-forward
+[33m774f037[m HEAD@{34}: checkout: moving from feature/sms to main2
+[33mcf9da3f[m HEAD@{35}: commit: Adding a SelectDeceased page
+[33m774f037[m HEAD@{36}: checkout: moving from main2 to feature/sms
+[33m774f037[m HEAD@{37}: merge feature/sms: Fast-forward
+[33ma32f414[m HEAD@{38}: checkout: moving from feature/sms to main2
+[33m774f037[m HEAD@{39}: commit: First sms code
+[33m402513f[m HEAD@{40}: checkout: moving from main to feature/sms
+[33m402513f[m HEAD@{41}: checkout: moving from main2 to main
+[33ma32f414[m HEAD@{42}: checkout: moving from main to main2
+[33m402513f[m HEAD@{43}: pull origin main: Fast-forward
+[33m0dbe904[m HEAD@{44}: commit: Removing the text that cause an error in current month card
+[33ma0c5cd0[m HEAD@{45}: pull origin main: Fast-forward
+[33ma32f414[m HEAD@{46}: checkout: moving from main2 to main
+[33ma32f414[m HEAD@{47}: merge main: Fast-forward
+[33mf595411[m HEAD@{48}: checkout: moving from main to main2
+[33ma32f414[m HEAD@{49}: commit: Adding filtering report functionality
+[33mf595411[m HEAD@{50}: checkout: moving from main2 to main
+[33mf595411[m HEAD@{51}: checkout: moving from main to main2
+[33mf595411[m HEAD@{52}: merge main2: Fast-forward
+[33mab3bc57[m HEAD@{53}: checkout: moving from main2 to main
+[33mf595411[m HEAD@{54}: commit: Deleting other officials
+[33mab3bc57[m HEAD@{55}: checkout: moving from main to main2
+[33mab3bc57[m HEAD@{56}: commit: Adding active route when the link is clicked
+[33mac411b2[m HEAD@{57}: commit: new commit
+[33m095ca6e[m HEAD@{58}: clone: from https://github.com/geronimorina12/damayan.git
