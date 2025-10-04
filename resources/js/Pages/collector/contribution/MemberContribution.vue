@@ -83,9 +83,9 @@ const unPaidFunc = (memberId) => {
 <template>
   <Head title="Member contribution"/>
   <CollectorLayout>
-    <div class="container">
-      <div class="bg-light p-2">
-        <h6 class="mt-4 ms-2">Payment Contribution</h6>
+    <div class="container main-container">
+      <div class="bg-light p-2 pt-0">
+        <h6 class="mt-4 ms-2 fs-1">Payment Contribution</h6>
 
         <PurokComponentForCollector :activePurok="getSelectedPurok"/>
 
@@ -110,7 +110,7 @@ const unPaidFunc = (memberId) => {
                   <td>
                     <button 
                       v-if="!(getPaidMembersId || []).includes(mem?.id)"
-                      class="btn btn-success"
+                      class="btn btn-danger"
                       data-bs-toggle="modal"
                       data-bs-target="#collectorModal"
                       @click="preparePayment(mem.id, mem.purok)"
@@ -118,7 +118,9 @@ const unPaidFunc = (memberId) => {
                       >
                       Paid
                     </button>
-                    <button v-else class="btn btn-success" @click="unPaidFunc(mem.id)" title="Mark member as unpaid">
+                    <button 
+                    v-else 
+                    class="btn btn-success" @click="unPaidFunc(mem.id)" title="Mark member as unpaid">
                       <i class="bi bi-check-lg"></i>
                     </button>
                   </td>
@@ -134,9 +136,13 @@ const unPaidFunc = (memberId) => {
             <span class="text-success"> {{ getSelectedPurok || 'N/A' }}</span>.
           </h5>
         </div>
+
       </div>
     </div>
 
+        <div class="container extra-space bg-dark"></div>
+
+        
     <!-- Collector Modal -->
     <div class="modal fade" id="collectorModal" tabindex="-1" aria-hidden="true">
       <div class="modal-dialog">
@@ -177,5 +183,18 @@ const unPaidFunc = (memberId) => {
   max-width: 100%;
   display: block;
   margin: 0 auto 15px;
+}
+.extra-space{
+  width: 50%;
+  height: 100%;
+}
+.main-container{
+  height: 100vh;
+  width: 100%;
+  overflow: auto;
+  padding-bottom: 80px;
+}
+.main-container::-webkit-scrollbar{
+  display: none;
 }
 </style>

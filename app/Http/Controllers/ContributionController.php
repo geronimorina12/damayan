@@ -50,7 +50,7 @@ public function toggleContributionPurok($purok)
     }
 
     $mem = memberModel::where('purok', $formatPurok)
-    ->with('contributions')->get();
+    ->with('contributions')->paginate(10);
 
     if ($mem->isEmpty() && $purok === 'all') {
         $mem = memberModel::with('contributions')->get();
