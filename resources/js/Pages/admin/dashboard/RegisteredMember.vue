@@ -142,7 +142,7 @@ const goToPage = (url) => {
         <div class="mb-3">
           <input 
             type="text" 
-            class="form-control" 
+            class="form-control w-50" 
             placeholder="Search members by name, contact, or purok..." 
             v-model="searchQuery"
           />

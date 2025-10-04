@@ -63,7 +63,7 @@ const restoreOfficial = (id) => {
         <thead class="table-light">
           <tr>
             <th>ID</th>
-            <th><i class="bi bi-person"></i> NAME</th>
+            <th> NAME</th>
             <th>Position</th>
             <th>Term</th>
             <th>STATUS</th>

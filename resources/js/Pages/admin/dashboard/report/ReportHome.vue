@@ -1,11 +1,11 @@
 <script setup>
 import AdminLayout from "@/Layouts/AdminLayout.vue";
 import { Head, Link } from "@inertiajs/vue3";
-import { defineProps, ref, watch } from "vue";
+import { defineProps, ref, watch, onMounted } from "vue";
 import ContributionReportForAdmin from "@/Components/dashboard/report/ContributionReportForAdmin.vue";
 import RecentContributionForAdmin from "@/Components/dashboard/report/RecentContributionForAdmin.vue";
 import ReportHomeButton from "@/Components/dashboard/report/ReportHomeButton.vue";
-
+import AddCollector from "@/Components/dashboard/report/AddCollector.vue";
 const props = defineProps({
     contributions: {
         type: Array,
@@ -28,6 +28,7 @@ let getMemberContributions = ref([]);
 let getDeathReports = ref([]);
 const isDownloading = ref(false);
 let selectedDeceased = ref(null);
+let modalInstance = null;
 
 watch(
     () => props.contributions,
@@ -93,6 +94,20 @@ const downloadPDF = () => {
             });
     });
 };
+
+onMounted(() => {
+  const modalEl = document.getElementById('addCollectorModal')
+  if (modalEl) {
+    modalInstance = bootstrap.Modal.getOrCreateInstance(modalEl)
+  }
+})
+
+const closeModal = () => {
+  if (modalInstance) {
+    modalInstance.hide()
+  }
+}
+
 </script>
 
 <template>
@@ -113,12 +128,13 @@ const downloadPDF = () => {
                         >
                             View Reports
                         </button>
-                        <Link
-                            :href="route('reports.addCollector')"
+                        <button
+                            data-bs-toggle="modal" 
+                            data-bs-target="#addCollectorModal"
                             class="btn btn-primary"
                         >
                             Add Collector
-                        </Link>
+                    </button>
                     </div>
                 </div>
 
@@ -303,6 +319,21 @@ const downloadPDF = () => {
                     </div>
                 </div>
 
+                    <!-- Add Collector -->
+                    <div class="modal fade" id="addCollectorModal" tabindex="-1" aria-labelledby="addCollectorModalLabel" aria-hidden="true">
+                    <div class="modal-dialog" style="max-width: 700px;">
+                        <div class="modal-content">
+                        <div class="modal-header">
+                            <h1 class="modal-title fs-5" id="addCollectorModalLabel">Add Collector</h1>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <AddCollector @submitted="closeModal"/>
+                        </div>
+                        </div>
+                    </div>
+                    </div>
+
                 <div class="extra-space"></div>
             </div>
         </AdminLayout>
@@ -327,7 +358,7 @@ const downloadPDF = () => {
 table th, table td {
     border-right: 2px solid #dee2e6;
 }
-table th{
-    background: #D4F3F9;
+table thead th{
+    background: #D4F3F9 !important;
 }
 </style>

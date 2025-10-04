@@ -117,8 +117,8 @@ class ReportController extends Controller
             'role' => $validated['role'],
             'purok' => $validated['purok'],
         ]);
-
-        return redirect()->route('reports.addCollector')->with('success', 'Collector added successfully!');
+        
+        return redirect()->back()->with('success', 'Collector added successfully!');
     }
 
 }

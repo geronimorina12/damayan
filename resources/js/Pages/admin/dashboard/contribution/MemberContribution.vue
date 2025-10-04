@@ -123,7 +123,7 @@ function goToPage(url) {
             </table>
 
             <!-- Pagination Controls -->
-                      <div class="pagination-controls d-flex align-items-center gap-2 mt-3">
+            <div class="pagination-controls d-flex align-items-center justify-content-end gap-2 mt-3">
               <button
                 class="btn btn-outline-primary"
                 :disabled="!props.member.prev_page_url"
@@ -201,5 +201,8 @@ thead tr {
   bottom: 0;
   background: #fff; 
   padding: 10px 0;
+}
+table th{
+  background: #D4F3F9;
 }
 </style>
