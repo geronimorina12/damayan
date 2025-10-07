@@ -44,7 +44,9 @@ class SmsNotificationController extends Controller
         public function sendToAllSelected($type, $message)
         {
             $members = memberModel::select('id', 'first_name', 'last_name', 'age')->get();
-            $users = User::select(['id', 'name'])->get();
+            $users = User::select(['id', 'name'])
+            
+            ->get();
 
             $all = collect($members)->merge($users)->sortBy('name')->values()->all();
             return Inertia::render('admin/smsNotification/SendToAllSelected', [
@@ -177,17 +179,17 @@ class SmsNotificationController extends Controller
     private function sendAndLog(string $message, string $number, int $notificationId): void
     {
             Log::info("FAKE SMS (TEST MODE) to {$number} | Notification ID: {$notificationId} | Message: {$message}");
-        // try {
-        //     $success = SmsNotificationSender::send($message, [$number]);
+         try {
+             $success = SmsNotificationSender::send($message, [$number]);
 
-        //     if ($success) {
-        //         Log::info("SMS sent successfully to {$number} | Notification ID: {$notificationId}");
-        //     } else {
-        //         Log::error("SMS failed to send to {$number} | Notification ID: {$notificationId}");
-        //     }
-        // } catch (\Exception $e) {
-        //     Log::error("Exception when sending SMS to {$number}: " . $e->getMessage());
-        // }
+             if ($success) {
+                 Log::info("SMS sent successfully to {$number} | Notification ID: {$notificationId}");
+             } else {
+                 Log::error("SMS failed to send to {$number} | Notification ID: {$notificationId}");
+             }
+         } catch (\Exception $e) {
+             Log::error("Exception when sending SMS to {$number}: " . $e->getMessage());
+         }
     }
 
     public function selectDeceased()

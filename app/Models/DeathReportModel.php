@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class DeathReportModel extends Model
 {
     protected $table = 'death_reports';
+      protected $primaryKey = 'report_id';
     protected $fillable = [
         'reported_by',
         'member_id',

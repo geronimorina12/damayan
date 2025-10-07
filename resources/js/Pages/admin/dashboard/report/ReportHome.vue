@@ -1,12 +1,11 @@
 <script setup>
 import AdminLayout from "@/Layouts/AdminLayout.vue";
 import { Head, Link } from "@inertiajs/vue3";
-import { defineProps, ref, watch } from "vue";
+import { defineProps, ref, watch, onMounted } from "vue";
 import ContributionReportForAdmin from "@/Components/dashboard/report/ContributionReportForAdmin.vue";
 import RecentContributionForAdmin from "@/Components/dashboard/report/RecentContributionForAdmin.vue";
 import ReportHomeButton from "@/Components/dashboard/report/ReportHomeButton.vue";
-import * as html2pdf from "html2pdf.js";
-// props
+import AddCollector from "@/Components/dashboard/report/AddCollector.vue";
 const props = defineProps({
     contributions: {
         type: Array,
@@ -22,14 +21,15 @@ const props = defineProps({
     },
 });
 
-// states
 let getContributions = ref([]);
-let showContributionsReport = ref(true);
+let showContributionsReport = ref(true); // default: report visible
 let showRecentContributions = ref(false);
 let getMemberContributions = ref([]);
 let getDeathReports = ref([]);
 const isDownloading = ref(false);
-// watchers
+let selectedDeceased = ref(null);
+let modalInstance = null;
+
 watch(
     () => props.contributions,
     (newContributions) => {
@@ -52,7 +52,16 @@ watch(
     { immediate: true }
 );
 
-// format date
+const showRecent = () => {
+    showRecentContributions.value = true;
+    showContributionsReport.value = false;
+};
+
+const showReport = () => {
+    showRecentContributions.value = false;
+    showContributionsReport.value = true;
+};
+
 const formatDate = (dateString) => {
     const options = { year: "numeric", month: "long", day: "numeric" };
     return new Date(dateString).toLocaleDateString(undefined, options);
@@ -62,7 +71,7 @@ const formatDate = (dateString) => {
 const downloadPDF = () => {
     const element = document.getElementById("report-pdf-content");
     if (!element) return;
-isDownloading.value = true;
+    isDownloading.value = true;
     import("html2pdf.js").then((html2pdf) => {
         const opt = {
             margin: 0.5,
@@ -71,7 +80,8 @@ isDownloading.value = true;
             html2canvas: { scale: 2 },
             jsPDF: { unit: "in", format: "letter", orientation: "portrait" },
         };
-          html2pdf.default()
+        html2pdf
+            .default()
             .set(opt)
             .from(element)
             .save()
@@ -82,9 +92,22 @@ isDownloading.value = true;
                 isDownloading.value = false;
                 alert("Something went wrong while downloading the PDF.");
             });
-
     });
 };
+
+onMounted(() => {
+  const modalEl = document.getElementById('addCollectorModal')
+  if (modalEl) {
+  //  modalInstance = bootstrap.Modal.getOrCreateInstance(modalEl)
+  }
+})
+
+const closeModal = () => {
+  if (modalInstance) {
+    modalInstance.hide()
+  }
+}
+
 </script>
 
 <template>
@@ -105,42 +128,42 @@ isDownloading.value = true;
                         >
                             View Reports
                         </button>
-                        <Link
-                            :href="route('reports.addCollector')"
+                        <button
+                            data-bs-toggle="modal" 
+                            data-bs-target="#addCollectorModal"
                             class="btn btn-primary"
                         >
                             Add Collector
-                        </Link>
+                    </button>
                     </div>
                 </div>
 
                 <!-- Switch buttons -->
-                <div
-                    class="container d-flex flex-row gap-2 mt-3 mb-2 ps-4"
-                >
+                <div class="container d-flex flex-row gap-2 mt-3 mb-2 ps-4">
                     <button
-                        class=" btn btn-outline-secondary"
-                        @click="
-                            showContributionsReport = false;
-                            showRecentContributions = true
+                        :class="
+                            showRecentContributions
+                                ? 'btn btn-secondary text-light'
+                                : 'btn btn-outline-secondary'
                         "
-                        :class="{ 'btn btn-secondary text-light': showRecentContributions }"
+                        @click="showRecent"
                     >
                         Recent Contributions
                     </button>
+
                     <button
-                        class="btn btn-outline-secondary"
-                        @click="
-                            showRecentContributions = false;
-                            showContributionsReport = true
+                        :class="
+                            showContributionsReport
+                                ? 'btn btn-secondary text-light'
+                                : 'btn btn-outline-secondary'
                         "
-                        :class="{ 'btn btn-secondary text-light': !showRecentContributions }"
+                        @click="showReport"
                     >
                         Contributions Report
                     </button>
                 </div>
 
-                <!-- Body -->
+                <!-- Content -->
                 <div class="container">
                     <ContributionReportForAdmin
                         :contributions="getContributions"
@@ -162,37 +185,75 @@ isDownloading.value = true;
                 >
                     <div class="modal-dialog custom-modal-width">
                         <div class="modal-content">
-                            <div class="modal-header">
-                                <h1
-                                    class="modal-title fs-5"
-                                    id="viewReportModalLabel"
-                                >
-                                    Reports
-                                </h1>
-                                <button
-                                    type="button"
-                                    class="btn-close"
-                                    data-bs-dismiss="modal"
-                                    aria-label="Close"
-                                ></button>
+                            <div
+                                class="modal-header d-flex justify-content-between align-items-center"
+                            >
+                                <div>
+                                    <p class="text-muted mb-0">
+                                        Select deceased person:
+                                    </p>
+
+                                    <select
+                                        class="form-select"
+                                        v-model="selectedDeceased"
+                                    >
+                                        <option value="" disabled>
+                                            Select Deceased
+                                        </option>
+                                        <option
+                                            v-for="data in getDeathReports"
+                                            :key="data.id"
+                                            :value="data"
+                                        >
+                                            {{ data.deceased_name }} -
+                                            {{ formatDate(data.date_of_death) }}
+                                        </option>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <button
+                                        type="button"
+                                        class="btn-close"
+                                        data-bs-dismiss="modal"
+                                        aria-label="Close"
+                                    ></button>
+                                </div>
                             </div>
 
                             <!-- Only this body will be exported to PDF -->
                             <div class="modal-body" id="report-pdf-content">
-                                <h1
-                                    class="fw-light text-muted text-center"
-                                >
-                                    <span class="fs-5 d-block">Deceased</span>
-                                    {{ deathReports[0].deceased_name }}
+                                <h1 class="fw-light fs-5 text-muted text-center">
+                                    <span class=" d-block">Deceased</span>
+                                    <span class="fs-3">{{
+                                        selectedDeceased != null
+                                            ? selectedDeceased.deceased_name
+                                            : deathReports[
+                                                  deathReports.length - 1
+                                              ].deceased_name
+                                    }}</span>
                                 </h1>
-                                <p class="text-muted">
-                                    {{ formatDate(deathReports[0].date_of_death) }}
+                                <p class="text-muted text-center">
+                                    {{
+                                        selectedDeceased != null
+                                            ? formatDate(
+                                                  selectedDeceased.date_of_death
+                                              )
+                                            : formatDate(
+                                                  deathReports[
+                                                      deathReports.length - 1
+                                                  ].date_of_death
+                                              )
+                                    }}
                                 </p>
-                                <h5 class="text-dark">List of Contributions</h5>
-                                <div class="table-responsive">
+                                <h5 class="text-dark">
+                                    List of Contributions
+                                </h5>
+                                <div class="table-responsive" v-if="getMemberContributions.length !== 0">
                                     <table class="table">
                                         <thead>
                                             <tr>
+                                                <th>Id</th>
                                                 <th>Name</th>
                                                 <th>Purok</th>
                                                 <th>Status</th>
@@ -200,9 +261,10 @@ isDownloading.value = true;
                                         </thead>
                                         <tbody>
                                             <tr
-                                                v-for="data in getMemberContributions"
+                                                v-for="(data, index) in getMemberContributions"
                                                 :key="data.id"
                                             >
+                                                <td>{{ index + 1 }}</td>
                                                 <td>
                                                     {{
                                                         data
@@ -221,9 +283,11 @@ isDownloading.value = true;
                                         </tbody>
                                     </table>
                                 </div>
+
+                                <div class="text-center container" v-else>No contributions found.</div>
                             </div>
 
-                            <!-- Footer buttons (not included in PDF) -->
+                            <!-- Footer buttons -->
                             <div class="modal-footer">
                                 <button
                                     type="button"
@@ -238,13 +302,37 @@ isDownloading.value = true;
                                     @click="downloadPDF"
                                     :disabled="isDownloading"
                                 >
-                                    <span v-if="isDownloading" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                                    {{ isDownloading ? "Downloading..." : "Download as PDF" }}
+                                    <span
+                                        v-if="isDownloading"
+                                        class="spinner-border spinner-border-sm me-2"
+                                        role="status"
+                                        aria-hidden="true"
+                                    ></span>
+                                    {{
+                                        isDownloading
+                                            ? "Downloading..."
+                                            : "Download as PDF"
+                                    }}
                                 </button>
                             </div>
                         </div>
                     </div>
                 </div>
+
+                    <!-- Add Collector -->
+                    <div class="modal fade" id="addCollectorModal" tabindex="-1" aria-labelledby="addCollectorModalLabel" aria-hidden="true">
+                    <div class="modal-dialog" style="max-width: 700px;">
+                        <div class="modal-content">
+                        <div class="modal-header">
+                            <h1 class="modal-title fs-5" id="addCollectorModalLabel">Add Collector</h1>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <AddCollector @submitted="closeModal"/>
+                        </div>
+                        </div>
+                    </div>
+                    </div>
 
                 <div class="extra-space"></div>
             </div>
@@ -266,5 +354,11 @@ isDownloading.value = true;
 }
 .custom-modal-width {
     max-width: 70% !important;
+}
+table th, table td {
+    border-right: 2px solid #dee2e6;
+}
+table thead th{
+    background: #D4F3F9 !important;
 }
 </style>

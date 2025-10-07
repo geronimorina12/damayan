@@ -165,6 +165,7 @@ const user = usePage().props.auth?.user;
 .sidebar {
   background: #7FEAFE;
   color: #333;
+  min-height: 100vh;
 }
 .main-container {
   width: 100%;

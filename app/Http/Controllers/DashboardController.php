@@ -111,7 +111,7 @@ class DashboardController extends Controller
       
     }
     public function registeredMember(){
-     $members = memberModel::orderBy('first_name', 'asc')->get();
+     $members = memberModel::orderBy('first_name', 'asc')->paginate(10);
       return Inertia::render('admin/dashboard/RegisteredMember', [
         'members' => $members
       ]);

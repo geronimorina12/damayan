@@ -2,21 +2,66 @@
 import { ref, defineProps, watch } from 'vue'
 import { router, Head, Link } from '@inertiajs/vue3'
 import AdminLayout from '@/Layouts/AdminLayout.vue'
+import DeceasedMember from '@/Components/dashboard/admin/archive/DeceasedMember.vue'
+import Official from '@/Components/dashboard/admin/archive/Official.vue'
 
 const props = defineProps({
   members: {
     type: Array,
     default: () => []
+  },
+  deceasedMembers: {
+    type: Array,
+    default: () => []
+  },
+  officials: {
+    type: Array,
+    default: () => []
   }
 })
 let getMembers = ref([]);
+const getDeceasedMembers = ref([]);
+let getOfficials = ref([]);
+
 watch(
-  () => props.members,
-  (newMember) => {
-    getMembers.value = newMember;
+  () => props.officials,
+  (newData) => {
+    getOfficials.value = newData;
   },
   {immediate: true}
 )
+
+watch(
+  () => props.deceasedMembers,
+  (newDeceasedMembers) => {
+    getDeceasedMembers.value = newDeceasedMembers;
+    filterAliveMembers();
+  },
+  { immediate: true }
+);
+
+watch(
+  () => props.members,
+  (newMembers) => {
+    filterAliveMembers(newMembers);
+  },
+  { immediate: true }
+);
+
+function filterAliveMembers(membersList = props.members) {
+  if (!membersList) {
+    getMembers.value = [];
+    return;
+  }
+
+  getMembers.value = membersList.filter((m) => {
+    const fullName = `${m.first_name} ${m.last_name}`.toLowerCase();
+    return !getDeceasedMembers.value.some(
+      (d) => d.deceased_name.toLowerCase() === fullName
+    );
+  });
+}
+
 
  const deletePermanently = (id) => {
       if (confirm('Are you sure you want to delete this member permanently?')) {
@@ -29,6 +74,16 @@ watch(
       }
     }
 
+const undoMember = (id) => {
+  if (confirm('Are you sure you want to undo this member?')) {
+    router.post(route('archive.undo', { id: id }), {
+      onSuccess: () => {
+        alert('Member restored successfully...');
+      },
+      onError: (err) => console.log('An error occurred while restoring data.', err)
+    });
+  }
+}
 </script>
 
 <template>
@@ -41,16 +96,15 @@ watch(
            <div class="container-fluid d-flex flex-row justify-content-between px-0 align-items-center">
                 <div>
                      <div>
-                       <h5 class="fw-semibold">Archived</h5>
+                       <h5 class="fw-semibold fs-3">Archived</h5>
                     </div>
-                </div>
-                <div>
-                    <Link :href="route('officialArchive.viewOfficials')" class="btn btn-success">Officials</Link>
                 </div>
            </div>
      </div>
 
-    <div class="table-responsive" v-if="getMembers.length">
+       <p class="text-muted ms-2">Members</p>
+    <div class="container" v-if="getMembers.length">
+    <div class="table-responsive" >
       <table class="table table-bordered align-middle text-center">
         <thead class="table-light">
           <tr>
@@ -72,32 +126,33 @@ watch(
             <td>{{ member.age }}</td>
             <td>{{ member.contact_number }}</td>
             <td>{{ member.purok }}</td>
-            <td>
-              <div class="form-check form-switch d-inline-flex justify-content-center">
-                <input class="form-check-input" type="checkbox"
-              :checked="member.status === 'active'"
-              title="can't modify"
-              disabled
-              />
-
-              </div>
-            </td>
+            <td>{{ member.status }}</td>
             <td>
               <Link :href="route('archive.view', {id: member?.id})" class="btn btn-sm btn-outline-dark me-1" title="view info.">
                 <i class="bi bi-eye"></i>
               </Link>
-              <button class="btn btn-sm btn-outline-dark" @click="deletePermanently(member.id)" title="delete permanently">
+              <button class="btn btn-sm btn-outline-dark me-1" @click="deletePermanently(member.id)" title="delete permanently">
                 <i class="bi bi-trash"></i>
               </button>
+
+              <button class="btn btn-sm btn-outline-dark" @click="undoMember(member.id)" title="undo delete">
+                <i class="bi bi-arrow-counterclockwise"></i>
+              </button>
+
             </td>
           </tr>
         </tbody>
       </table>
     </div>
 
-    <div class="container text-center mt-3">
+    </div>
+    <div class="container text-center mt-3" v-else>
         <h5 class="text-dark fw-light">No Member's Archive Data.</h5>
     </div>
+
+
+    <DeceasedMember :deceasedMembers="getDeceasedMembers" />
+    <Official :officials="getOfficials" />
   </div>
     </AdminLayout>
 </template>

@@ -71,3 +71,12 @@ watch(
         </div>
     </div>
 </template>
+
+<style scoped>
+table th, table td {
+    border-right: 2px solid #dee2e6;
+}
+table thead th{
+    background: #D4F3F9 !important;
+}
+</style>
