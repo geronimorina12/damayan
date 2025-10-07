@@ -3,6 +3,7 @@
 import { router, Head } from '@inertiajs/vue3'
 import { defineProps, ref, watch } from 'vue'
 import AdminLayout from '@/Layouts/AdminLayout.vue'
+import Add from '@/Components/dashboard/admin/official/Add.vue'
 
 const props = defineProps({
   officials: Array,
@@ -92,12 +93,28 @@ const formatDate = (dateString) => {
     </div>
 
             <div class="container-fluid d-flex justify-content-end">
-                 <button class="btn btn-primary mt-3" @click="addOfficial">
+                 <button class="btn btn-primary mt-3" data-bs-toggle="modal" data-bs-target="#addOfficial">
                        Add New Official
                 </button>
             </div>
   </div>
         </AdminLayout>
+
+
+      <!-- Add New Official Modal -->
+      <div class="modal fade" id="addOfficial" tabindex="-1" aria-labelledby="addOfficialLabel" aria-hidden="true">
+        <div class="modal-dialog" style="min-width: 700px;">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h1 class="modal-title fs-5" id="exampleModalLabel">Add Official</h1>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <Add />
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
 </template>

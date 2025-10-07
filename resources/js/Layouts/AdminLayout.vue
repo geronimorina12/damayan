@@ -122,7 +122,7 @@ const overlayStyles = computed(() => {
 
         <Link :href="route('smsNotification.smsPage')" class="nav-link text-dark d-flex align-items-center"
           @click="closeSidebar"
-          :class="{ active: currentRoute.includes('/smsNotification') }"
+          :class="{ active: currentRoute.includes('/smsNotification/sms-page') }"
         >
           <i class="bi bi-bell me-2"></i> SMS
         </Link>
