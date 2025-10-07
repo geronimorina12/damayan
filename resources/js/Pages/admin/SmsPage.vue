@@ -80,7 +80,7 @@ function sendFundUpdates() {
             <div>
               <label for="deathReport" class="form-label">Death Report</label>
             </div>
-            <textarea v-model="getDeathReport.message" id="deathReport" class="form-control"></textarea>
+            <textarea v-model="getDeathReport.message" id="deathReport" class="form-control" disabled></textarea>
 
             <div class="container-fluid d-flex flex-row align-items-center gap-3 justify-content-end mt-3">
               <div>
@@ -97,29 +97,14 @@ function sendFundUpdates() {
             </div>
           </div>
 
-          <!-- Schedule Contribution -->
-          <div class="mb-4 position-relative">
-            <div>
-              <label for="scheduleContribution" class="form-label">Schedule Contribution</label>
-            </div>
-            <textarea v-model="getScheduleContribution.message" id="scheduleContribution" class="form-control"></textarea>
-
-            <div class="container-fluid d-flex flex-row align-items-center gap-3 justify-content-end mt-3">
-              <Link :href="route('smsNotification.sendToAllSelected', {type: 'scheduleContribution', message: getScheduleContribution.message})" class="save-btn text-uppercase text-decoration-none">
-                send to all selected
-              </Link>
-              <div>
-                <button class="save-btn text-uppercase" @click="sendScheduleContribution">send</button>
-              </div>
-            </div>
-          </div>
+         
 
           <!-- Reminders -->
           <div class="mb-4 position-relative">
             <div>
               <label for="reminders" class="form-label">Reminders</label>
             </div>
-            <textarea v-model="getReminders.message" id="reminders" class="form-control"></textarea>
+            <textarea v-model="getReminders.message" id="reminders" class="form-control" disabled></textarea>
 
             <div class="container-fluid d-flex flex-row align-items-center gap-3 justify-content-end mt-3">
               <div>
@@ -138,7 +123,7 @@ function sendFundUpdates() {
             <div>
               <label for="fundUpdates" class="form-label">Fund Updates</label>
             </div>
-            <textarea v-model="getFundUpdates.message" id="fundUpdates" class="form-control"></textarea>
+            <textarea v-model="getFundUpdates.message" id="fundUpdates" class="form-control" disabled></textarea>
 
             <div class="container-fluid d-flex flex-row align-items-center gap-3 justify-content-end mt-3">
               <div>

@@ -95,7 +95,9 @@ class SmsNotificationController extends Controller
     public function sendScheduleContribution(Request $request)
     {
         $request->validate([
-            'message' => 'required|string'
+            'id',
+            'message' => 'required|string',
+            'contact_number' => 'required|string'
         ]);
 
         $members = memberModel::whereNotNull('contact_number')->get();
@@ -110,10 +112,7 @@ class SmsNotificationController extends Controller
             'type' => 'scheduleContribution',
         ]);
 
-        foreach ($members as $member) {
-            $this->sendAndLog($message, $member->contact_number, $notification->id);
-        }
-
+            $this->sendAndLog($request->message, $request->contact_number, $notification->id);
         return redirect()->back()->with('success', 'Schedule contribution notifications sent.');
     }
 

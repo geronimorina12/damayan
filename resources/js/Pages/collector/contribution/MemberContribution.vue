@@ -19,11 +19,22 @@ let getPaidMembersId = ref([]);
 let selectedMemberId = ref(null);
 let selectedMemberPurok = ref('');
 let selectedCollector = ref('');
+let getCurrentCollector = ref({});
 
 watch(() => props.member, (newData) => getMember.value = newData, { immediate: true });
 watch(() => props.selectedPurok, (newData) => getSelectedPurok.value = newData, { immediate: true });
-watch(() => props.collectors, (newData) => getCollectors.value = newData, { immediate: true });
+watch(() => props.collectors, (newData) => {
+  getCollectors.value = newData;
+}, { immediate: true });
 watch(() => props.paidMembersId, (newData) => getPaidMembersId.value = newData, { immediate: true });
+watch(() => props.currentCollector, (newData) => {
+  getCurrentCollector.value = newData
+  console.log("current user" , getCollectors.value)
+  console.log("current user 2" , props.currentCollector)
+
+
+}, { immediate: true });
+
 
 const form = useForm({
   member_id: null,
@@ -42,10 +53,19 @@ const normalizePurok = (purok) => {
 };
 
 // assign member before opening modal
-const preparePayment = (memberId, memberPurok) => {
+const preparePayment = (memberId, memberPurok, contact_number) => {
   selectedMemberId.value = memberId;
   selectedMemberPurok.value = memberPurok;
   selectedCollector.value = ''; // reset
+
+  router.post(route('smsNotification.sendScheduleContribution'), {
+    id: memberId,
+    message: "Successfully paid.",
+    contact_number: contact_number
+  }, {
+    onSuccess: () => alert('Schedule Contribution sent successfully!'),
+    onError: () => alert('Error sending Schedule Contribution')
+  })
 };
 
 // confirm when Done clicked
@@ -86,7 +106,6 @@ const unPaidFunc = (memberId) => {
     <div class="container main-container">
       <div class="bg-light p-2 pt-0">
         <h6 class="mt-4 ms-2 fs-1">Payment Contribution</h6>
-
         <PurokComponentForCollector :activePurok="getSelectedPurok"/>
 
         <div class="table-wrapper mt-3" v-if="getMember.length > 0">
@@ -113,7 +132,7 @@ const unPaidFunc = (memberId) => {
                       class="btn btn-danger"
                       data-bs-toggle="modal"
                       data-bs-target="#collectorModal"
-                      @click="preparePayment(mem.id, mem.purok)"
+                      @click="preparePayment(mem.id, mem.purok, mem.contact_number)"
                       title="Mark member as paid"
                       >
                       Paid
