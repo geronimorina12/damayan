@@ -31,8 +31,6 @@ watch(() => props.currentCollector, (newData) => {
   getCurrentCollector.value = newData
   console.log("current user" , getCollectors.value)
   console.log("current user 2" , props.currentCollector)
-
-
 }, { immediate: true });
 
 
