@@ -170,7 +170,7 @@ const formatDate = (dateString) => {
           </div>
 
           <div class="d-flex flex-row gap-2 align-items-center">
-            <button class="btn btn-success">Save</button>
+            <button class="btn btn-success">submit</button>
           </div>
         </div>
       </form>
@@ -193,6 +193,7 @@ const formatDate = (dateString) => {
               Save Beneficiary
             </button>
           </div>
+
         </form>
       </div>
     </div>
