@@ -4,6 +4,8 @@ import { Head } from '@inertiajs/vue3';
 import CurrentMothCard from '@/Components/dashboard/CurrentMothCard.vue';
 import CurrentYearCard from '@/Components/dashboard/CurrentYearCard.vue';
 import MonthlyOverviewCard from '@/Components/dashboard/MonthlyOverviewCard.vue';
+import CurrentDeceased from '@/Components/dashboard/admin/charts/CurrentDeceased.vue';
+import DeceasedRecorded from '@/Components/dashboard/admin/charts/DeceasedRecorded.vue';
 import { ref, defineProps, watch } from 'vue';
 const props = defineProps({
   currentMonthData: {
@@ -56,15 +58,15 @@ watch(
             <h2 class="fw-normal fs-5 my-4 ms-3">Analytics Dashboard</h2>
 
              <div class="row g-4">
-        <!-- Bar Chart -->
-        <div class="col-md-8 responsive-card">
-          <CurrentMothCard :data="getCurrentMonthData"/>
-        </div>
+            <!-- Bar Chart -->
+            <div class="col-md-8 responsive-card">
+              <CurrentMothCard :data="getCurrentMonthData"/>
+            </div>
 
-        <!-- Pie Chart -->
-        <div class="col-md-4 responsive-card">
-          <CurrentYearCard :data="getYearData"/>
-        </div>
+            <!-- Pie Chart -->
+            <div class="col-md-4 responsive-card">
+              <CurrentYearCard :data="getYearData"/>
+            </div>
       </div>
 
       <!-- Monthly Line Chart -->
@@ -74,6 +76,10 @@ watch(
         </div>
       </div>
 
+      <div class="dashboard-container">
+    <CurrentDeceased :data="currentData" />
+    <DeceasedRecorded :records="allRecords" />
+  </div>
 
       <div class="add-space-at-bottom "></div>
         </div>
