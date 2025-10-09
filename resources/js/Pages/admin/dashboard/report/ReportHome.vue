@@ -29,7 +29,7 @@ let getDeathReports = ref([]);
 const isDownloading = ref(false);
 let selectedDeceased = ref(null);
 let modalInstance = null;
-
+let totalAmount = ref(0);
 watch(
     () => props.contributions,
     (newContributions) => {
@@ -41,6 +41,8 @@ watch(
     () => props.memberContributions,
     (newMemberContributions) => {
         getMemberContributions.value = newMemberContributions;
+        totalAmount.value = getMemberContributions.value
+  .reduce((sum, data) => sum + Number(data.amount), 0);
     },
     { immediate: true }
 );
@@ -257,6 +259,7 @@ const closeModal = () => {
                                                 <th>Name</th>
                                                 <th>Purok</th>
                                                 <th>Status</th>
+                                                <th>Amount</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -279,9 +282,11 @@ const closeModal = () => {
                                                 </td>
                                                 <td>{{ data.purok }}</td>
                                                 <td>{{ data.status }}</td>
+                                                <td>{{ Math.floor(data.amount) }}</td>
                                             </tr>
                                         </tbody>
                                     </table>
+                                    <p class="text-muted">Total amount: {{ totalAmount }}</p>
                                 </div>
 
                                 <div class="text-center container" v-else>No contributions found.</div>

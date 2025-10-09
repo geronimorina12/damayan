@@ -40,4 +40,12 @@ class ArchiveController extends Controller
         $member->restore();
         return redirect()->back()->with(['success' => 'Member restored successfully...'], 201);
     }
+    public function viewDeceasedMember(){
+          $deceasedMembers = DeathReportModel::select('report_id', 'member_id', 'deceased_name', 'date_of_death')
+        ->orderBy('date_of_death', 'desc')
+        ->get();
+        return Inertia::render('admin/dashboard/archive/member/Deceased', [
+            'deceasedMembers' => $deceasedMembers,
+        ]);
+    }
 }

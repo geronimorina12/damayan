@@ -93,12 +93,16 @@ const undoMember = (id) => {
 
 
      <div class="container-fluid d-flex flex-row justify-content-between align-items-center mb-2">
-           <div class="container-fluid d-flex flex-row justify-content-between px-0 align-items-center">
+           <div class="">
                 <div>
                      <div>
                        <h5 class="fw-semibold fs-3">Archived</h5>
                     </div>
                 </div>
+           </div>
+
+           <div>
+            <Link :href="route('archive.viewDeceasedMember')" class="btn btn-dark">View Deceased Member</Link>
            </div>
      </div>
 
@@ -151,7 +155,6 @@ const undoMember = (id) => {
     </div>
 
 
-    <DeceasedMember :deceasedMembers="getDeceasedMembers" />
     <Official :officials="getOfficials" />
   </div>
     </AdminLayout>

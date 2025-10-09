@@ -78,6 +78,7 @@ Route::prefix('officials')->name('officials.')->middleware('auth')->group(functi
 // Member Archive
 Route::prefix('archive')->name('archive.')->middleware('auth')->group(function () {
     Route::get('/view-archive', [ArchiveController::class, 'index'])->name('index');
+    Route::get('/view-deceased', [ArchiveController::class, 'viewDeceasedMember'])->name('viewDeceasedMember');
     Route::get('/view-info/{id}', [ArchiveController::class, 'view'])->name('view');
     Route::delete('/delete-permanently/{id}', [ArchiveController::class, 'deletePermanently'])->name('deleteMember');
     Route::post('/undo/{id}', [ArchiveController::class, 'undo'])->name('undo');

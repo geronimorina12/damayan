@@ -53,10 +53,10 @@ watch(
 
 const form = useForm({
     member_id: "",
-    amount: "",
+    amount: 100,
     payment_date: "",
     collector: "",
-    status: "",
+    status: "paid",
     purok: "",
 });
 
@@ -106,22 +106,6 @@ const submit = () => {
                                     </div>
                                 </div>
 
-                                <!-- Amount -->
-                                <div class="mb-3">
-                                    <label for="amount" class="form-label">Amount</label>
-                                    <input
-                                        v-model="form.amount"
-                                        type="number"
-                                        step="0.01"
-                                        id="amount"
-                                        class="form-control"
-                                        :class="{ 'is-invalid': form.errors.amount }"
-                                        placeholder="Enter amount"
-                                    />
-                                    <div v-if="form.errors.amount" class="invalid-feedback">
-                                        {{ form.errors.amount }}
-                                    </div>
-                                </div>
 
                                 <!-- Payment Date -->
                                 <div class="mb-3">
@@ -163,24 +147,15 @@ const submit = () => {
                                     </div>
                                 </div>
 
-                                <!-- Status -->
-                                <div class="mb-3">
-                                    <label for="status" class="form-label">Status</label>
-                                    <select v-model="form.status" class="form-control">
-                                        <option value="" disabled>Paid or Not</option>
-                                        <option value="paid">Paid</option>
-                                        <option value="not_paid">Not</option>
-                                    </select>
-                                </div>
 
                                 <!-- Purok -->
                                 <div class="mb-3">
                                     <label for="purok" class="form-label">Purok</label>
                                     <select v-model="form.purok" class="form-control">
-                                        <option value="purok1">1</option>
-                                        <option value="purok2">2</option>
-                                        <option value="purok3">3</option>
-                                        <option value="purok4">4</option>
+                                        <option value="purok1">Purok 1</option>
+                                        <option value="purok2">Purok 2</option>
+                                        <option value="purok3">Purok 3</option>
+                                        <option value="purok4">Purok 4</option>
                                     </select>
                                 </div>
 
