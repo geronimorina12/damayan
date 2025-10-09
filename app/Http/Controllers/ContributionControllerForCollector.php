@@ -18,13 +18,15 @@ class ContributionControllerForCollector extends Controller
         ->where('role', 'collector')
         ->get();
         $paidMembersId = ContributionModel::pluck('member_id')->toArray();
-        $currentCollector = User::where('id', Auth::id())->get();
+        $currentCollector = User::select('id', 'name', 'purok')
+        ->where('id', Auth::id())
+        ->first();
         return Inertia::render('collector/contribution/MemberContribution', [
             'member' => $mem,
             'selectedPurok' => 'all',
             'collectors' => $collectors,
             'paidMembersId' => $paidMembersId,
-            'currentCollector', $currentCollector,
+            'currentCollector'=> $currentCollector,
         ]);
     }
 
@@ -59,12 +61,16 @@ class ContributionControllerForCollector extends Controller
     $collectors = User::select('id', 'name', 'purok')
         ->where('role', 'collector')
         ->get();
+    $currentCollector = User::select('id', 'name', 'purok')
+        ->where('id', Auth::id())
+        ->first();
 
         $paidMembersId = ContributionModel::pluck('member_id')->toArray();
         return Inertia::render('collector/contribution/MemberContribution', [
             'member' => $mem,
             'selectedPurok' => $purok,
             'paidMembersId' => $paidMembersId,
+            'currentCollector' => $currentCollector,
         ]);
     }
 

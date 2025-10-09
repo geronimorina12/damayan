@@ -10,6 +10,7 @@ const props = defineProps({
   selectedPurok: String,
   collectors: Array,
   paidMembersId: Array,
+  currentCollector: Object,
 })
 
 let getMember = ref([]);
@@ -29,9 +30,9 @@ watch(() => props.collectors, (newData) => {
 watch(() => props.paidMembersId, (newData) => getPaidMembersId.value = newData, { immediate: true });
 watch(() => props.currentCollector, (newData) => {
   getCurrentCollector.value = newData
-  console.log("current user" , getCollectors.value)
-  console.log("current user 2" , props.currentCollector)
+  console.log("current collector:", newData)
 }, { immediate: true });
+
 
 
 const form = useForm({
@@ -59,7 +60,9 @@ const preparePayment = (memberId, memberPurok, contact_number) => {
   router.post(route('smsNotification.sendScheduleContribution'), {
     id: memberId,
     message: "Successfully paid.",
-    contact_number: contact_number
+    contact_number: contact_number,
+    collector: getCurrentCollector.name,
+    purok: memberPurok,
   }, {
     onSuccess: () => alert('Schedule Contribution sent successfully!'),
     onError: () => alert('Error sending Schedule Contribution')
@@ -128,10 +131,9 @@ const unPaidFunc = (memberId) => {
                     <button 
                       v-if="!(getPaidMembersId || []).includes(mem?.id)"
                       class="btn btn-danger"
-                      data-bs-toggle="modal"
-                      data-bs-target="#collectorModal"
                       @click="preparePayment(mem.id, mem.purok, mem.contact_number)"
                       title="Mark member as paid"
+                      :class="{'disabled': mem.purok.slice(-1) !== getCurrentCollector?.purok}"
                       >
                       Paid
                     </button>

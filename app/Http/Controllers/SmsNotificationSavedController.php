@@ -20,13 +20,15 @@ class SmsNotificationSavedController extends Controller
         'reminders' => 'nullable|string',
         'fundUpdates' => 'nullable|string',
         'type' => 'required|string',
+        'memberId' => 'required',
         ]);
 
         if($request->type == 'deathReport'){
            // Get all member IDs from members table
             $membersId = memberModel::pluck('id')->toArray(); // pluck gives a flat array directly
 
-            // Delete contributions where member_id is in $membersId
+
+            // Don't delete the user even he/she is dead according to prototype
             // ContributionModel::whereIn('member_id', $membersId)->delete();
             // $member = memberModel::find($request->memberId);
             // if($member){
@@ -38,6 +40,7 @@ class SmsNotificationSavedController extends Controller
                 'deceased_name' => $request->deceasedName,
                 'date_of_death' => $request->dateOfDeath,
                 'report_date' => now(),
+                'last_night' => $request->lastNight ?: null,
             ]);
 
             SmsNotificationSaved::create([

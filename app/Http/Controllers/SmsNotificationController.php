@@ -7,7 +7,9 @@ use App\Models\memberModel;
 use App\Models\SmsNotificationSaved;
 use App\Models\User;
 use App\Services\SmsNotificationSender;
+use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
@@ -92,29 +94,65 @@ class SmsNotificationController extends Controller
     /**
      * Schedule Contribution
      */
-    public function sendScheduleContribution(Request $request)
-    {
-        $request->validate([
-            'id',
-            'message' => 'required|string',
-            'contact_number' => 'required|string'
-        ]);
+        public function sendScheduleContribution(Request $request)
+        {
+            try {
+                $request->validate([
+                    'id' => 'required',
+                    'message' => 'required|string',
+                    'contact_number' => 'required|string',
+                    'collector' => 'nullable|string',
+                    'purok' => 'required|string',
+                ]);
 
-        $members = memberModel::whereNotNull('contact_number')->get();
-        if ($members->isEmpty()) {
-            return redirect()->back()->with('error', 'No members with contact numbers.');
+                $members = memberModel::whereNotNull('contact_number')->get();
+                if ($members->isEmpty()) {
+                    return redirect()->back()->with('error', 'No members with contact numbers.');
+                }
+
+                $message = $request->input('message');
+
+                $notification = SmsNotificationSaved::create([
+                    'message' => $message,
+                    'type' => 'scheduleContribution',
+                ]);
+
+                //  Convert "Purok 1" → "purok1"
+                $normalizedPurok = $this->normalizePurok($request->purok);
+
+                ContributionModel::create([
+                    'member_id' => $request->id,
+                    'amount' => 100,
+                    'payment_date' => now(),
+                    'updated_by' => Auth::id(),
+                    'collector' => $request->collector ?: "",
+                    'purok' => $normalizedPurok,
+                    'status' => "paid",
+                ]);
+
+                $this->sendAndLog($request->message, $request->contact_number, $notification->id);
+
+                return redirect()->back()->with('success', 'Schedule contribution notifications sent.');
+            } catch (\Exception $e) {
+                Log::error('Error in sendScheduleContribution: ' . $e->getMessage());
+                return redirect()->back()->with('error', 'An error occurred while sending schedule contribution: ' . $e->getMessage());
+            }
         }
 
-        $message = $request->input('message');
+        /**
+         *  Helper function to normalize Purok format
+         * Converts "Purok 1" → "purok1"
+         */
+        private function normalizePurok($purok)
+        {
+            if (!$purok) {
+                return '';
+            }
 
-        $notification = SmsNotificationSaved::create([
-            'message' => $message,
-            'type' => 'scheduleContribution',
-        ]);
+            // Remove spaces, lowercase the string
+            return strtolower(str_replace(' ', '', $purok));
+        }
 
-            $this->sendAndLog($request->message, $request->contact_number, $notification->id);
-        return redirect()->back()->with('success', 'Schedule contribution notifications sent.');
-    }
 
     /**
      * Reminders

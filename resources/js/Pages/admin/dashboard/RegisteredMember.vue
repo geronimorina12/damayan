@@ -142,7 +142,8 @@ const isDead = (member) => {
   const message = `We regret to inform you that ${member?.first_name || '[Name of Dead]'} ${member?.last_name || ''} has passed away. Collection for burial assistance starts on ${formatted}.'`;
   router.post(route('smsNotificationSaved.send', {
     'message' : message,
-    'type': 'deathReport'
+    'type': 'deathReport',
+    'memberId': member.id
   }))
 }
 </script>
@@ -295,10 +296,6 @@ const isDead = (member) => {
           </div>
           <div class="modal-body">
             <AddNewMember />
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-            <button type="button" class="btn btn-primary">Save changes</button>
           </div>
         </div>
       </div>
