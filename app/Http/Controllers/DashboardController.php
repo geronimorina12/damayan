@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\AssistanceDistribution;
 use App\Models\ContributionModel;
+use App\Models\DeathReportModel;
 use App\Models\memberModel;
 use App\Models\OfficialModel;
 use App\Models\User;
@@ -112,8 +113,10 @@ class DashboardController extends Controller
     }
     public function registeredMember(){
      $members = memberModel::orderBy('first_name', 'asc')->paginate(10);
+     $deceasedMember = DeathReportModel::select('member_id', 'deceased_name')->get();
       return Inertia::render('admin/dashboard/RegisteredMember', [
-        'members' => $members
+        'members' => $members,
+        'deceasedMember' => $deceasedMember,
       ]);
     }
 }

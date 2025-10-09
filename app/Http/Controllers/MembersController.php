@@ -58,4 +58,5 @@ class MembersController extends Controller
             'message' => 'Member status updated successfully.',
         ]);
     }
+
 }

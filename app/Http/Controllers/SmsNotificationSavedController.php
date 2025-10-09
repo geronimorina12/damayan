@@ -27,11 +27,11 @@ class SmsNotificationSavedController extends Controller
             $membersId = memberModel::pluck('id')->toArray(); // pluck gives a flat array directly
 
             // Delete contributions where member_id is in $membersId
-            ContributionModel::whereIn('member_id', $membersId)->delete();
-            $member = memberModel::find($request->memberId);
-            if($member){
-                $member->delete();
-            }
+            // ContributionModel::whereIn('member_id', $membersId)->delete();
+            // $member = memberModel::find($request->memberId);
+            // if($member){
+            //     $member->delete();
+            // }
             DeathReportModel::create([
                 'reported_by' => Auth::id(),
                 'member_id' => $request->memberId,

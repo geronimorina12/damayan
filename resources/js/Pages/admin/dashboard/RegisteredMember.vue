@@ -10,9 +10,12 @@ const props = defineProps({
   members: {
     type: Object, // will contain data, links, meta
     default: () => ({ data: [], links: [], prev_page_url: null, next_page_url: null })
+  },
+  deceasedMember: {
+    type: Array,
+    default: () => []
   }
 })
-
 let getMembers = ref([])
 const showActionsPopup = ref(false)
 const popupPosition = ref({ top: '0px', left: '0px' })
@@ -21,12 +24,19 @@ const actionButtonRefs = ref({})
 const statusChangeAlert = ref(false)
 const passNameToAlert = ref('')
 const searchQuery = ref("")   // 🔍 search input
-
+const getDeceasedMember = ref([])
 // Watch members from props
 watch(
   () => props.members,
   (newMember) => {
     getMembers.value = newMember.data || []
+  },
+  { immediate: true }
+)
+watch(
+  () => props.deceasedMember,
+  (newData) => {
+    getDeceasedMember.value = newData.data || []
   },
   { immediate: true }
 )
@@ -122,6 +132,19 @@ const goToPage = (url) => {
     router.get(url, {}, { preserveScroll: true, preserveState: true })
   }
 }
+const isDead = (member) => {
+  let today = new Date();
+  let formatted = today.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  });
+  const message = `We regret to inform you that ${member?.first_name || '[Name of Dead]'} ${member?.last_name || ''} has passed away. Collection for burial assistance starts on ${formatted}.'`;
+  router.post(route('smsNotificationSaved.send', {
+    'message' : message,
+    'type': 'deathReport'
+  }))
+}
 </script>
 
 <template>
@@ -159,6 +182,7 @@ const goToPage = (url) => {
                 <th>CONTACT NO.</th>
                 <th>STREET</th>
                 <th>STATUS</th>
+                <th>IsDead?</th>
                 <th>ACTION</th>
               </tr>
             </thead>
@@ -177,6 +201,15 @@ const goToPage = (url) => {
                       @click="toggleMemberStatus(member)" />
                   </div>
                 </td>
+
+                <td>
+                  <div class="form-check form-switch d-inline-flex justify-content-center">
+                    <input class="form-check-input" type="checkbox"
+                      :checked="getDeceasedMember.some(deceased => deceased.member_id === member.id)"
+                      @click="isDead(member)" />
+                  </div>
+                </td>
+
                 <td class="actions-column">
                   <div class="action-buttons-large">
                     <Link :href="route('viewMemberInfo', {id: member?.id})" class=" me-1">
