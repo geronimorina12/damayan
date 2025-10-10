@@ -1,6 +1,5 @@
 <script setup>
-import { ref, onMounted, watch, nextTick, onUnmounted, defineProps } from 'vue';
-import * as echarts from 'echarts';
+import { defineProps, ref, watch } from "vue";
 
 const props = defineProps({
   data: {
@@ -9,78 +8,56 @@ const props = defineProps({
   },
 });
 
-const chartRef = ref(null);
-let chartInstance = null;
-
-const updateChart = () => {
-  if (!chartInstance) return;
-
-  const total = props.data.length;
-  const current = total > 0 ? props.data.filter(d => d.status === 'current').length : 0;
-  const others = total - current;
-
-  chartInstance.setOption({
-    title: { text: 'Current Deceased', left: 'center' },
-    tooltip: { trigger: 'item' },
-    legend: { bottom: 0 },
-    series: [
-      {
-        name: 'Deceased Status',
-        type: 'pie',
-        radius: ['40%', '70%'],
-        avoidLabelOverlap: false,
-        label: { show: true, formatter: '{b}: {c}' },
-        data: [
-          { value: current, name: 'Current' },
-          { value: others, name: 'Others' },
-        ],
-      },
-    ],
-  });
-
-  chartInstance.resize();
-};
+const currentDeceased = ref([]);
 
 watch(
   () => props.data,
-  () => updateChart(),
+  (newData) => {
+    // Filter only current deceased records
+    currentDeceased.value = newData.filter((d) => d.status === "current");
+  },
   { immediate: true }
 );
-
-onMounted(async () => {
-  await nextTick();
-  if (!chartRef.value) return;
-  chartInstance = echarts.init(chartRef.value);
-  updateChart();
-  window.addEventListener('resize', chartInstance.resize);
-});
-
-onUnmounted(() => {
-  if (chartInstance) {
-    window.removeEventListener('resize', chartInstance.resize);
-    chartInstance.dispose();
-    chartInstance = null;
-  }
-});
 </script>
 
 <template>
-  <div class="chart-card">
-    <div ref="chartRef" class="chart"></div>
+  <div class="table-card">
+    <h5 class="fw-bold mb-3">Current Deceased Records</h5>
+    <div class="table-responsive">
+      <table class="table table-bordered align-middle">
+        <thead class="table-light">
+          <tr>
+            <th>#</th>
+            <th>Name</th>
+            <th>Date of Death</th>
+            <th>Cause</th>
+            <th>Address</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-if="currentDeceased.length === 0">
+            <td colspan="5" class="text-center text-muted">No current deceased record found.</td>
+          </tr>
+          <tr v-for="(person, index) in currentDeceased" :key="index">
+            <td>{{ index + 1 }}</td>
+            <td>{{ person.name }}</td>
+            <td>{{ person.date_of_death || 'N/A' }}</td>
+            <td>{{ person.cause || 'N/A' }}</td>
+            <td>{{ person.address || 'N/A' }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 </template>
 
 <style scoped>
-.chart-card {
+.table-card {
   flex: 1;
-  min-width: 300px;
+  min-width: 350px;
   background: #fff;
   border-radius: 12px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
   padding: 1rem;
-}
-.chart {
-  width: 100%;
-  height: 280px;
 }
 </style>
