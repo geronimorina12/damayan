@@ -1,6 +1,6 @@
 <script setup>
 import { ref, defineProps, watch, onMounted, onUnmounted, nextTick, computed } from 'vue'
-import { router, Head, Link } from '@inertiajs/vue3'
+import { router, Head, Link, useForm } from '@inertiajs/vue3'
 import AdminLayout from '@/Layouts/AdminLayout.vue'
 import Header from '@/Components/dashboard/admin/registeredMember/Header.vue'
 import Alert from '@/Components/dashboard/admin/registeredMember/Alert.vue'
@@ -132,20 +132,36 @@ const goToPage = (url) => {
     router.get(url, {}, { preserveScroll: true, preserveState: true })
   }
 }
+const form = useForm({
+  message: '',
+  type: 'deathReport',
+  memberId: null,
+});
+
 const isDead = (member) => {
-  let today = new Date();
-  let formatted = today.toLocaleDateString('en-US', {
+  const today = new Date();
+  const formatted = today.toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'long',
     day: 'numeric'
   });
-  const message = `We regret to inform you that ${member?.first_name || '[Name of Dead]'} ${member?.last_name || ''} has passed away. Collection for burial assistance starts on ${formatted}.'`;
-  router.post(route('smsNotificationSaved.send', {
-    'message' : message,
-    'type': 'deathReport',
-    'memberId': member.id
-  }))
-}
+
+  form.message = `We regret to inform you that ${member?.first_name || '[Name of Dead]'} ${member?.last_name || ''} has passed away. Collection for burial assistance starts on ${formatted}.`;
+  
+  form.type = 'deathReport';
+  form.memberId = member.id;
+
+  form.post(route('smsNotificationSaved.send'), {
+    onStart: () => console.log('Sending SMS...'),
+    onSuccess: () => {
+      console.log('SMS sent successfully ');
+      form.reset(); 
+    },
+    onError: (errors) => {
+      console.error('Error sending SMS:', errors);
+    },
+  });
+};
 </script>
 
 <template>
