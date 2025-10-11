@@ -19,12 +19,21 @@ const props = defineProps({
   monthlyOverview: {
     type: Object,
     default: () => ({})
+  },
+  currentDeceasedMember: {
+    type: Array,
+    default: () => []
+  },
+  allDeceased: {
+    type: Array,
+    default: () => []
   }
 });
 let getCurrentMonthData = ref([]);
 let getYearData = ref([]);
 let getMothlyOverview = ref([]);
-
+const getCurrentDeceased = ref([]);
+const getAllDeceased = ref([]);
 watch(
   () => props.currentMonthData,
   (newData) => {
@@ -43,6 +52,20 @@ watch(
   () => props.monthlyOverview,
   (newData) => {
     getMothlyOverview.value = newData ? Object.values(newData) : [];
+  },
+  {immediate: true}
+)
+watch(
+  () => props.currentDeceasedMember,
+  (newData) => {
+    getCurrentDeceased.value = newData ? Object.values(newData) : [];
+  },
+  {immediate: true}
+)
+watch(
+  () => props.allDeceased,
+  (newData) => {
+    getAllDeceased.value = newData ? Object.values(newData) : [];
   },
   {immediate: true}
 )
@@ -77,8 +100,8 @@ watch(
       </div>
 
       <div class="dashboard-container">
-    <CurrentDeceased :data="currentData" />
-    <DeceasedRecorded :records="allRecords" />
+    <CurrentDeceased :data="getCurrentDeceased" />
+    <DeceasedRecorded :records="getAllDeceased" />
   </div>
 
       <div class="add-space-at-bottom "></div>

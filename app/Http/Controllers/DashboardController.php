@@ -97,10 +97,14 @@ class DashboardController extends Controller
 
     // redirect sa specific na dashboard depende sa role 
       if(Auth::user()->role === 'admin') {
+     $currentDeceasedMember = DeathReportModel::where('iscurrent', true)->get();
+     $allDeceased = DeathReportModel::all();
         return Inertia::render('admin/dashboard/Home', [
           'currentMonthData' => $currentMonthData,
           'yearData' => $yearData,
           'monthlyOverview' => $monthlyOverview,
+          'currentDeceasedMember' => $currentDeceasedMember,
+          'allDeceased' => $allDeceased,
         ]);
       }else if(Auth::user()->role === 'collector') {
         return Inertia::render('collector/dashboard/Home', [

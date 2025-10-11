@@ -13,8 +13,7 @@ const currentDeceased = ref([]);
 watch(
   () => props.data,
   (newData) => {
-    // Filter only current deceased records
-    currentDeceased.value = newData.filter((d) => d.status === "current");
+    currentDeceased.value = newData;
   },
   { immediate: true }
 );
@@ -30,7 +29,6 @@ watch(
             <th>#</th>
             <th>Name</th>
             <th>Date of Death</th>
-            <th>Cause</th>
             <th>Address</th>
           </tr>
         </thead>
@@ -40,10 +38,9 @@ watch(
           </tr>
           <tr v-for="(person, index) in currentDeceased" :key="index">
             <td>{{ index + 1 }}</td>
-            <td>{{ person.name }}</td>
+            <td>{{ person.deceased_name }}</td>
             <td>{{ person.date_of_death || 'N/A' }}</td>
-            <td>{{ person.cause || 'N/A' }}</td>
-            <td>{{ person.address || 'N/A' }}</td>
+            <td>{{ person.address || 'Bonga, Bulan, Sor.' }}</td>
           </tr>
         </tbody>
       </table>
