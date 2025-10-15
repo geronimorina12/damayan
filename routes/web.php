@@ -168,4 +168,7 @@ Route::prefix('filterAnalytics')->name('filterAnalytics.')->middleware('auth')->
     Route::get('/deceased/next/{id}', [FilterAnalytics::class, 'next'])->name('next');
     Route::get('/deceased/previous/{id}', [FilterAnalytics::class, 'previous'])->name('previous');
 });
+Route::prefix('filterContribution')->name('filterContribution.')->middleware('auth')->group(function (){
+    Route::get('/contribution/toggle/{id}', [ContributionController::class, 'toggle'])->name('toggle');
+});
 require __DIR__.'/auth.php';

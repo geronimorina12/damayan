@@ -5,7 +5,7 @@ import { defineProps, watch, ref } from 'vue';
 import Purok from '@/Components/dashboard/contribution/Purok.vue';
 import Header from '@/Components/dashboard/contribution/Header.vue';
 import Collector from '@/Components/dashboard/contribution/Collector.vue';
-
+import ToggleContribution from '@/Components/dashboard/contribution/ToggleContribution.vue';
 const props = defineProps({
   member: {
     type: Object,   // pagination object with data + links + meta
@@ -19,12 +19,21 @@ const props = defineProps({
     type: Array,
     default: () => []
   },
+  currentDeceasedMembers: {
+    type: Array,
+    default: () => []
+  },
+  currentDeceasedMember: {
+    type: Object,
+    default: () => ({})
+  }
 });
 
 let getMember = ref([]);
 let getSelectedPurok = ref('');
 let getCollectors = ref([]);
-
+const getCurrentDeceasedMembers = ref([]);
+const getCurrentDeceasedMember = ref({});
 watch(
   () => props.member,
   (newData) => {
@@ -48,7 +57,20 @@ watch(
   },
   { immediate: true }
 );
-
+watch(
+  () => props.currentDeceasedMembers,
+  (newData) => {
+    getCurrentDeceasedMembers.value = newData ? Object.values(newData) : [];
+  },
+  { immediate: true }
+);
+watch(
+  () => props.currentDeceasedMember,
+  (newData) => {
+    getCurrentDeceasedMember.value = newData;
+  },
+  { immediate: true }
+);
 const formatDate = (dateString) => {
   const options = { year: "numeric", month: "long", day: "numeric" };
   return new Date(dateString).toLocaleDateString(undefined, options);
@@ -76,7 +98,10 @@ function goToPage(url) {
           <Header />
 
           <Purok :activePurok="getSelectedPurok" />
-
+          <ToggleContribution 
+            :allDeceased="getCurrentDeceasedMembers" 
+            :data="getCurrentDeceasedMember"
+          />
           <div class="table-responsive mt-3" v-if="Array.isArray(getMember) && getMember.length > 0">
             <table class="table table-bordered table-hover align-middle text-center">
               <thead class="table-light">
@@ -115,7 +140,7 @@ function goToPage(url) {
                     <span
                       v-if="mem?.contributions[0]?.status === 'paid'"
                       class="badge bg-success"
-                    >Paid</span>
+                    >Paid</span>  
                     <span v-else class="">Unpaid</span>
                   </td>
                 </tr>
