@@ -13,19 +13,24 @@ const props = defineProps({
         type: Array,
         default: () => [],
     },
+    deceasedMembers: {
+        type: Array,
+        default: () => [],
+    },
 });
 let getMembers = ref([]);
 let getFullName = ref([]);
 const getCollectors = ref([]);
 const getUsers = ref([]);
+const getDeceasedMembersData = ref([]);
 
 // Create a full name from first, middle, and last name || pero ang hali sa users full name na
 watch(
-    [() => props.members, () => props.users],
-    ([membersData, usersData]) => {
+    [() => props.members, () => props.users, () => props.deceasedMembers],
+    ([membersData, usersData, deceasedData]) => {
         // Keep raw members
         getMembers.value = membersData || [];
-
+        getDeceasedMembersData.value = deceasedData || [];
         // Map members
         const memberFullNames = (membersData || []).map((member) => ({
             id: member.id,
@@ -58,6 +63,7 @@ const form = useForm({
     collector: "",
     status: "paid",
     purok: "",
+    deceased_id: "",
 });
 
 const submit = () => {
@@ -156,6 +162,21 @@ const submit = () => {
                                         <option value="purok2">Purok 2</option>
                                         <option value="purok3">Purok 3</option>
                                         <option value="purok4">Purok 4</option>
+                                    </select>
+                                </div>
+
+                                <!-- Select deceased member  -->
+                                 <div class="mb-3">
+                                    <label for="deceased_member" class="form-label">Select Deceased Member</label>
+                                    <select v-model="form.deceased_id" class="form-control">
+                                        <option disabled value="">-- Select Deceased Member --</option>
+                                        <option
+                                            v-for="deceased in getDeceasedMembersData"
+                                            :key="deceased.id"
+                                            :value="deceased.member_id"
+                                        >
+                                            {{ deceased.deceased_name }}
+                                        </option>
                                     </select>
                                 </div>
 

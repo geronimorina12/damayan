@@ -11,19 +11,15 @@ use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
-class DashboardController extends Controller
+class FilterAnalytics extends Controller
 {
-    public function index(){
+   public function next($id){
       if (!Auth::check()) {
         return redirect()->route('login');
       }
 
-      $currentDeceasedMemberId = DeathReportModel::where('iscurrent', true)
-      ->latest('created_at') 
-      ->value('member_id');
       // Carbon = library san laravel para sa date and time manipulation
       $month = Carbon::now()->month;
       $year = Carbon::now()->year;
@@ -31,13 +27,13 @@ class DashboardController extends Controller
       //total san collected
       $totalCollected = ContributionModel::whereMonth('payment_date', $month)
     ->whereYear('payment_date', $year)
-    ->where('deceased_id', $currentDeceasedMemberId)
+    ->where('deceased_id', $id)
     ->sum('amount');
 
     // Total Disbursed This Month
     $totalDisbursed = ContributionModel::whereMonth('payment_date', $month)
     ->whereYear('payment_date', $year)
-    ->where('deceased_id', $currentDeceasedMemberId)
+    ->where('deceased_id', $id)
     ->sum('amount');
 
     // Balance (mag kakaiba ang table pero same cra member san damayan)
@@ -102,35 +98,21 @@ class DashboardController extends Controller
 
     // redirect sa specific na dashboard depende sa role 
       if(Auth::user()->role === 'admin') {
-     $currentDeceasedMembers = DeathReportModel::where('iscurrent', true)
+      $currentDeceasedMembers = DeathReportModel::where('iscurrent', true)
      ->get();
      $currentDeceasedMember = DeathReportModel::where('iscurrent', true)
-     ->latest('created_at')
+     ->where('member_id', $id)
      ->first();
      $allDeceased = DeathReportModel::all();
         return Inertia::render('admin/dashboard/Home', [
           'currentMonthData' => $currentMonthData,
           'yearData' => $yearData,
           'monthlyOverview' => $monthlyOverview,
+          'currentDeceasedMember' => $currentDeceasedMember,
           'currentDeceasedMembers' => $currentDeceasedMembers,
           'allDeceased' => $allDeceased,
-          'currentDeceasedMember' => $currentDeceasedMember,
-        ]);
-      }else if(Auth::user()->role === 'collector') {
-        return Inertia::render('collector/dashboard/Home', [
-          'currentMonthData' => $currentMonthData,
-          'yearData' => $yearData,
-          'monthlyOverview' => $monthlyOverview,
         ]);
       }
       
-    }
-    public function registeredMember(){
-     $members = memberModel::orderBy('first_name', 'asc')->paginate(10);
-     $deceasedMember = DeathReportModel::select('member_id', 'deceased_name')->get();
-      return Inertia::render('admin/dashboard/RegisteredMember', [
-        'members' => $members,
-        'deceasedMember' => $deceasedMember,
-      ]);
     }
 }

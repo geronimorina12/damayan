@@ -6,6 +6,7 @@ import CurrentYearCard from '@/Components/dashboard/CurrentYearCard.vue';
 import MonthlyOverviewCard from '@/Components/dashboard/MonthlyOverviewCard.vue';
 import CurrentDeceased from '@/Components/dashboard/admin/charts/CurrentDeceased.vue';
 import DeceasedRecorded from '@/Components/dashboard/admin/charts/DeceasedRecorded.vue';
+import DashboardHeader from '@/Components/dashboard/admin/DashboardHeader.vue';
 import { ref, defineProps, watch } from 'vue';
 const props = defineProps({
   currentMonthData: {
@@ -20,13 +21,17 @@ const props = defineProps({
     type: Object,
     default: () => ({})
   },
-  currentDeceasedMember: {
+  currentDeceasedMembers: {
     type: Array,
     default: () => []
   },
   allDeceased: {
     type: Array,
     default: () => []
+  },
+  currentDeceasedMember: {
+    type: Object,
+    default: () => ({})
   }
 });
 let getCurrentMonthData = ref([]);
@@ -34,6 +39,7 @@ let getYearData = ref([]);
 let getMothlyOverview = ref([]);
 const getCurrentDeceased = ref([]);
 const getAllDeceased = ref([]);
+const getCurrentDeceasedMember = ref({});
 watch(
   () => props.currentMonthData,
   (newData) => {
@@ -56,7 +62,7 @@ watch(
   {immediate: true}
 )
 watch(
-  () => props.currentDeceasedMember,
+  () => props.currentDeceasedMembers,
   (newData) => {
     getCurrentDeceased.value = newData ? Object.values(newData) : [];
   },
@@ -66,6 +72,13 @@ watch(
   () => props.allDeceased,
   (newData) => {
     getAllDeceased.value = newData ? Object.values(newData) : [];
+  },
+  {immediate: true}
+)
+watch(
+  () => props.currentDeceasedMember,
+  (newData) => {
+    getCurrentDeceasedMember.value = newData ? newData : {};
   },
   {immediate: true}
 )
@@ -80,6 +93,10 @@ watch(
         <div class="container-fluid mx-0 px-0 home-container">
             <h2 class="fw-normal fs-5 my-4 ms-3">Analytics Dashboard</h2>
 
+            <DashboardHeader 
+            :data="getCurrentDeceasedMember"
+            :allDeceased="getAllDeceased"
+            />
              <div class="row g-4">
             <!-- Bar Chart -->
             <div class="col-md-8 responsive-card">

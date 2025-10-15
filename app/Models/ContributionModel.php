@@ -15,6 +15,7 @@ class ContributionModel extends Model
         'collector',
         'purok',
         'status',
+        'deceased_id',
     ];
 
     public function memberContribution(){

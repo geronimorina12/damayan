@@ -9,6 +9,7 @@ use App\Http\Controllers\ContributionControllerForCollector;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DeathReport;
+use App\Http\Controllers\FilterAnalytics;
 use App\Http\Controllers\MemberControllerForCollector;
 use App\Http\Controllers\MembersController;
 use App\Http\Controllers\OfficialArchive;
@@ -162,5 +163,9 @@ Route::prefix('deathReport')->name('deathReport.')->middleware('auth')->group(fu
 });
 Route::prefix('officialArchived')->name('officialArchived.')->middleware('auth')->group(function (){
     Route::post('/restore/{id}', [OfficialArchive::class, 'restoreOfficial'])->name('restoreOfficial');
+});
+Route::prefix('filterAnalytics')->name('filterAnalytics.')->middleware('auth')->group(function (){
+    Route::get('/deceased/next/{id}', [FilterAnalytics::class, 'next'])->name('next');
+    Route::get('/deceased/previous/{id}', [FilterAnalytics::class, 'previous'])->name('previous');
 });
 require __DIR__.'/auth.php';

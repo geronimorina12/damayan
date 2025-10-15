@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\ContributionModel;
+use App\Models\DeathReportModel;
 use App\Models\memberModel;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -76,10 +77,12 @@ public function toggleContributionPurok($purok)
         ->orderBy('name', 'asc')
         ->get(); 
         $paidMembersId = ContributionModel::pluck('member_id')->toArray();
+        $deceasedMembers = DeathReportModel::select('member_id', 'deceased_name')->get();
         return Inertia::render('admin/dashboard/contribution/AddContribution', [
             'members' => $members,
             'users' => $users,
             'paidMembersId' => $paidMembersId,
+            'deceasedMembers' => $deceasedMembers,
         ]);
     }
 
@@ -92,7 +95,9 @@ public function toggleContributionPurok($purok)
         'collector' => 'nullable|max:255',
         'purok' => 'required',
         'status' => 'required',
+        'deceased_id' => 'nullable|exists:death_reports,member_id',
     ]);
+    dd($request->deceased_id ?: "No id"); 
     ContributionModel::create([
         'member_id' => $request->member_id,
         'amount' => $request->amount,
@@ -101,7 +106,8 @@ public function toggleContributionPurok($purok)
         'collector' => $request->collector ?: "",
         'purok' => $request->purok,
         'status' => $request->status,
-    ]); 
+        'deceased_id' => $request->deceased_id,
+    ]);
 
     return redirect()->back()->with('success', 'Contribution created successfully.');
 }
