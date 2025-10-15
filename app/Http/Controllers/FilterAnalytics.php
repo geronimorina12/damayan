@@ -96,15 +96,26 @@ class FilterAnalytics extends Controller
       ];
     ////////////////////////
 
-    // redirect sa specific na dashboard depende sa role 
-      if(Auth::user()->role === 'admin') {
-      $currentDeceasedMembers = DeathReportModel::where('iscurrent', true)
+     $currentDeceasedMembers = DeathReportModel::where('iscurrent', true)
      ->get();
      $currentDeceasedMember = DeathReportModel::where('iscurrent', true)
      ->where('member_id', $id)
      ->first();
      $allDeceased = DeathReportModel::all();
+
+    // redirect sa specific na dashboard depende sa role 
+      if(Auth::user()->role === 'admin') {
+     
         return Inertia::render('admin/dashboard/Home', [
+          'currentMonthData' => $currentMonthData,
+          'yearData' => $yearData,
+          'monthlyOverview' => $monthlyOverview,
+          'currentDeceasedMember' => $currentDeceasedMember,
+          'currentDeceasedMembers' => $currentDeceasedMembers,
+          'allDeceased' => $allDeceased,
+        ]);
+      }else{
+        return Inertia::render('collector/dashboard/Home', [
           'currentMonthData' => $currentMonthData,
           'yearData' => $yearData,
           'monthlyOverview' => $monthlyOverview,

@@ -4,6 +4,7 @@ import CollectorLayout from '@/Layouts/CollectorLayout.vue';
 import CurrentMothCard from '@/Components/dashboard/CurrentMothCard.vue';
 import CurrentYearCard from '@/Components/dashboard/CurrentYearCard.vue';
 import MonthlyOverviewCard from '@/Components/dashboard/MonthlyOverviewCard.vue';
+import DashboardHeader from '@/Components/dashboard/admin/DashboardHeader.vue';
 import { defineProps, ref, watch } from 'vue';
 
 const props = defineProps({
@@ -18,12 +19,28 @@ const props = defineProps({
   monthlyOverview: {
     type: Object,
     default: () => ({})
+  },
+  currentDeceasedMembers: {
+    type: Array,
+    default: () => []
+  },
+  allDeceased: {
+    type: Array,
+    default: () => []
+  },
+  currentDeceasedMember: {
+    type: Object,
+    default: () => ({})
   }
 });
 
 let getCurrentMonthData = ref([]);
 let getYearData = ref([]);
 let getMothlyOverview = ref([]);
+const getCurrentDeceased = ref({});
+const getAllDeceased = ref([]);
+const getCurrentDeceasedMember = ref({});
+const getCurrentDeceasedMembers = ref([]);
 
 watch(
   () => props.currentMonthData,
@@ -46,6 +63,27 @@ watch(
   },
   { immediate: true }
 );
+watch(
+  () => props.currentDeceasedMembers,
+  (newData) => {
+    getCurrentDeceasedMembers.value = newData ? Object.values(newData) : [];
+  },
+  {immediate: true}
+)
+watch(
+  () => props.allDeceased,
+  (newData) => {
+    getAllDeceased.value = newData ? Object.values(newData) : [];
+  },
+  {immediate: true}
+)
+watch(
+  () => props.currentDeceasedMember,
+  (newData) => {
+    getCurrentDeceasedMember.value = newData ? newData : {};
+  },
+  {immediate: true}
+)
 </script>
 
 <template>
@@ -54,6 +92,11 @@ watch(
   <CollectorLayout>
     <div class="container-fluid mx-0 px-0 home-container">
       <h2 class="fw-normal fs-5 my-4 ps-3">Analytics Dashboard</h2>
+
+        <DashboardHeader 
+            :data="getCurrentDeceasedMember"
+            :allDeceased="getCurrentDeceasedMembers"
+            />
 
       <div class="row g-4">
         <!-- Bar Chart -->

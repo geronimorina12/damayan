@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\ContributionModel;
+use App\Models\DeathReportModel;
 use App\Models\memberModel;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -21,12 +22,22 @@ class ContributionControllerForCollector extends Controller
         $currentCollector = User::select('id', 'name', 'purok')
         ->where('id', Auth::id())
         ->first();
+
+        
+          $currentDeceasedMembers = DeathReportModel::where('iscurrent', true)
+     ->get();
+     $currentDeceasedMember = DeathReportModel::where('iscurrent', true)
+     ->latest('created_at')
+     ->first();
+
         return Inertia::render('collector/contribution/MemberContribution', [
             'member' => $mem,
             'selectedPurok' => 'all',
             'collectors' => $collectors,
             'paidMembersId' => $paidMembersId,
             'currentCollector'=> $currentCollector,
+            'currentDeceasedMembers' => $currentDeceasedMembers,
+            'currentDeceasedMember' => $currentDeceasedMember,
         ]);
     }
 

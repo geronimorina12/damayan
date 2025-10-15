@@ -37,7 +37,7 @@ class ContributionController extends Controller
         ]);
     }
 
-public function toggleContributionPurok($purok)
+public function toggleContributionPurok($purok, $deceasedId)
 {
     switch ($purok) {
         case 'all':
@@ -70,10 +70,18 @@ public function toggleContributionPurok($purok)
         ->where('role', 'collector')
         ->get();
 
+         $currentDeceasedMembers = DeathReportModel::where('iscurrent', true)
+     ->get();
+     $currentDeceasedMember = DeathReportModel::where('member_id', $deceasedId)
+     ->latest('created_at')
+     ->first();
+
     return Inertia::render('admin/dashboard/contribution/MemberContribution', [
         'member'        => $mem,
         'selectedPurok' => $purok,
         'collectors'    => $collectors,
+        'currentDeceasedMembers' => $currentDeceasedMembers,
+        'currentDeceasedMember' => $currentDeceasedMember,
     ]);
 }
 
@@ -122,12 +130,9 @@ public function toggleContributionPurok($purok)
 }
   public function toggle($id)
 {
-    $mem = memberModel::with(['contributions' => function ($query) use ($id) {
+   $mem = memberModel::with(['contributions' => function ($query) use ($id) {
         $query->where('deceased_id', $id);
     }])
-    ->whereHas('contributions', function ($query) use ($id) {
-        $query->where('deceased_id', $id);
-    })
     ->orderBy('first_name', 'asc')
     ->paginate(10);
 
@@ -139,17 +144,27 @@ public function toggleContributionPurok($purok)
 
          $currentDeceasedMembers = DeathReportModel::where('iscurrent', true)
      ->get();
-     $currentDeceasedMember = DeathReportModel::where('iscurrent', true)
+     $currentDeceasedMember = DeathReportModel::where('member_id', $id)
      ->latest('created_at')
      ->first();
 
-    return Inertia::render('admin/dashboard/contribution/MemberContribution', [
+    if(Auth::user()->role === 'admin'){
+        return Inertia::render('admin/dashboard/contribution/MemberContribution', [
         'member' => $mem,
         'selectedPurok' => $selectedPurok,
         'collectors' => $collectors,
         'currentDeceasedMembers' => $currentDeceasedMembers,
         'currentDeceasedMember' => $currentDeceasedMember,
     ]);
+    }else{
+        return Inertia::render('collector/contribution/MemberContribution', [
+            'member' => $mem,
+            'selectedPurok' => $selectedPurok,
+            'collectors' => $collectors,
+            'currentDeceasedMembers' => $currentDeceasedMembers,
+            'currentDeceasedMember' => $currentDeceasedMember,
+        ]);
+    }
 }
 
 }

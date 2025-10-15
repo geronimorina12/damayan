@@ -3,6 +3,7 @@ import { Head, router, useForm } from '@inertiajs/vue3';
 import CollectorLayout from '@/Layouts/CollectorLayout.vue';
 import { defineProps, watch, ref, computed } from 'vue';
 import PurokComponentForCollector from '@/Components/dashboard/contribution/PurokComponentForCollector.vue';
+import ToggleContribution from '@/Components/dashboard/contribution/ToggleContribution.vue';
 
 const props = defineProps({
   member: Array,
@@ -10,6 +11,14 @@ const props = defineProps({
   collectors: Array,
   paidMembersId: Array,
   currentCollector: Object,
+  currentDeceasedMembers: {
+    type: Array,
+    default: () => []
+  },
+  currentDeceasedMember: {
+    type: Object,
+    default: () => ({})
+  }
 });
 
 let getMember = ref([]);
@@ -20,6 +29,8 @@ let selectedMemberId = ref(null);
 let selectedMemberPurok = ref('');
 let selectedCollector = ref('');
 let getCurrentCollector = ref({});
+const getCurrentDeceasedMembers = ref([]);
+const getCurrentDeceasedMember = ref({});
 
 watch(() => props.member, (newData) => (getMember.value = newData), { immediate: true });
 watch(() => props.selectedPurok, (newData) => (getSelectedPurok.value = newData), { immediate: true });
@@ -29,6 +40,21 @@ watch(() => props.currentCollector, (newData) => {
   getCurrentCollector.value = newData;
   console.log('current collector:', newData);
 }, { immediate: true });
+
+watch(
+  () => props.currentDeceasedMembers,
+  (newData) => {
+    getCurrentDeceasedMembers.value = newData ? Object.values(newData) : [];
+  },
+  { immediate: true }
+);
+watch(
+  () => props.currentDeceasedMember,
+  (newData) => {
+    getCurrentDeceasedMember.value = newData;
+  },
+  { immediate: true }
+);
 
 // 🧭 SEARCH BAR (reactive)
 const searchQuery = ref('');
@@ -140,7 +166,10 @@ const unPaidFunc = (memberId) => {
        </div>
 
         <PurokComponentForCollector :activePurok="getSelectedPurok" />
-
+       <ToggleContribution 
+            :allDeceased="getCurrentDeceasedMembers" 
+            :data="getCurrentDeceasedMember"
+          />
        
 
         <!-- Table Section -->

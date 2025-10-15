@@ -57,7 +57,7 @@ Route::prefix('contribution')->name('contributions.')->middleware('auth')->group
     Route::get('/view-contributions', [ContributionController::class, 'index'])->name('index');
     Route::get('/add-contributions-route', [ContributionController::class, 'add'])->name('add');
     Route::post('/add-contributions-post', [ContributionController::class, 'store'])->name('store');
-    Route::get('/toggle-purok/{purok}', [ContributionController::class, 'toggleContributionPurok'])->name('togglePurok');
+    Route::get('/toggle-purok/{purok}/{deceasedId}', [ContributionController::class, 'toggleContributionPurok'])->name('togglePurok');
 });
 
 //reports

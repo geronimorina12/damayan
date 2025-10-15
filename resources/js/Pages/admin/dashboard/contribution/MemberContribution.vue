@@ -97,7 +97,9 @@ function goToPage(url) {
         <div class="bg-light p-2">
           <Header />
 
-          <Purok :activePurok="getSelectedPurok" />
+          <Purok :activePurok="getSelectedPurok" 
+          :currentDeceasedId="getCurrentDeceasedMember?.member_id"
+          />
           <ToggleContribution 
             :allDeceased="getCurrentDeceasedMembers" 
             :data="getCurrentDeceasedMember"

@@ -15,7 +15,6 @@ const props = defineProps({
 
 console.log("props.data:", props.data);
 console.log("props.allDeceased:", props.allDeceased);
-
 // current report unique identifiers
 const currentReportId = ref(props.data.report_id ?? null);
 const currentMemberId = ref(props.data.member_id ?? null);
