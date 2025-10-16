@@ -41,7 +41,7 @@ class ContributionControllerForCollector extends Controller
         ]);
     }
 
-  public function toggleContributionPurok($purok){
+  public function toggleContributionPurok($purok, $deceasedId){
         switch ($purok) {
         case 'all':
             $formatPurok = 'all';
@@ -76,12 +76,21 @@ class ContributionControllerForCollector extends Controller
         ->where('id', Auth::id())
         ->first();
 
+        
+    $currentDeceasedMembers = DeathReportModel::where('iscurrent', true)
+     ->get();
+     $currentDeceasedMember = DeathReportModel::where('member_id', $deceasedId)
+     ->latest('created_at')
+     ->first();
+
         $paidMembersId = ContributionModel::pluck('member_id')->toArray();
         return Inertia::render('collector/contribution/MemberContribution', [
             'member' => $mem,
             'selectedPurok' => $purok,
             'paidMembersId' => $paidMembersId,
             'currentCollector' => $currentCollector,
+            'currentDeceasedMembers' => $currentDeceasedMembers,
+            'currentDeceasedMember' => $currentDeceasedMember,
         ]);
     }
 

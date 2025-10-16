@@ -62,15 +62,15 @@ public function toggleContributionPurok($purok, $deceasedId)
     $mem = memberModel::where('purok', $formatPurok)
     ->with('contributions')->paginate(10);
 
-    if ($mem->isEmpty() && $purok === 'all') {
-        $mem = memberModel::with('contributions')->get();
+    if (count($mem->items()) === 0 && $purok === 'all') {
+          $mem = memberModel::with('contributions')->paginate(10);
     }
 
     $collectors = User::select('id', 'name', 'purok')
         ->where('role', 'collector')
         ->get();
 
-         $currentDeceasedMembers = DeathReportModel::where('iscurrent', true)
+    $currentDeceasedMembers = DeathReportModel::where('iscurrent', true)
      ->get();
      $currentDeceasedMember = DeathReportModel::where('member_id', $deceasedId)
      ->latest('created_at')
@@ -128,15 +128,14 @@ public function toggleContributionPurok($purok, $deceasedId)
 
     return redirect()->back()->with('success', 'Contribution created successfully.');
 }
-  public function toggle($id)
+  public function toggle($id, $purok)
 {
    $mem = memberModel::with(['contributions' => function ($query) use ($id) {
         $query->where('deceased_id', $id);
     }])
     ->orderBy('first_name', 'asc')
     ->paginate(10);
-
-    $selectedPurok = 'all';
+    $selectedPurok = $purok;
 
     $collectors = User::select('id', 'name', 'purok')
         ->where('role', 'collector')
@@ -158,7 +157,7 @@ public function toggleContributionPurok($purok, $deceasedId)
     ]);
     }else{
         return Inertia::render('collector/contribution/MemberContribution', [
-            'member' => $mem,
+            'member' => $mem->items(),
             'selectedPurok' => $selectedPurok,
             'collectors' => $collectors,
             'currentDeceasedMembers' => $currentDeceasedMembers,

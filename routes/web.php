@@ -119,7 +119,7 @@ Route::prefix('collector')->name('collector.')->middleware('auth')->group(functi
 });
 Route::prefix('collector-contribution')->name('collectorContribution.')->middleware('auth')->group(function (){
     Route::get('/view-contribution-as-collector', [ContributionControllerForCollector::class, 'index'])->name('index');
-    Route::get('/toggle-purok-as-collector/{purok}', [ContributionControllerForCollector::class, 'toggleContributionPurok'])->name('togglePurok');
+    Route::get('/toggle-purok-as-collector/{purok}/{deceasedId}', [ContributionControllerForCollector::class, 'toggleContributionPurok'])->name('togglePurok');
     Route::delete('/delete-contribution/{id}', [ContributionControllerForCollector::class, 'deleteContribution'])->name('deleteContribution');
 });
 Route::prefix('collectorProfile')->name('collectorProfile.')->middleware('auth')->group(function (){
@@ -169,6 +169,6 @@ Route::prefix('filterAnalytics')->name('filterAnalytics.')->middleware('auth')->
     Route::get('/deceased/previous/{id}', [FilterAnalytics::class, 'previous'])->name('previous');
 });
 Route::prefix('filterContribution')->name('filterContribution.')->middleware('auth')->group(function (){
-    Route::get('/contribution/toggle/{id}', [ContributionController::class, 'toggle'])->name('toggle');
+    Route::get('/contribution/toggle/{id}/{purok}', [ContributionController::class, 'toggle'])->name('toggle');
 });
 require __DIR__.'/auth.php';

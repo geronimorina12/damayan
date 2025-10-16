@@ -10,11 +10,12 @@ const props = defineProps({
   allDeceased: {
     type: Array,
     default: () => []
+  },
+  purok: {
+    type: String,
+    default: () => ''
   }
 });
-
-console.log("props.data:", props.data);
-console.log("props.allDeceased:", props.allDeceased);
 
 // current report unique identifiers
 const currentReportId = ref(props.data.report_id ?? null);
@@ -69,7 +70,15 @@ const prevName = () => {
   if (!prevMember) return;
 
   // pass the member_id to your route as requested
-  router.get(route("filterContribution.toggle", { id: prevMember.member_id }), {}, { preserveScroll: true });
+  router.get(
+  route("filterContribution.toggle", { 
+    id: prevMember.member_id,
+    purok: props.purok
+  }),
+  {},
+  { preserveScroll: true }
+);
+
 };
 
 // navigate to next distinct member
@@ -83,7 +92,16 @@ const nextName = () => {
   const nextMember = props.allDeceased[nextIdx];
   if (!nextMember) return;
 
-  router.get(route("filterContribution.toggle", { id: nextMember.member_id }), {}, { preserveScroll: true });
+  console.log("Next member:", nextMember);
+    router.get(
+  route("filterContribution.toggle", { 
+    id: nextMember.member_id,
+    purok: props.purok
+  }),
+  {},
+  { preserveScroll: true }
+);
+
 };
 </script>
 

@@ -28,7 +28,6 @@ const props = defineProps({
     default: () => ({})
   }
 });
-
 let getMember = ref([]);
 let getSelectedPurok = ref('');
 let getCollectors = ref([]);
@@ -103,6 +102,7 @@ function goToPage(url) {
           <ToggleContribution 
             :allDeceased="getCurrentDeceasedMembers" 
             :data="getCurrentDeceasedMember"
+            :purok="getSelectedPurok"
           />
           <div class="table-responsive mt-3" v-if="Array.isArray(getMember) && getMember.length > 0">
             <table class="table table-bordered table-hover align-middle text-center">

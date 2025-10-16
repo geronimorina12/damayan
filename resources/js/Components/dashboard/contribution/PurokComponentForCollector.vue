@@ -5,6 +5,10 @@ const props = defineProps({
     activePurok: {
         type: String,
         default: () => ''
+    },
+    deceasedId: {
+        type: Number,
+        default: () => 0
     }
 })
 let getActivePurok = ref('');
@@ -17,7 +21,7 @@ watch(
 )
 const puroks = ['purok1', 'purok2', 'purok3', 'purok4']
 const togglePurok = (purok) =>{
-    router.get(route('collectorContribution.togglePurok', {purok: purok}), {
+    router.get(route('collectorContribution.togglePurok', {purok: purok, deceasedId: props.deceasedId}), {
         onSuccess: () => console.log("changing purok"),
         onError: (err) => console.log("An error occured: " , err)
     })

@@ -43,7 +43,7 @@ const undo = (id) => {
     <div class="container mt-3">
 
       <p class="text-muted">Deceased Members</p>
-    <div class="table-responsive" v-if="getDeceasedMembers.length != 0">
+    <div class="table-responsive" style="max-height: 400px; overflow-y: auto;" v-if="getDeceasedMembers.length != 0">
 
       <table class="table">
         <thead class="table-light">
@@ -77,7 +77,7 @@ const undo = (id) => {
         No Deceased Members Found.
       </div>
 
-          <Link :href="route('archive.index')" class="btn btn-dark"
+          <Link :href="route('archive.index')" class="btn btn-dark mt-2"
         >
          Go back
         </Link>

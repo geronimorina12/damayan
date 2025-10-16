@@ -20,7 +20,6 @@ const props = defineProps({
     default: () => ({})
   }
 });
-
 let getMember = ref([]);
 let getSelectedPurok = ref('');
 let getCollectors = ref([]);
@@ -165,9 +164,13 @@ const unPaidFunc = (memberId) => {
         </div>
        </div>
 
-        <PurokComponentForCollector :activePurok="getSelectedPurok" />
+        <PurokComponentForCollector 
+        :activePurok="getSelectedPurok"
+        :deceasedId="getCurrentDeceasedMember.member_id"
+        />
        <ToggleContribution 
             :allDeceased="getCurrentDeceasedMembers" 
+            :purok="getSelectedPurok"
             :data="getCurrentDeceasedMember"
           />
        
