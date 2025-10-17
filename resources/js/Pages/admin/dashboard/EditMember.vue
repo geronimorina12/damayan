@@ -6,11 +6,11 @@ import { ref, defineProps, watch } from "vue";
 const props = defineProps({
     member: {
         type: Object,
-        default: () => ({})
-    }
-})
+        default: () => ({}),
+    },
+});
 
-// Form for adding a single beneficiary (modal input)
+// Temp beneficiary input
 const beneficiarytemp = ref({
     name: "",
     relation: "",
@@ -27,14 +27,13 @@ const form = useForm({
     address: "",
     contact_number: "",
     date_of_birth: "",
-    // registration_date: "",
     purok: "",
     age: "",
     middle_name: "",
     status: "",
     occupation: "",
     gender: "",
-    beneficiaries: [], 
+    beneficiaries: [],
 });
 
 watch(
@@ -51,25 +50,28 @@ watch(
         form.status = newData?.status;
         form.occupation = newData?.occupation;
         form.gender = newData?.gender;
-        form.beneficiaries = newData?.beneficiaries;
-        beneficiary.value = newData.beneficiaries;
+        form.beneficiaries = newData?.beneficiaries || [];
+        beneficiary.value = newData?.beneficiaries || [];
     },
-    {immediate: true}
-)
+    { immediate: true }
+);
 
 const submit = () => {
     form.clearErrors();
 
     const phoneRegex = /^0\d{10}$/;
     if (!phoneRegex.test(form.contact_number)) {
-        form.setError("contact_number", "Contact number must start with 0 and be exactly 11 digits.");
+        form.setError(
+            "contact_number",
+            "Contact number must start with 0 and be exactly 11 digits."
+        );
         return;
     }
 
     form.beneficiaries = beneficiary.value;
 
-    form.post(route("addMemberPost"), {
-        onSuccess: () => alert("Member added successfully."),
+    form.put(route("members.update", props.member.id), {
+        onSuccess: () => alert("Member updated successfully."),
         onError: (err) => console.log("An error occurred => ", err),
     });
 };
@@ -88,6 +90,7 @@ const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString(undefined, options);
 };
 </script>
+
 
 <template>
     <Head title="Edit member info" />

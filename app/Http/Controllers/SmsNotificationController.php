@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\BeneficiaryModel;
 use App\Models\ContributionModel;
 use App\Models\memberModel;
 use App\Models\SmsNotificationSaved;
@@ -73,11 +74,12 @@ class SmsNotificationController extends Controller
         }
 
         // delete contributions for all members
-        $memberIds = memberModel::pluck('id')->toArray();
-        ContributionModel::whereIn('member_id', $memberIds)->delete();
+        // $memberIds = memberModel::pluck('id')->toArray();
+        // ContributionModel::whereIn('member_id', $memberIds)->delete();
 
         $message = $request->input('message');
 
+        $beneficiaries = memberModel::whereHas('beneficiaries')->with('beneficiaries')->get();
         $notification = SmsNotificationSaved::create([
             'message' => $message,
             'type' => 'deathReport',

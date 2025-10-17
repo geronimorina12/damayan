@@ -6,6 +6,7 @@ import ContributionReportForAdmin from "@/Components/dashboard/report/Contributi
 import RecentContributionForAdmin from "@/Components/dashboard/report/RecentContributionForAdmin.vue";
 import ReportHomeButton from "@/Components/dashboard/report/ReportHomeButton.vue";
 import AddCollector from "@/Components/dashboard/report/AddCollector.vue";
+
 const props = defineProps({
     contributions: {
         type: Array,
@@ -22,7 +23,7 @@ const props = defineProps({
 });
 
 let getContributions = ref([]);
-let showContributionsReport = ref(true); // default: report visible
+let showContributionsReport = ref(true);
 let showRecentContributions = ref(false);
 let getMemberContributions = ref([]);
 let getDeathReports = ref([]);
@@ -30,6 +31,7 @@ const isDownloading = ref(false);
 let selectedDeceased = ref(null);
 let modalInstance = null;
 let totalAmount = ref(0);
+
 watch(
     () => props.contributions,
     (newContributions) => {
@@ -37,15 +39,22 @@ watch(
     },
     { immediate: true }
 );
+
 watch(
     () => props.memberContributions,
     (newMemberContributions) => {
-        getMemberContributions.value = newMemberContributions;
-        totalAmount.value = getMemberContributions.value
-  .reduce((sum, data) => sum + Number(data.amount), 0);
+        // filter out null relations
+        getMemberContributions.value = newMemberContributions.filter(
+            (data) => data.member_contribution !== null
+        );
+        totalAmount.value = getMemberContributions.value.reduce(
+            (sum, data) => sum + Number(data.amount || 0),
+            0
+        );
     },
     { immediate: true }
 );
+
 watch(
     () => props.deathReports,
     (newDeathReports) => {
@@ -98,18 +107,17 @@ const downloadPDF = () => {
 };
 
 onMounted(() => {
-  const modalEl = document.getElementById('addCollectorModal')
-  if (modalEl) {
-  //  modalInstance = bootstrap.Modal.getOrCreateInstance(modalEl)
-  }
-})
+    const modalEl = document.getElementById("addCollectorModal");
+    if (modalEl) {
+        // modalInstance = bootstrap.Modal.getOrCreateInstance(modalEl)
+    }
+});
 
 const closeModal = () => {
-  if (modalInstance) {
-    modalInstance.hide()
-  }
-}
-
+    if (modalInstance) {
+        modalInstance.hide();
+    }
+};
 </script>
 
 <template>
@@ -131,12 +139,12 @@ const closeModal = () => {
                             View Reports
                         </button>
                         <button
-                            data-bs-toggle="modal" 
+                            data-bs-toggle="modal"
                             data-bs-target="#addCollectorModal"
                             class="btn btn-primary"
                         >
                             Add Collector
-                    </button>
+                        </button>
                     </div>
                 </div>
 
@@ -223,17 +231,19 @@ const closeModal = () => {
                                 </div>
                             </div>
 
-                            <!-- Only this body will be exported to PDF -->
+                            <!-- PDF export area -->
                             <div class="modal-body" id="report-pdf-content">
                                 <h1 class="fw-light fs-5 text-muted text-center">
-                                    <span class=" d-block">Deceased</span>
-                                    <span class="fs-3">{{
-                                        selectedDeceased != null
-                                            ? selectedDeceased.deceased_name
-                                            : deathReports[
-                                                  deathReports.length - 1
-                                              ].deceased_name
-                                    }}</span>
+                                    <span class="d-block">Deceased</span>
+                                    <span class="fs-3">
+                                        {{
+                                            selectedDeceased != null
+                                                ? selectedDeceased.deceased_name
+                                                : deathReports[
+                                                      deathReports.length - 1
+                                                  ].deceased_name
+                                        }}
+                                    </span>
                                 </h1>
                                 <p class="text-muted text-center">
                                     {{
@@ -248,10 +258,14 @@ const closeModal = () => {
                                               )
                                     }}
                                 </p>
+
                                 <h5 class="text-dark">
                                     List of Contributions
                                 </h5>
-                                <div class="table-responsive" v-if="getMemberContributions.length !== 0">
+                                <div
+                                    class="table-responsive"
+                                    v-if="getMemberContributions.length !== 0"
+                                >
                                     <table class="table">
                                         <thead>
                                             <tr>
@@ -272,27 +286,36 @@ const closeModal = () => {
                                                     {{
                                                         data
                                                             .member_contribution
-                                                            .first_name
+                                                            ?.first_name || 'N/A'
                                                     }}
                                                     {{
                                                         data
                                                             .member_contribution
-                                                            .last_name
+                                                            ?.last_name || ''
                                                     }}
                                                 </td>
                                                 <td>{{ data.purok }}</td>
                                                 <td>{{ data.status }}</td>
-                                                <td>{{ Math.floor(data.amount) }}</td>
+                                                <td>
+                                                    {{ Math.floor(data.amount) }}
+                                                </td>
                                             </tr>
                                         </tbody>
                                     </table>
-                                    <p class="text-muted">Total amount: {{ totalAmount }}</p>
+                                    <p class="text-muted">
+                                        Total amount: {{ totalAmount }}
+                                    </p>
                                 </div>
 
-                                <div class="text-center container" v-else>No contributions found.</div>
+                                <div
+                                    class="text-center container"
+                                    v-else
+                                >
+                                    No contributions found.
+                                </div>
                             </div>
 
-                            <!-- Footer buttons -->
+                            <!-- Footer -->
                             <div class="modal-footer">
                                 <button
                                     type="button"
@@ -324,20 +347,36 @@ const closeModal = () => {
                     </div>
                 </div>
 
-                    <!-- Add Collector -->
-                    <div class="modal fade" id="addCollectorModal" tabindex="-1" aria-labelledby="addCollectorModalLabel" aria-hidden="true">
+                <!-- Add Collector Modal -->
+                <div
+                    class="modal fade"
+                    id="addCollectorModal"
+                    tabindex="-1"
+                    aria-labelledby="addCollectorModalLabel"
+                    aria-hidden="true"
+                >
                     <div class="modal-dialog" style="max-width: 700px;">
                         <div class="modal-content">
-                        <div class="modal-header">
-                            <h1 class="modal-title fs-5" id="addCollectorModalLabel">Add Collector</h1>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body">
-                            <AddCollector @submitted="closeModal"/>
-                        </div>
+                            <div class="modal-header">
+                                <h1
+                                    class="modal-title fs-5"
+                                    id="addCollectorModalLabel"
+                                >
+                                    Add Collector
+                                </h1>
+                                <button
+                                    type="button"
+                                    class="btn-close"
+                                    data-bs-dismiss="modal"
+                                    aria-label="Close"
+                                ></button>
+                            </div>
+                            <div class="modal-body">
+                                <AddCollector @submitted="closeModal" />
+                            </div>
                         </div>
                     </div>
-                    </div>
+                </div>
 
                 <div class="extra-space"></div>
             </div>
@@ -360,10 +399,11 @@ const closeModal = () => {
 .custom-modal-width {
     max-width: 70% !important;
 }
-table th, table td {
+table th,
+table td {
     border-right: 2px solid #dee2e6;
 }
-table thead th{
-    background: #D4F3F9 !important;
+table thead th {
+    background: #d4f3f9 !important;
 }
 </style>

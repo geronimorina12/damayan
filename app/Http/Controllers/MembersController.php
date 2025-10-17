@@ -36,6 +36,40 @@ class MembersController extends Controller
             'member' => $mem,
         ]);
     }
+
+    public function update(Request $request, $id)
+{
+    $member = memberModel::findOrFail($id);
+
+    $validated = $request->validate([
+        'first_name' => 'required|string',
+        'last_name' => 'required|string',
+        'contact_number' => 'required|string|size:11',
+        'address' => 'required|string',
+        'purok' => 'required',
+        'age' => 'required|integer',
+        'gender' => 'required',
+        'status' => 'required',
+        'occupation' => 'required|string',
+        'date_of_birth' => 'required|date',
+        'middle_name' => 'nullable|string',
+        'beneficiaries' => 'array',
+    ]);
+
+    $member->update($validated);
+
+    // Update beneficiaries if provided
+    if (isset($validated['beneficiaries'])) {
+        $member->beneficiaries()->delete();
+        foreach ($validated['beneficiaries'] as $b) {
+            $member->beneficiaries()->create($b);
+        }
+    }
+
+    return redirect()->back()->with('success', 'Member updated successfully!');
+}
+
+
     public function destroy($id)
     {
         $member = memberModel::findOrFail($id);

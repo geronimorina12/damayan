@@ -51,6 +51,7 @@ Route::post('/add-beneficiary', [AdminController::class, 'addBeneficiary'])->nam
 Route::delete('/delete-beneficiary/{id}', [AdminController::class, 'deleteBeneficiary'])->name('deleteBeneficiary');
 Route::get('/view-member-info/{id}', [MembersController::class, 'viewMemberInfo'])->name('viewMemberInfo');
 Route::get('/edit-member-route/{id}', [MembersController::class, 'editMember'])->name('editMember');
+Route::put('/members/{id}', [MembersController::class, 'update'])->name('members.update');
 Route::put('/members/{id}/toggle-status', [MembersController::class, 'toggleStatus'])->name('toggleMemberStatus');
 //contribution
 Route::prefix('contribution')->name('contributions.')->middleware('auth')->group(function () {
@@ -138,6 +139,7 @@ Route::prefix('activityLog')->name('activityLog.')->middleware('auth')->group(fu
 Route::prefix('smsNotification')->name('smsNotification.')->middleware('auth')->group(function () {
     Route::post('/add-death-report', [SmsNotificationController::class, 'addDeathReport'])->name('addDeathReport');
     Route::post('/send-schedule-contribution', [SmsNotificationController::class, 'sendScheduleContribution'])->name('sendScheduleContribution');
+
     Route::post('/send-reminders', [SmsNotificationController::class, 'sendReminders'])->name('sendReminders');
     Route::post('/send-fund-updates', [SmsNotificationController::class, 'sendFundUpdates'])->name('sendFundUpdates');
 
