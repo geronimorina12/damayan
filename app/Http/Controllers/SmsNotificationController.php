@@ -105,6 +105,7 @@ class SmsNotificationController extends Controller
                     'contact_number' => 'required|string',
                     'collector' => 'nullable|string',
                     'purok' => 'required|string',
+                    'deceasedId' => 'nullable'
                 ]);
 
                 $members = memberModel::whereNotNull('contact_number')->get();
@@ -130,6 +131,7 @@ class SmsNotificationController extends Controller
                     'collector' => $request->collector ?: "",
                     'purok' => $normalizedPurok,
                     'status' => "paid",
+                    'deceased_id' => $request->deceasedId,
                 ]);
 
                 $this->sendAndLog($request->message, $request->contact_number, $notification->id);

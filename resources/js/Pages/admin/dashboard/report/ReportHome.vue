@@ -31,7 +31,7 @@ const isDownloading = ref(false);
 let selectedDeceased = ref(null);
 let modalInstance = null;
 let totalAmount = ref(0);
-
+let selectedDeceasedId = ref(null);
 watch(
     () => props.contributions,
     (newContributions) => {
@@ -46,6 +46,10 @@ watch(
         // filter out null relations
         getMemberContributions.value = newMemberContributions.filter(
             (data) => data.member_contribution !== null
+        );
+        console.log(
+            "member contributions:",
+            getMemberContributions.value
         );
         totalAmount.value = getMemberContributions.value.reduce(
             (sum, data) => sum + Number(data.amount || 0),
@@ -117,6 +121,16 @@ const closeModal = () => {
     if (modalInstance) {
         modalInstance.hide();
     }
+};
+const filterData = (deceasedId) => {
+    selectedDeceasedId.value = deceasedId;
+    getMemberContributions.value = props.memberContributions.filter(
+        (data) => data.deceased_id === deceasedId
+    );
+    totalAmount.value = getMemberContributions.value.reduce(
+        (sum, data) => sum + Number(data.amount || 0),
+        0
+    );
 };
 </script>
 
@@ -206,6 +220,7 @@ const closeModal = () => {
                                     <select
                                         class="form-select"
                                         v-model="selectedDeceased"
+                                        @click="filterData(selectedDeceased.member_id)"
                                     >
                                         <option value="" disabled>
                                             Select Deceased
@@ -214,6 +229,7 @@ const closeModal = () => {
                                             v-for="data in getDeathReports"
                                             :key="data.id"
                                             :value="data"
+                                            
                                         >
                                             {{ data.deceased_name }} -
                                             {{ formatDate(data.date_of_death) }}

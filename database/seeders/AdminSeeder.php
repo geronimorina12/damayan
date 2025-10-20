@@ -22,6 +22,7 @@ class AdminSeeder extends Seeder
             'password' => Hash::make('iamrina123'),
             'role' => 'admin',
         ]);
+        
     }
     //collector (already in database)
     // jiji_protectdamayan@gmail.org 

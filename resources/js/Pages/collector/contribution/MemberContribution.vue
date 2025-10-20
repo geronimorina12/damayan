@@ -106,6 +106,7 @@ const preparePayment = (memberId, memberPurok, contact_number) => {
       contact_number: contact_number,
       collector: getCurrentCollector.value.name,
       purok: memberPurok,
+      deceasedId: getCurrentDeceasedMember.value.member_id || null,
     },
     {
       onSuccess: () => alert('Schedule Contribution sent successfully!'),

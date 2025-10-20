@@ -40,7 +40,6 @@ class SmsNotificationSavedController extends Controller
                 'report_date' => now(),
                 'last_night' => $request->lastNight ?: null,
             ]);
-            Log::info('deceased member: ' . $deceased->beneficiaries[0]);
             if($deceased->beneficiaries[0]){
                 $nameParts = explode(' ', trim($deceased->beneficiaries[0]->name));
                 $firstName = $nameParts[0] ?? 'Unknown';

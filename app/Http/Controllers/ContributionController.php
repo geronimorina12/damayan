@@ -6,6 +6,7 @@ use App\Models\ContributionModel;
 use App\Models\DeathReportModel;
 use App\Models\memberModel;
 use App\Models\User;
+use App\Services\SmsNotificationSender;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -95,6 +96,7 @@ public function toggleContributionPurok($purok, $deceasedId)
         ->get(); 
         $paidMembersId = ContributionModel::pluck('member_id')->toArray();
         $deceasedMembers = DeathReportModel::select('member_id', 'deceased_name')->get();
+
         return Inertia::render('admin/dashboard/contribution/AddContribution', [
             'members' => $members,
             'users' => $users,
@@ -114,7 +116,10 @@ public function toggleContributionPurok($purok, $deceasedId)
         'status' => 'required',
         'deceased_id' => 'nullable|exists:death_reports,member_id',
     ]);
-    dd($request->deceased_id ?: "No id"); 
+
+    $member = memberModel::find($request->member_id);
+    $message = "Dear {$member->first_name} {$member->last_name}, your contribution of {$request->amount} has been recorded on {$request->payment_date}. Thank you for your support!";   
+    $this->sendAndLog($message, $member->contact_number, $notification->id ?? 0);
     ContributionModel::create([
         'member_id' => $request->member_id,
         'amount' => $request->amount,
@@ -165,5 +170,21 @@ public function toggleContributionPurok($purok, $deceasedId)
         ]);
     }
 }
+
+private function sendAndLog(string $message, string $number, int $notificationId): void
+    {
+            Log::info("FAKE SMS (TEST MODE) to {$number} | Notification ID: {$notificationId} | Message: {$message}");
+         try {
+             $success = SmsNotificationSender::send($message, [$number]);
+
+             if ($success) {
+                 Log::info("SMS sent successfully to {$number} | Notification ID: {$notificationId}");
+             } else {
+                 Log::error("SMS failed to send to {$number} | Notification ID: {$notificationId}");
+             }
+         } catch (\Exception $e) {
+             Log::error("Exception when sending SMS to {$number}: " . $e->getMessage());
+         }
+    }
 
 }
