@@ -250,8 +250,8 @@ const filterData = (deceasedId) => {
                             <!-- PDF export area -->
                             <div class="modal-body" id="report-pdf-content">
                                 <h1 class="fw-light fs-5 text-muted text-center">
-                                    <span class="d-block">Deceased</span>
-                                    <span class="fs-3">
+                                    <span class="d-block mb-3 ">Deceased</span>
+                                    <span class="fs-3 fw-bold">
                                         {{
                                             selectedDeceased != null
                                                 ? selectedDeceased.deceased_name
@@ -275,7 +275,7 @@ const filterData = (deceasedId) => {
                                     }}
                                 </p>
 
-                                <h5 class="text-dark">
+                                <h5 class="text-dark mb-3">
                                     List of Contributions
                                 </h5>
                                 <div
