@@ -199,7 +199,7 @@ const isDead = (member) => {
                 <th>CONTACT NO.</th>
                 <th>STREET</th>
                 <th>STATUS</th>
-                <th>IsDead?</th>
+                <th>Deceased</th>
                 <th>ACTION</th>
               </tr>
             </thead>

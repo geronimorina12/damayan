@@ -88,7 +88,7 @@ const nextName = () => {
 
 <template>
   <div class="d-flex flex-column align-items-center" style="height: 120px;">
-    <h5 class="mb-3 fw-semibold">This analytics belongs to:</h5>
+    <h5 class="mb-3">This analytics belongs to:</h5>
 
     <div class="d-flex align-items-center gap-4">
       <!-- Left Arrow -->
@@ -100,9 +100,9 @@ const nextName = () => {
       </button>
 
       <!-- Current Name -->
-      <h2 class="fw-bold text-dark mb-0">
+      <h5 class="fw-bold text-dark mb-0">
         {{ props.data.deceased_name || "No name available" }}
-      </h2>
+      </h5>
 
       <!-- Right Arrow -->
       <button
