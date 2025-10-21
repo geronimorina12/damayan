@@ -152,13 +152,6 @@ const filterData = (deceasedId) => {
                         >
                             View Reports
                         </button>
-                        <button
-                            data-bs-toggle="modal"
-                            data-bs-target="#addCollectorModal"
-                            class="btn btn-primary"
-                        >
-                            Add Collector
-                        </button>
                     </div>
                 </div>
 

@@ -17,7 +17,7 @@ watch(
 {immediate: true}
 )
 const toggleStatus = (official) => {
-  router.put(`/officials/${official.id}/toggle-status`, {
+  router.patch(route('officials.status.toggle', {id: official.id}), {
     status: !official.status,
   })
 }
@@ -67,12 +67,12 @@ const formatDate = (dateString) => {
           <td>{{ formatDate(official.term_start) }} - {{ formatDate(official.term_end) }}</td>
           <td>
             <div class="form-check form-switch d-flex justify-content-center">
-              <input
-                class="form-check-input bg-success"
-                type="checkbox"
-                :checked="official.status"
-                @change="toggleStatus(official)"
-              />
+             <input
+              type="checkbox"
+              :checked="official.status"
+              @change="toggleStatus(official)"
+              :class="{'form-check-input': true, 'bg-success': official.status, 'bg-danger': !official.status}"
+          />
             </div>
           </td>
           <td>
@@ -110,7 +110,7 @@ const formatDate = (dateString) => {
               <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-              <Add />
+              <Add/>
             </div>
           </div>
         </div>
