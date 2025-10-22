@@ -19,7 +19,9 @@ const getMembers = ref([]);
 
 watch(() => props.deathReport, (data) => { getDeathReport.value = data }, { immediate: true })
 watch(() => props.scheduleContribution, (data) => { getScheduleContribution.value = data }, { immediate: true })
-watch(() => props.reminders, (data) => { getReminders.value = data }, { immediate: true })
+watch(() => props.reminders, (data) => { 
+  getReminders.value = data
+}, { immediate: true })
 watch(() => props.fundUpdates, (data) => { getFundUpdates.value = data }, { immediate: true })
 watch(() => props.members, (data) => { getMembers.value = data }, { immediate: true })
 
@@ -81,11 +83,11 @@ function sendFundUpdates() {
             <div>
               <label for="reminders" class="form-label">Reminders</label>
             </div>
-            <textarea v-model="getReminders.message" id="reminders" class="form-control" disabled></textarea>
+            <textarea v-model="getReminders" id="reminders" class="form-control" disabled></textarea>
 
             <div class="container-fluid d-flex flex-row align-items-center gap-3 justify-content-end mt-3">
               <div>
-                <Link :href="route('smsNotification.sendToAllSelected', {type: 'reminders', message: getReminders.message})" class="save-btn text-uppercase text-decoration-none">
+                <Link :href="route('smsNotification.sendToAllSelected', {type: 'reminders', message: getReminders})" class="save-btn text-uppercase text-decoration-none">
                   send to all selected
                 </Link>
               </div>

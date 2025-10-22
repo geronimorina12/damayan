@@ -35,11 +35,10 @@ class SmsNotificationController extends Controller
         $scheduleContribution = SmsNotificationSaved::where('type', 'scheduleContribution')->latest()->first();
         $reminders = SmsNotificationSaved::where('type', 'reminders')->latest()->first();
         $fundUpdates = SmsNotificationSaved::where('type', 'fundUpdates')->latest()->first();
-
         return Inertia::render('admin/SmsPage', [
             'deathReport' => $deathReport,
             'scheduleContribution' => $scheduleContribution,
-            'reminders' => $reminders,
+            'reminders' => "Hello, our records show you still have an unpaid balance for the contribution (Damayan). Please settle it at your earliest convenience. Thank you.",
             'fundUpdates' => $fundUpdates,
             'members' => memberModel::select('id', 'first_name', 'last_name')->get()->toArray(),
         ]);
@@ -53,6 +52,21 @@ class SmsNotificationController extends Controller
 
             $all = collect($members)->merge($users)->sortBy('name')->values()->all();
             return Inertia::render('admin/smsNotification/SendToAllSelected', [
+                'members' => $all,
+                'type' => $type,
+                'message' => $message,
+                'deceased' => $deceased
+            ]);
+        }
+
+        public function sendToAllSelectedV2($type, $message, $deceased)
+        {
+            $members = memberModel::select('id', 'first_name', 'last_name', 'age')->get();
+            $users = User::select(['id', 'name'])
+            ->get();
+
+            $all = collect($members)->merge($users)->sortBy('name')->values()->all();
+            return Inertia::render('admin/smsNotification/sendToAllSelectedForDeceased', [
                 'members' => $all,
                 'type' => $type,
                 'message' => $message,
