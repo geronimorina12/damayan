@@ -5,10 +5,11 @@ import AdminLayout from '@/Layouts/AdminLayout.vue'
 import Header from '@/Components/dashboard/admin/registeredMember/Header.vue'
 import Alert from '@/Components/dashboard/admin/registeredMember/Alert.vue'
 import AddNewMember from '@/Components/dashboard/admin/registeredMember/members/AddNewMember.vue'
+import IsDeceased from '@/Components/dashboard/admin/registeredMember/members/IsDeceased.vue'
 
 const props = defineProps({
   members: {
-    type: Object, // will contain data, links, meta
+    type: Object,
     default: () => ({ data: [], links: [], prev_page_url: null, next_page_url: null })
   },
   deceasedMember: {
@@ -16,6 +17,7 @@ const props = defineProps({
     default: () => []
   }
 })
+
 let getMembers = ref([])
 const showActionsPopup = ref(false)
 const popupPosition = ref({ top: '0px', left: '0px' })
@@ -23,9 +25,12 @@ const activeMemberId = ref(null)
 const actionButtonRefs = ref({})
 const statusChangeAlert = ref(false)
 const passNameToAlert = ref('')
-const searchQuery = ref("")   // 🔍 search input
+const searchQuery = ref("")
 const getDeceasedMember = ref([])
-// Watch members from props
+const deceasedMember = ref({})
+const showDeceasedModal = ref(false)
+
+// Watch members
 watch(
   () => props.members,
   (newMember) => {
@@ -33,6 +38,8 @@ watch(
   },
   { immediate: true }
 )
+
+// Watch deceased
 watch(
   () => props.deceasedMember,
   (newData) => {
@@ -41,7 +48,7 @@ watch(
   { immediate: true }
 )
 
-// Computed: filter members based on searchQuery
+// Computed for search
 const filteredMembers = computed(() => {
   if (!searchQuery.value) return getMembers.value
   return getMembers.value.filter((member) => {
@@ -78,6 +85,7 @@ const toggleMemberStatus = (member) => {
   })
 }
 
+// Popup actions
 const togglePopup = (event, memberId) => {
   if (showActionsPopup.value && activeMemberId.value === memberId) {
     showActionsPopup.value = false
@@ -126,59 +134,31 @@ onUnmounted(() => {
   document.removeEventListener('click', closePopup)
 })
 
-// pagination navigation
+// Pagination
 const goToPage = (url) => {
-  if (url) {
-    router.get(url, {}, { preserveScroll: true, preserveState: true })
-  }
+  if (url) router.get(url, {}, { preserveScroll: true, preserveState: true })
 }
-const form = useForm({
-  message: '',
-  type: 'deathReport',
-  memberId: null,
-});
 
+// Custom deceased modal
 const isDead = (member) => {
-  const today = new Date();
-  const formatted = today.toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
-  });
+  deceasedMember.value = member || null
+  showDeceasedModal.value = true
+}
 
-  form.message = `We regret to inform you that ${member?.first_name || '[Name of Dead]'} ${member?.last_name || ''} has passed away. Collection for burial assistance starts on ${formatted}.`;
-  
-  form.type = 'deathReport';
-  form.memberId = member.id;
-
-  form.post(route('smsNotificationSaved.send'), {
-    onStart: () => console.log('Sending SMS...'),
-    onSuccess: () => {
-      console.log('SMS sent successfully ');
-      form.reset(); 
-    },
-    onError: (errors) => {
-      console.error('Error sending SMS:', errors);
-    },
-  });
-};
+const closeDeceasedModal = () => {
+  showDeceasedModal.value = false
+}
 </script>
 
 <template>
   <Head title="Registered members" />
   <AdminLayout>
     <div class="main-section bg-light">
-
       <Header />
-      <!-- Alert for status changes -->
-      <Alert 
-        :status="statusChangeAlert"
-        :name="passNameToAlert"
-      />
+
+      <Alert :status="statusChangeAlert" :name="passNameToAlert" />
 
       <div class="container table-container">
-        
-        <!-- 🔍 Search Bar -->
         <div class="mb-3">
           <input 
             type="text" 
@@ -199,47 +179,50 @@ const isDead = (member) => {
                 <th>CONTACT NO.</th>
                 <th>STREET</th>
                 <th>STATUS</th>
-                <th>Deceased</th>
+                <th>DECEASED</th>
                 <th>ACTION</th>
               </tr>
             </thead>
             <tbody>
               <tr v-for="(member, index) in filteredMembers" :key="index">
-                <td>{{ member.id }}</td>  
-                <td class="text-start">{{ member?.first_name }} {{ member?.middle_name }} {{ member?.last_name }}</td>
+                <td>{{ member.id }}</td>
+                <td class="text-start">{{ member.first_name }} {{ member.middle_name }} {{ member.last_name }}</td>
                 <td>{{ member.gender || 'N/A' }}</td>
                 <td>{{ member.age }}</td>
                 <td>{{ member.contact_number }}</td>
                 <td>{{ member.purok }}</td>
                 <td>
                   <div class="form-check form-switch d-inline-flex justify-content-center">
-                    <input class="form-check-input" type="checkbox"
+                    <input 
+                      class="form-check-input" 
+                      type="checkbox"
                       :checked="member.status === 'active'"
-                      @click="toggleMemberStatus(member)" />
+                      @click="toggleMemberStatus(member)" 
+                    />
                   </div>
                 </td>
-
                 <td>
                   <div class="form-check form-switch d-inline-flex justify-content-center">
-                    <input class="form-check-input" type="checkbox"
-                      :checked="getDeceasedMember.some(deceased => deceased.member_id === member.id)"
-                      @click="isDead(member)" />
+                    <input 
+                      class="form-check-input" 
+                      type="checkbox"
+                      :checked="getDeceasedMember.some(d => d.member_id === member.id)"
+                      @click="isDead(member)"
+                    />
                   </div>
                 </td>
-
                 <td class="actions-column">
                   <div class="action-buttons-large">
-                    <Link :href="route('viewMemberInfo', {id: member?.id})" class=" me-1">
+                    <Link :href="route('viewMemberInfo', {id: member.id})" class="me-1">
                       <i class="bi bi-eye"></i>
                     </Link>
-                    <Link :href="route('editMember', {id: member?.id})" class=" me-1">
+                    <Link :href="route('editMember', {id: member.id})" class="me-1">
                       <i class="bi bi-pencil"></i>
                     </Link>
-                    <button class="" @click="trashMember(member.id)">
+                    <button @click="trashMember(member.id)">
                       <i class="bi bi-trash"></i>
                     </button>
                   </div>
-
                   <div class="action-buttons-small">
                     <button
                       class="btn btn-sm btn-outline-dark three-dots-button"
@@ -252,7 +235,7 @@ const isDead = (member) => {
                 </td>
               </tr>
               <tr v-if="filteredMembers.length === 0">
-                <td colspan="8" class="text-center text-muted">No members found</td>
+                <td colspan="9" class="text-center text-muted">No members found</td>
               </tr>
             </tbody>
           </table>
@@ -272,7 +255,7 @@ const isDead = (member) => {
       </div>
     </div>
 
-    <!-- Popup menu -->
+    <!-- Actions Popup -->
     <div
       v-if="showActionsPopup"
       class="actions-popup card shadow"
@@ -302,7 +285,7 @@ const isDead = (member) => {
       </div>
     </div>
 
-    <!-- Add new member modal -->
+      <!-- Add new member modal -->
     <div class="modal fade" id="addNewMember" tabindex="-1" aria-labelledby="addNewMemberLabel" aria-hidden="true">
       <div class="modal-dialog" style="max-width: 800px;">
         <div class="modal-content">
@@ -316,11 +299,24 @@ const isDead = (member) => {
         </div>
       </div>
     </div>
+    
+    <!-- Plain HTML Deceased Modal -->
+    <div v-if="showDeceasedModal" class="custom-modal-overlay" @click.self="closeDeceasedModal">
+      <div class="custom-modal">
+        <div class="custom-modal-header">
+          <h3>Add Deceased Info</h3>
+          <span class="close-icon" @click="closeDeceasedModal">&times;</span>
+        </div>
+        <div class="custom-modal-body">
+          <IsDeceased :deceasedMember="deceasedMember" />
+        </div>
+      </div>
+    </div>
   </AdminLayout>
 </template>
 
-
 <style scoped>
+/* layout styles */
 .main-section {
   width: 100%;
   height: 100%;
@@ -328,19 +324,12 @@ const isDead = (member) => {
   overflow-y: scroll;
   padding-bottom: 2rem;
 }
-
 .table th,
 .table td {
   vertical-align: middle;
 }
-
-.action-buttons-small {
-  display: none;
-}
-
-.action-buttons-large {
-  display: block;
-}
+.action-buttons-small { display: none; }
+.action-buttons-large { display: block; }
 
 .actions-popup {
   position: absolute;
@@ -348,45 +337,80 @@ const isDead = (member) => {
   min-width: 150px;
 }
 
-.main-section {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-}
-
-.table-container {
-  flex: 1;
-  overflow-y: auto;
-}
-
 .pagination-controls {
   position: sticky;
   bottom: 0;
-  left: 0;
-  width: 100%;
   background: #fff;
   padding: 10px;
   border-top: 1px solid #dee2e6;
-  z-index: 100;
 }
 
-
+/* Responsive */
 @media (max-width: 755.98px) {
-  .action-buttons-large {
-    display: none;
-  }
+  .action-buttons-large { display: none; }
+  .action-buttons-small { display: block; }
+  .table-responsive table { font-size: 0.85em; }
+  .table-responsive th, .table-responsive td { padding: 0.5rem; }
+}
 
-  .action-buttons-small {
-    display: block; 
-  }
+/* ===== Custom Deceased Modal ===== */
+.custom-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1050;
+  animation: fadeIn 0.3s ease;
+}
 
-  .table-responsive table {
-    font-size: 0.85em;
-  }
+.custom-modal {
+  background: white;
+  border-radius: 10px;
+  width: 90%;
+  max-width: 700px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+  overflow: hidden;
+  animation: scaleUp 0.25s ease;
+}
 
-  .table-responsive th,
-  .table-responsive td {
-    padding: 0.5rem;
-  }
+.custom-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #007bff;
+  color: white;
+  padding: 15px 20px;
+}
+
+.custom-modal-header h3 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.close-icon {
+  cursor: pointer;
+  font-size: 1.6rem;
+  font-weight: bold;
+  transition: color 0.2s;
+}
+.close-icon:hover {
+  color: #ffdddd;
+}
+
+.custom-modal-body {
+  padding: 20px;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; } to { opacity: 1; }
+}
+@keyframes scaleUp {
+  from { transform: scale(0.95); opacity: 0.8; }
+  to { transform: scale(1); opacity: 1; }
 }
 </style>

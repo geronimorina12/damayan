@@ -75,29 +75,6 @@ function sendFundUpdates() {
         <h4 class="mb-4 fw-bold sticky-header text-start ps-2 pt-3">SMS</h4>
 
         <div class="scroll-content">
-          <!-- Death Report -->
-          <div class="mb-4 position-relative">
-            <div>
-              <label for="deathReport" class="form-label">Death Report</label>
-            </div>
-            <textarea v-model="getDeathReport.message" id="deathReport" class="form-control" disabled></textarea>
-
-            <div class="container-fluid d-flex flex-row align-items-center gap-3 justify-content-end mt-3">
-              <div>
-                <Link :href="route('smsNotification.sendToAllSelected', {type: 'deathReport', message: getDeathReport.message})" class="save-btn text-uppercase text-decoration-none">
-                send to all selected
-              </Link>
-
-              </div>
-              <div>
-                <button @click="sendDeathReport" class="save-btn text-uppercase text-decoration-none">
-                  send
-                </button>
-              </div>
-            </div>
-          </div>
-
-         
 
           <!-- Reminders -->
           <div class="mb-4 position-relative">

@@ -7,6 +7,8 @@ const props = defineProps({
   members: { type: Array, default: () => [] },
   type: { type: String, default: 'deathReport' },
   message: { type: String, default: '' },
+  deceased: {type: Number},
+  last: {type: String}
 })
 
 const selectedMembers = ref([])
@@ -50,6 +52,8 @@ function sendToAllSelected() {
   router.post(route(`smsSelectMember.${messageType.value}`), {
     member_ids: memberIds,
     message: smsMessage.value,
+    deceased: props.deceased || 0,
+    last: props.last
   }, {
     onSuccess: () => {
       message.value = `${messageType.value} SMS sent successfully.`

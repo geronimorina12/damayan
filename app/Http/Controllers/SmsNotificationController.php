@@ -44,7 +44,7 @@ class SmsNotificationController extends Controller
             'members' => memberModel::select('id', 'first_name', 'last_name')->get()->toArray(),
         ]);
     }
-        public function sendToAllSelected($type, $message)
+        public function sendToAllSelected($type, $message, $deceased)
         {
             $members = memberModel::select('id', 'first_name', 'last_name', 'age')->get();
             $users = User::select(['id', 'name'])
@@ -56,6 +56,7 @@ class SmsNotificationController extends Controller
                 'members' => $all,
                 'type' => $type,
                 'message' => $message,
+                'deceased' => $deceased
             ]);
         }
 

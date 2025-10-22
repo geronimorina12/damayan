@@ -148,7 +148,8 @@ Route::prefix('smsNotification')->name('smsNotification.')->middleware('auth')->
     Route::get('/sms-notification', [SmsNotificationController::class, 'index'])->name('index');
     Route::get('/sms-page', [SmsNotificationController::class, 'smsPage'])->name('smsPage');
     Route::get('/death-report/select', [SmsNotificationController::class, 'selectDeceased'])->name('selectDeceased');
-    Route::get('/send-to-all-selected/{type}/{message}', [SmsNotificationController::class, 'sendToAllSelected'])->name('sendToAllSelected');
+    Route::get('/send-to-all-selected/{type}/{message}/', [SmsNotificationController::class, 'sendToAllSelected'])->name('sendToAllSelected');
+    Route::get('/send-to-all-selected/v2/{type}/{message}/{deceased}/{last}', [SmsNotificationController::class, 'sendToAllSelected'])->name('sendToAllSelectedV2');
 });
 
 Route::prefix('smsSelectMember')->name('smsSelectMember.')->middleware('auth')->group(function () {
