@@ -26,7 +26,7 @@ class AdminController extends Controller
             'date_of_birth' => 'required|date|max:255',
             'purok' => 'required|max:255',
             'age' => 'required|integer',
-            'middle_name' => 'required|string|max:255',
+            'middle_name' => 'nullable|string|max:255',
             'status' => 'required|in:Single,Married,Widowed,Divorced,Separated,Live-in,Annulled,active,inactive',
             'occupation' => 'required|string|max:255',
             'gender' => 'required|in:Male,Female',
@@ -49,6 +49,7 @@ class AdminController extends Controller
             'status' => $request->status,
             'occupation' => $request->occupation,
             'gender' => $request->gender,
+            'created_at' => now(),
         ]);
 
         if ($request->has('beneficiaries')) {
@@ -95,5 +96,21 @@ class AdminController extends Controller
             return response()->json(['Error: ' => 'cannot find beneficiary data.']);
         }
         $bene->delete();
+    }
+     public function newlyRegistered()
+    {
+        $latestMember = memberModel::orderBy('created_at', 'desc')->first();
+
+        if (!$latestMember) {
+            return response()->json([
+                'message' => 'No member found',
+                'data' => null
+            ], 404);
+        }
+
+        return response()->json([
+            'message' => 'Latest member retrieved successfully',
+            'data' => $latestMember
+        ]);
     }
 }

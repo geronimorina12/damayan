@@ -40,6 +40,7 @@ async function checkHasPresident() {
         }
         const data = await response.json();
         hasPresident.value = data.has_president;
+        console.log("has president: ", hasPresident.value)
         return hasPresident;
 
     } catch (error) {

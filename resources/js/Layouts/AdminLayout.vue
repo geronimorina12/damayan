@@ -1,7 +1,7 @@
 <script setup>
 import { ref, onMounted, onUnmounted, computed } from 'vue'
 import { Link, router, usePage } from '@inertiajs/vue3'
-import HeaderComponent from '@/Components/dashboard/HeaderComponent.vue'
+import HeaderComponent from '@/Components/dashboard/admin/HeaderComponent.vue'
 
 const toggleSidebar = ref(true)
 const isSmallScreen = ref(false)
@@ -119,20 +119,20 @@ const overlayStyles = computed(() => {
         >
           <i class="bi bi-archive me-2"></i> Archived
         </Link>
-
+<!-- 
         <Link :href="route('smsNotification.smsPage')" class="nav-link text-dark d-flex align-items-center"
           @click="closeSidebar"
           :class="{ active: currentRoute.includes('/smsNotification/sms-page') }"
         >
           <i class="bi bi-bell me-2"></i> SMS
-        </Link>
+        </Link> -->
 
-        <Link :href="route('settings.viewSettings')" class="nav-link text-dark d-flex align-items-center"
+        <!-- <Link :href="route('settings.viewSettings')" class="nav-link text-dark d-flex align-items-center"
           @click="closeSidebar"
           :class="{ active: currentRoute.includes('/settings') }"
         >
           <i class="bi bi-gear me-2"></i> Settings
-        </Link>
+        </Link> -->
 
         <Link :href="route('logout')" method="post" class="nav-link text-dark d-flex align-items-center"
           @click="closeSidebar"

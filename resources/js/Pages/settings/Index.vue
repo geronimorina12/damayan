@@ -10,9 +10,7 @@ import AdminLayout from '@/Layouts/AdminLayout.vue';
             <div class="container text-start fs-4">Settings</div>
             <hr>
         <div class="container-fluid d-flex flex-column">
-            <div class="list">
-                <Link :href="route('role.index')" class="link text-decoration-none fs-5">User Role and Management</Link>
-            </div>
+            
             <hr>
             <div class="list">
                 <Link :href="route('activityLog.index')" class="link text-decoration-none fs-5">Activity Logs</Link>

@@ -1,4 +1,3 @@
-
 <script setup>
 import { Head, Link, useForm } from "@inertiajs/vue3";
 import { ref, defineProps } from "vue";
@@ -12,9 +11,9 @@ const beneficiarytemp = ref({
 });
 
 const beneficiary = ref([]);
-const showAddBeneficiaryForm = ref(false); // controls visibility
+const showAddBeneficiaryForm = ref(false);
+const successMessage = ref(""); //  for bootstrap alert
 
-// Main member form
 const form = useForm({
     first_name: "",
     last_name: "",
@@ -42,7 +41,12 @@ const submit = () => {
     form.beneficiaries = beneficiary.value;
 
     form.post(route("addMemberPost"), {
-        onSuccess: () => alert("Member added successfully."),
+        onSuccess: () => {
+            successMessage.value = " Member added successfully!";
+            setTimeout(() => {
+                successMessage.value = "";
+            }, 4000); // auto-hide after 4 seconds
+        },
         onError: (err) => console.log("An error occurred => ", err),
     });
 };
@@ -50,7 +54,7 @@ const submit = () => {
 const addBeneficiaryFunc = () => {
     beneficiary.value.push({ ...beneficiarytemp.value });
     beneficiarytemp.value = { name: "", relation: "", age: "", birth_date: "" };
-    showAddBeneficiaryForm.value = false; // hide after adding
+    showAddBeneficiaryForm.value = false;
 };
 
 const deleteBeneficiary = (index) => {
@@ -63,9 +67,20 @@ const formatDate = (dateString) => {
 };
 </script>
 
+
 <template>
-  <div class="container-fluid d-flex flex-row justify-content-center align-items-center main-container">
+  <div class="container-fluid d-flex flex-row justify-content-center main-container ">
     <div class="container mt-5">
+
+       <div
+        v-if="successMessage"
+        class="alert alert-success alert-dismissible fade show"
+        role="alert"
+      >
+        {{ successMessage }}
+        <button type="button" class="btn-close" @click="successMessage = ''"></button>
+      </div>
+
       <form @submit.prevent="submit" class="form">
         <!-- Member Form Fields -->
         <div class="row mb-3 d-flex align-items-center">
@@ -89,7 +104,7 @@ const formatDate = (dateString) => {
 
         <div class="row mb-3">
           <div class="col col-6">
-            <input type="text" class="form-control" placeholder="Middle name" v-model="form.middle_name" required />
+            <input type="text" class="form-control" placeholder="Middle name" v-model="form.middle_name" />
           </div>
           <div class="col col-6">
             <select class="form-control" v-model="form.gender" required>

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\ContributionModel;
 use App\Models\DeathReportModel;
 use App\Models\memberModel;
+use App\Models\OfficialModel;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -41,11 +42,12 @@ class ReportController extends Controller
         'date' => $matchedContributions->max('created_at'),
     ];
 });
-
+        $president = OfficialModel::where('position', 'president')->first();
         return Inertia::render('admin/dashboard/report/ReportHome', [
             'contributions' => $collectorStats,
             'memberContributions' => $memberContributions,
             'deathReports' => $deathReports,
+            'president' => $president
         ]);
     }
 

@@ -6,7 +6,9 @@ use App\Models\BeneficiaryModel;
 use App\Models\memberModel;
 use App\Models\ContributionModel;
 use App\Models\DeathReportModel;
+use App\Models\NotificationModel;
 use App\Models\SmsNotificationSaved;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use App\Services\SmsNotificationSender;
@@ -40,6 +42,16 @@ class SelectMemberController extends Controller
                 'last_night' => $request->last ?: null,
             ]);
 
+       $collectors = User::where('role', 'collector')->get(['id']);
+
+            if ($collectors->isNotEmpty()) {
+                foreach ($collectors as $collector) {
+                    NotificationModel::create([
+                        'user_id' => $collector->id,
+                        'message' => $request->message,
+                    ]);
+                }
+            }
         if ($members->isEmpty()) {
             return back()->with('error', 'No valid members with contact numbers.');
         }

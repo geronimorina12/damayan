@@ -105,6 +105,28 @@ public function toggleContributionPurok($purok, $deceasedId)
         ]);
     }
 
+    public function getMembersData(){
+         $members = memberModel::select('id', 'first_name', 'last_name', 'middle_name', 'purok')
+        ->orderBy('first_name', 'asc')
+        ->get();
+
+    $users = User::select('id', 'name', 'role')
+        ->orderBy('name', 'asc')
+        ->get();
+
+    $paidMembersId = ContributionModel::pluck('member_id')->toArray();
+
+    $deceasedMembers = DeathReportModel::select('report_id', 'member_id', 'deceased_name')->get();
+
+    return response()->json([
+        'members' => $members,
+        'users' => $users,
+        'paidMembersId' => $paidMembersId,
+        'deceasedMembers' => $deceasedMembers,
+    ]);
+    }
+
+
      public function store(Request $request)
 {
     $request->validate([

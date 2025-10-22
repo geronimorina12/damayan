@@ -1,5 +1,5 @@
 <script setup>
-import AddContribution from '@/Components/dashboard/contribution/AddContribution.vue';
+import AddContribution from './AddContribution.vue';
 </script>
 
 <template>
@@ -10,9 +10,25 @@ import AddContribution from '@/Components/dashboard/contribution/AddContribution
             </div>
             <div>
               <!-- Add contribution Component -->
+              <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#exampleModal">Add contribution</button>
+            </div>
+          </div>
+
+
+      <!-- Add contribution modal -->
+      <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" style="min-width: 60%;">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h1 class="modal-title fs-5" id="exampleModalLabel">Add contribution</h1>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
               <AddContribution />
             </div>
           </div>
+        </div>
+      </div>
   </div>
 </template>
 

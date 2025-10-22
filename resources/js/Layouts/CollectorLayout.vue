@@ -87,8 +87,12 @@ const user = usePage().props.auth?.user;
 
       <div class="nav flex-column">
         <hr class="hr">
-        <Link :href="route('collectorProfile.profile')" class="nav-link text-dark d-flex align-items-center py-0" @click="closeSidebar">
-          <i class="bi bi-person-circle me-2"></i> {{ user.name || 'User' }}
+        <Link :href="route('collectorProfile.profile')" class="nav-link text-dark align-items-start py-0 d-flex flex-row justify-content-start" @click="closeSidebar">
+          <div><i class="bi bi-person-circle me-2 fs-3"></i></div> 
+          <div class="text-sm text-start">
+            <div> {{ user.name || 'User' }}</div>
+            <div class=" text-success">Collector</div>  
+          </div>
         </Link>
         <hr class="hr">
 
@@ -186,4 +190,5 @@ const user = usePage().props.auth?.user;
 .logo-container {
   cursor: pointer;
 }
+
 </style>

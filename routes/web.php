@@ -45,6 +45,7 @@ Route::middleware('auth')->group(function () {
 
 // admin 
 Route::get('/add-new-member', [AdminController::class, 'addNewMember'])->name('addNewMember');
+Route::get('/member/new', [AdminController::class, 'newlyRegistered'])->name('newlyRegistered');
 Route::delete('/delete-member/{id}', [MembersController::class, 'destroy'])->name('deleteMember');
 Route::post('/add-new-member-post', [AdminController::class, 'addMemberPost'])->name('addMemberPost');
 Route::post('/add-beneficiary', [AdminController::class, 'addBeneficiary'])->name('addBeneficiary');
@@ -59,6 +60,8 @@ Route::prefix('contribution')->name('contributions.')->middleware('auth')->group
     Route::get('/add-contributions-route', [ContributionController::class, 'add'])->name('add');
     Route::post('/add-contributions-post', [ContributionController::class, 'store'])->name('store');
     Route::get('/toggle-purok/{purok}/{deceasedId}', [ContributionController::class, 'toggleContributionPurok'])->name('togglePurok');
+    Route::get('/members-data', [ContributionController::class, 'getMembersData'])
+    ->name('members.data');
 });
 
 //reports
@@ -119,6 +122,8 @@ Route::prefix('collector')->name('collector.')->middleware('auth')->group(functi
     Route::get('/view-report-as-collector', [ReportForCollector::class, 'index'])->name('viewReportAsCollector');
     Route::get('/toggle-status-as-collector/{status}/{purok}', [ReportForCollector::class, 'toggleStatus'])->name('toggleStatus');
     Route::get('/toggle-purok-as-collector/{status}/{purok}', [ReportForCollector::class, 'togglePurok'])->name('togglePurok');
+    Route::get('/notification/has', [CollectorController::class, 'hasNotification'])->name('hasNotification');
+    Route::post('/notification/mark-as-read/{id}', [CollectorController::class, 'markAsRead'])->name('markAsRead');
 });
 Route::prefix('collector-contribution')->name('collectorContribution.')->middleware('auth')->group(function (){
     Route::get('/view-contribution-as-collector', [ContributionControllerForCollector::class, 'index'])->name('index');

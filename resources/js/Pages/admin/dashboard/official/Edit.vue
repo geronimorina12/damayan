@@ -46,7 +46,6 @@ function submit() {
     <Head title="Add Official" />
   <div class="main-container">
     <AdminLayout>
-    <HeaderComponent />
     <div class="container border-0 pt-2">
       <div class="card-body px-3 ">
         <h5 class=" fw-light mb-2">Edit {{ getOfficial.name }} info.</h5>
