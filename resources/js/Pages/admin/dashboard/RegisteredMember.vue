@@ -33,7 +33,7 @@ const deceasedMember = ref({})
 const showDeceasedModal = ref(false)
 const editMemberValue = ref({})
 
-// ✅ Watch members
+//  Watch members
 watch(
   () => props.members,
   (newMember) => {
@@ -42,7 +42,7 @@ watch(
   { immediate: true }
 )
 
-// ✅ Watch deceased
+//  Watch deceased
 watch(
   () => props.deceasedMember,
   (newData) => {
@@ -51,7 +51,7 @@ watch(
   { immediate: true }
 )
 
-// ✅ Computed for search
+//  Computed for search
 const filteredMembers = computed(() => {
   if (!searchQuery.value) return getMembers.value
   return getMembers.value.filter((member) => {
@@ -64,7 +64,7 @@ const filteredMembers = computed(() => {
   })
 })
 
-// ✅ Trash Member
+//  Trash Member
 const trashMember = (id) => {
   if (confirm('Are you sure you want to trash this member?')) {
     router.delete(route('deleteMember', { id }), {
@@ -76,7 +76,7 @@ const trashMember = (id) => {
   }
 }
 
-// ✅ Toggle Member Status
+//  Toggle Member Status
 const toggleMemberStatus = (member) => {
   const newStatus = member.status === 'active' ? 'inactive' : 'active'
   router.put(route('toggleMemberStatus', { id: member.id }), {
@@ -90,7 +90,7 @@ const toggleMemberStatus = (member) => {
   })
 }
 
-// ✅ Popup toggle
+//  Popup toggle
 const togglePopup = (event, memberId) => {
   if (showActionsPopup.value && activeMemberId.value === memberId) {
     showActionsPopup.value = false
@@ -122,7 +122,7 @@ const togglePopup = (event, memberId) => {
   })
 }
 
-// ✅ Close popup when clicking outside
+//  Close popup when clicking outside
 const closePopup = (event) => {
   if (showActionsPopup.value && event.target &&
       !event.target.closest('.actions-popup') &&
@@ -135,12 +135,12 @@ const closePopup = (event) => {
 onMounted(() => document.addEventListener('click', closePopup))
 onUnmounted(() => document.removeEventListener('click', closePopup))
 
-// ✅ Pagination
+//  Pagination
 const goToPage = (url) => {
   if (url) router.get(url, {}, { preserveScroll: true, preserveState: true })
 }
 
-// ✅ Custom deceased modal
+//  Custom deceased modal
 const isDead = (member) => {
   deceasedMember.value = member || null
   showDeceasedModal.value = true
@@ -263,6 +263,31 @@ const EditMemberFunc = (member) => {
       </div>
     </div>
 
+    <!-- ✅ Action Popup -->
+    <div
+      v-if="showActionsPopup"
+      class="actions-popup bg-white border rounded shadow-sm p-2"
+      :style="{ top: popupPosition.top, left: popupPosition.left, position: 'absolute' }"
+    >
+      <ul class="list-unstyled m-0">
+        <li>
+          <Link :href="route('viewMemberInfo', { id: activeMemberId })" class="dropdown-item">
+            <i class="bi bi-eye me-2"></i> View
+          </Link>
+        </li>
+        <li>
+          <button class="dropdown-item w-100 text-start" @click="EditMemberFunc(getMembers.find(m => m.id === activeMemberId))" data-bs-toggle="modal" data-bs-target="#editMember">
+            <i class="bi bi-pencil me-2"></i> Edit
+          </button>
+        </li>
+        <li>
+          <button class="dropdown-item w-100 text-start text-danger" @click="trashMember(activeMemberId)">
+            <i class="bi bi-trash me-2"></i> Delete
+          </button>
+        </li>
+      </ul>
+    </div>
+
     <!-- Edit Member Modal -->
     <div class="modal fade" id="editMember" tabindex="-1" aria-labelledby="editMemberLabel" aria-hidden="true">
       <div class="modal-dialog" style="max-width: 800px;">
@@ -272,7 +297,6 @@ const EditMemberFunc = (member) => {
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
-            <!--  Reactive data passed -->
             <EditMember :member="editMemberValue"/>
           </div>
         </div>
@@ -310,8 +334,21 @@ const EditMemberFunc = (member) => {
 
 .actions-popup {
   position: absolute;
-  z-index: 1000;
-  min-width: 150px;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  z-index: 2000;
+  min-width: 140px;
+  animation: fadeIn 0.2s ease;
+}
+.actions-popup ul li {
+  padding: 6px 10px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+.actions-popup ul li:hover {
+  background-color: #f8f9fa;
 }
 
 .pagination-controls {
