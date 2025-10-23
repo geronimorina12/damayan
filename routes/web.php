@@ -70,7 +70,7 @@ Route::prefix('reports')->name('reports.')->middleware('auth')->group(function (
     Route::get('/add-collector-route', [ReportController::class, 'addCollector'])->name('addCollector');
      Route::post('/add-collector', [ReportController::class, 'storeCollector'])->name('storeCollector');
 });
-
+    
 // Official
 Route::prefix('officials')->name('officials.')->middleware('auth')->group(function (){
     Route::get('/view-officials', [OfficialController::class, 'index'])->name('index');

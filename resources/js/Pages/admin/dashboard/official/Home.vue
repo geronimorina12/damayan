@@ -3,11 +3,14 @@ import { router, Head, Link } from '@inertiajs/vue3'
 import { defineProps, ref, watch } from 'vue'
 import AdminLayout from '@/Layouts/AdminLayout.vue'
 import Add from '@/Components/dashboard/admin/official/Add.vue'
+import Edit from '@/Components/dashboard/admin/official/Edit.vue'
 
 const props = defineProps({
   officials: Array,
 })
 let getOfficials = ref([]);
+let selectedOfficial  = ref({});
+
 watch(
 () => props.officials,
 (newData) => {
@@ -22,7 +25,8 @@ const toggleStatus = (official) => {
 }
 
 const editOfficial = (official) => {
-  router.get(route('officials.edit', {id: official}))
+  selectedOfficial .value = official;
+  console.log("official: ", selectedOfficial .value)
 }
 
 const deleteOfficial = (id) => {
@@ -88,7 +92,12 @@ const formatDate = (dateString) => {
                           </td>
                           <td class="actions-cell">
                             <div class="action-buttons">
-                              <button class="btn-action btn-edit" @click="editOfficial(official.id)" title="Edit">
+                              <button class="btn-action btn-edit" 
+                              @click="editOfficial(official)" 
+                              title="Edit"
+                              data-bs-toggle="modal" 
+                              data-bs-target="#editOfficial"
+                              >
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                   <path d="M11 4H4C3.46957 4 2.96086 4.21071 2.58579 4.58579C2.21071 4.96086 2 5.46957 2 6V20C2 20.5304 2.21071 21.0391 2.58579 21.4142C2.96086 21.7893 3.46957 22 4 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                                   <path d="M18.5 2.5C18.8978 2.10217 19.4374 1.87868 20 1.87868C20.5626 1.87868 21.1022 2.10217 21.5 2.5C21.8978 2.89782 22.1213 3.43739 22.1213 4C22.1213 4.56261 21.8978 5.10217 21.5 5.5L12 15L8 16L9 12L18.5 2.5Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -153,11 +162,28 @@ const formatDate = (dateString) => {
               <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-              <Add/>
+              <Add />
             </div>
           </div>
         </div>
       </div>
+
+       <!-- Edit Official Modal -->
+      <div class="modal fade" id="editOfficial" tabindex="-1" aria-labelledby="editOfficialLabel" aria-hidden="true">
+        <div class="modal-dialog modern-modal">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h2 class="modal-title">Edit Official</h2>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <Edit :official="selectedOfficial "/>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
     </div>
 </template>
 
