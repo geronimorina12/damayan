@@ -199,7 +199,6 @@ function closeModal() {
               <option value="secretary">Secretary</option>
               <option value="treasurer">Treasurer</option>
               <option value="auditor">Auditor</option>
-              <option value="purok_leader">Purok Leader</option>
             </select>
           </div>
 
@@ -250,8 +249,9 @@ function closeModal() {
             />
           </div>
 
-          <!-- Term Dates -->
-          <div v-if="!isCollector" class="mb-3">
+        <div class="d-flex justify-content-between gap-2">
+            <!-- Term Dates -->
+          <div v-if="!isCollector" class="w-50">
             <label for="term_start" class="form-label fw-semibold">Term Start</label>
             <input
               v-model="form.term_start"
@@ -266,7 +266,7 @@ function closeModal() {
             </div>
           </div>
 
-          <div v-if="!isCollector" class="mb-3">
+          <div v-if="!isCollector" class="mb-3 w-50">
             <label for="term_end" class="form-label fw-semibold">Term End</label>
             <input
               v-model="form.term_end"
@@ -281,6 +281,8 @@ function closeModal() {
             </div>
           </div>
 
+
+        </div>
           <!-- Active Status -->
           <div class="form-check form-switch mb-4">
             <input

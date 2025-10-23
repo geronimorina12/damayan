@@ -1,9 +1,5 @@
 <template>
   <div class="container mt-4">
-    <h4 class="mb-3 text-primary fw-bold d-flex align-items-center">
-      <i class="bi bi-person-lines-fill me-2"></i>
-      Newly Registered Member
-    </h4>
 
     <div v-if="loading" class="text-center my-5">
       <div class="spinner-border text-primary" role="status">

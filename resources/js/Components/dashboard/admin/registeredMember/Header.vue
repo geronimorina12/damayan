@@ -63,9 +63,17 @@ window.addEventListener('click', (e) => {
 
     <!-- Newly Created Member Modal -->
     <div id="newCreatedMemberModal" class="custom-modal" style="padding-top: 0;">
-      <div class="modal-content" style="min-width: 60%; height: auto;">
-        <div class="modal-header d-flex justify-content-end">
-          <button class="close-btn fs-3" @click="closeModal('newCreatedMemberModal')">&times;</button>
+
+      <div class="modal-content " style="min-width: 60%; height: auto;">
+        <div class="modal-header alig-items-center">
+
+                <div class="">
+                    <h4 class="mb-3 text-dark fw-bold d-flex align-items-center">
+                      Newly Registered Member
+                </h4>
+            </div>
+
+          <button class="close-btn2 fs-2" @click="closeModal('newCreatedMemberModal')">&times;</button>
         </div>
         <div class="modal-body">
           <NewlyCreated />
@@ -174,6 +182,9 @@ window.addEventListener('click', (e) => {
 }
 .close-btn:hover {
   color: #000;
+}
+.close-btn2{
+  transform: translateY(-20%);
 }
 @keyframes fadeIn {
   from { opacity: 0; transform: scale(0.95); }

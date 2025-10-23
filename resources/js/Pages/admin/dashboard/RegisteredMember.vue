@@ -150,7 +150,7 @@ const closeDeceasedModal = () => {
   showDeceasedModal.value = false
 }
 
-// ✅ Edit Member Modal Trigger
+//  Edit Member Modal Trigger
 const EditMemberFunc = (member) => {
   showActionsPopup.value = false
   editMemberValue.value = { ...member } // make it reactive and assign directly
@@ -197,16 +197,27 @@ const EditMemberFunc = (member) => {
                 <td>{{ member.age }}</td>
                 <td>{{ member.contact_number }}</td>
                 <td>{{ member.purok }}</td>
-                <td>
-                  <div class="form-check form-switch d-inline-flex justify-content-center">
-                    <input 
-                      class="form-check-input" 
-                      type="checkbox"
-                      :checked="member.status === 'active'"
-                      @click="toggleMemberStatus(member)" 
-                    />
-                  </div>
-                </td>
+
+                <td class="status-cell">
+  <div class="status-toggle">
+    <label class="toggle-switch">
+      <input
+        type="checkbox"
+        :checked="member.status === 'active'"
+        @change="toggleMemberStatus(member)"
+      >
+      <span class="toggle-slider"></span>
+    </label>
+    <span
+      class="status-label"
+      :class="member.status === 'active' ? 'active' : 'inactive'"
+    >
+      {{ member.status === 'active' ? 'Active' : 'Inactive' }}
+    </span>
+  </div>
+</td>
+
+
                 <td>
                   <div class="form-check form-switch d-inline-flex justify-content-center">
                     <input 
@@ -408,6 +419,228 @@ const EditMemberFunc = (member) => {
   padding: 20px;
   max-height: 70vh;
   overflow-y: auto;
+}
+
+
+.status-cell {
+  text-align: center;
+}
+
+.status-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 24px;
+}
+
+.toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #e5e7eb;
+  transition: .3s;
+  border-radius: 24px;
+}
+
+.toggle-slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: .3s;
+  border-radius: 50%;
+}
+
+input:checked + .toggle-slider {
+  background-color: #10b981;
+}
+
+input:checked + .toggle-slider:before {
+  transform: translateX(20px);
+}
+
+.status-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.status-label.active {
+  color: #10b981;
+}
+
+.status-label.inactive {
+  color: #ef4444;
+}
+
+.actions-cell {
+  text-align: center;
+}
+
+.action-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.btn-action {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.btn-edit {
+  color: #6b7280;
+}
+
+.btn-edit:hover {
+  background-color: #eff6ff;
+  color: #3b82f6;
+}
+
+.btn-delete {
+  color: #6b7280;
+}
+
+.btn-delete:hover {
+  background-color: #fef2f2;
+  color: #ef4444;
+}
+
+.empty-state {
+  padding: 4rem 2rem;
+  text-align: center;
+}
+
+.empty-content h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #374151;
+  margin: 1rem 0 0.5rem;
+}
+
+.empty-content p {
+  color: #6b7280;
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.footer-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  border-top: 1px solid #f3f4f6;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  border: none;
+  cursor: pointer;
+  font-size: 0.875rem;
+}
+
+.btn-secondary {
+  background-color: #f8fafc;
+  color: #374151;
+  border: 1px solid #e5e7eb;
+}
+
+.btn-secondary:hover {
+  background-color: #f1f5f9;
+  color: #1e293b;
+}
+
+.btn-primary {
+  background-color: #3b82f6;
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: #2563eb;
+}
+
+.modern-modal {
+  max-width: 700px;
+}
+
+.modern-modal .modal-content {
+  border-radius: 12px;
+  border: none;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.modern-modal .modal-header {
+  padding: 1.5rem 2rem;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.modern-modal .modal-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.modern-modal .modal-body {
+  padding: 2rem;
+}
+
+@media (max-width: 768px) {
+  .modern-container {
+    padding: 1rem;
+  }
+  
+  .footer-actions {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: stretch;
+  }
+  
+  .footer-actions .btn {
+    justify-content: center;
+  }
+  
+  .modern-table th,
+  .modern-table td {
+    padding: 0.75rem 1rem;
+  }
+  
+  .status-toggle {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
 }
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 @keyframes scaleUp { from { transform: scale(0.95); opacity: 0.8; } to { transform: scale(1); opacity: 1; } }

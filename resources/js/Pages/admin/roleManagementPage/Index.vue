@@ -108,9 +108,6 @@ const getUserAcess = (role, position) => {
                                 </tbody>
                             </table>
                         </div>
-                        <Link :href="route('role.add')" class="btn btn-primary float-end mt-2">
-                            Add User
-                        </Link>
                     </div>
                 </div>
                     <RoleAndPermissionTable :users="getUsers"/>
