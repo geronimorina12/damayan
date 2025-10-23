@@ -153,15 +153,14 @@ const filterData = (deceasedId) => {
                 <!-- Header -->
                 <div class="modern-header">
                     <div class="header-content">
-                        <h1 class="page-title">Reports Dashboard</h1>
-                        <p class="page-subtitle">View and manage contribution reports</p>
+                        <h5 class="page-title fw-light">Reports Dashboard</h5>
                     </div>
                     <div class="header-actions">
                         <button
                             class="btn btn-primary"
                             data-bs-toggle="modal"
                             data-bs-target="#viewReportModal"
-                        >
+                        >   
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M9 17H15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
                                 <path d="M9 13H15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
@@ -438,13 +437,13 @@ const filterData = (deceasedId) => {
 }
 
 .modern-header {
-    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
-    color: white;
+    /* background: #D4F3F9; */
+    color: #333;
     padding: 2rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    /* box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); */
 }
 
 .page-title {
@@ -462,7 +461,7 @@ const filterData = (deceasedId) => {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    background: rgba(255, 255, 255, 0.2);
+    background: #3b82f6;
     border: 1px solid rgba(255, 255, 255, 0.3);
     border-radius: 8px;
     padding: 0.75rem 1.5rem;
