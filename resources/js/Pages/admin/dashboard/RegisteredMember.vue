@@ -33,7 +33,7 @@ const deceasedMember = ref({})
 const showDeceasedModal = ref(false)
 const editMemberValue = ref({})
 
-//  Watch members
+// ✅ Watch members
 watch(
   () => props.members,
   (newMember) => {
@@ -42,7 +42,7 @@ watch(
   { immediate: true }
 )
 
-//  Watch deceased
+// ✅ Watch deceased
 watch(
   () => props.deceasedMember,
   (newData) => {
@@ -51,7 +51,7 @@ watch(
   { immediate: true }
 )
 
-//  Computed for search
+// ✅ Computed for search
 const filteredMembers = computed(() => {
   if (!searchQuery.value) return getMembers.value
   return getMembers.value.filter((member) => {
@@ -64,7 +64,7 @@ const filteredMembers = computed(() => {
   })
 })
 
-//  Trash Member
+// ✅ Trash Member
 const trashMember = (id) => {
   if (confirm('Are you sure you want to trash this member?')) {
     router.delete(route('deleteMember', { id }), {
@@ -76,7 +76,7 @@ const trashMember = (id) => {
   }
 }
 
-//  Toggle Member Status
+// ✅ Toggle Member Status
 const toggleMemberStatus = (member) => {
   const newStatus = member.status === 'active' ? 'inactive' : 'active'
   router.put(route('toggleMemberStatus', { id: member.id }), {
@@ -90,7 +90,7 @@ const toggleMemberStatus = (member) => {
   })
 }
 
-//  Popup toggle
+// ✅ Popup toggle
 const togglePopup = (event, memberId) => {
   if (showActionsPopup.value && activeMemberId.value === memberId) {
     showActionsPopup.value = false
@@ -122,7 +122,7 @@ const togglePopup = (event, memberId) => {
   })
 }
 
-//  Close popup when clicking outside
+// ✅ Close popup when clicking outside
 const closePopup = (event) => {
   if (showActionsPopup.value && event.target &&
       !event.target.closest('.actions-popup') &&
@@ -135,12 +135,12 @@ const closePopup = (event) => {
 onMounted(() => document.addEventListener('click', closePopup))
 onUnmounted(() => document.removeEventListener('click', closePopup))
 
-// Pagination
+// ✅ Pagination
 const goToPage = (url) => {
   if (url) router.get(url, {}, { preserveScroll: true, preserveState: true })
 }
 
-//  Custom deceased modal
+// ✅ Custom deceased modal
 const isDead = (member) => {
   deceasedMember.value = member || null
   showDeceasedModal.value = true
@@ -150,7 +150,7 @@ const closeDeceasedModal = () => {
   showDeceasedModal.value = false
 }
 
-//  Edit Member Modal Trigger
+// ✅ Edit Member Modal Trigger
 const EditMemberFunc = (member) => {
   showActionsPopup.value = false
   editMemberValue.value = { ...member } // make it reactive and assign directly
@@ -272,7 +272,7 @@ const EditMemberFunc = (member) => {
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
-            <!--  Reactive data passed -->
+            <!-- ✅ Reactive data passed -->
             <EditMember :member="editMemberValue"/>
           </div>
         </div>
