@@ -7,6 +7,8 @@ import MonthlyOverviewCard from '@/Components/dashboard/MonthlyOverviewCard.vue'
 import CurrentDeceased from '@/Components/dashboard/admin/charts/CurrentDeceased.vue';
 import DeceasedRecorded from '@/Components/dashboard/admin/charts/DeceasedRecorded.vue';
 import DashboardHeader from '@/Components/dashboard/admin/DashboardHeader.vue';
+import Contributions from '@/Components/dashboard/admin/charts/Contributions.vue';
+
 import { ref, defineProps, watch } from 'vue';
 const props = defineProps({
   currentMonthData: {
@@ -116,6 +118,9 @@ watch(
         </div>
       </div>
 
+      <div>
+        <Contributions />
+      </div>
       <div class="dashboard-container">
     <CurrentDeceased :data="getCurrentDeceased" />
     <DeceasedRecorded :records="getAllDeceased" />

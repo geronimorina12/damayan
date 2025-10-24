@@ -109,7 +109,7 @@ class DashboardController extends Controller
 
       if(Auth::user()->role === 'admin') {
 
-     $allDeceased = DeathReportModel::all();
+       $allDeceased = DeathReportModel::all();
         return Inertia::render('admin/dashboard/Home', [
           'currentMonthData' => $currentMonthData,
           'yearData' => $yearData,

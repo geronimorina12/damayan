@@ -193,6 +193,12 @@ public function toggleContributionPurok($purok, $deceasedId)
     }
 }
 
+   public function getContributions()
+    {
+        $contributions = ContributionModel::orderBy('payment_date', 'desc')->get();
+        return response()->json($contributions);
+    }
+
 private function sendAndLog(string $message, string $number, int $notificationId): void
     {
             Log::info("FAKE SMS (TEST MODE) to {$number} | Notification ID: {$notificationId} | Message: {$message}");
