@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ArchiveContributions;
 use App\Models\BeneficiaryModel;
 use App\Models\ContributionModel;
 use App\Models\memberModel;
@@ -43,7 +44,7 @@ class SmsNotificationController extends Controller
             'members' => memberModel::select('id', 'first_name', 'last_name')->get()->toArray(),
         ]);
     }
-        public function sendToAllSelected($type, $message, $deceased)
+        public function sendToAllSelected($type, $message, $deceased, $last)
         {
             $members = memberModel::select('id', 'first_name', 'last_name', 'age')->get();
             $users = User::select(['id', 'name'])
@@ -55,7 +56,8 @@ class SmsNotificationController extends Controller
                 'members' => $all,
                 'type' => $type,
                 'message' => $message,
-                'deceased' => $deceased
+                'deceased' => $deceased,
+                'last' => $last,
             ]);
         }
 
@@ -148,7 +150,16 @@ class SmsNotificationController extends Controller
                     'status' => "paid",
                     'deceased_id' => $request->deceasedId,
                 ]);
-
+                ArchiveContributions::create([
+                    'member_id' => $request->id,
+                    'amount' => 100,
+                    'payment_date' => now(),
+                    'updated_by' => Auth::id(),
+                    'collector' => $request->collector ?: "",
+                    'purok' => $normalizedPurok,
+                    'status' => "paid",
+                    'deceased_id' => $request->deceasedId,
+                ]);
                 $this->sendAndLog($request->message, $request->contact_number, $notification->id);
 
                 return redirect()->back()->with('success', 'Schedule contribution notifications sent.');

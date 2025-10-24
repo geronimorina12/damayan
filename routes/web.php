@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ActivityLogController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\ArchiveContribution;
 use App\Http\Controllers\ArchiveController;
 use App\Http\Controllers\CollectorController;
 use App\Http\Controllers\ContributionController;
@@ -62,7 +63,7 @@ Route::prefix('contribution')->name('contributions.')->middleware('auth')->group
     Route::get('/toggle-purok/{purok}/{deceasedId}', [ContributionController::class, 'toggleContributionPurok'])->name('togglePurok');
     Route::get('/members-data', [ContributionController::class, 'getMembersData'])
     ->name('members.data');
-    Route::get('/list', [ContributionController::class, 'getContributions'])
+    Route::get('/list', [ArchiveContribution::class, 'getContributions'])
     ->name('list');
 });
 

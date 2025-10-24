@@ -7,7 +7,7 @@ const props = defineProps({
   members: { type: Array, default: () => [] },
   type: { type: String, default: 'deathReport' },
   message: { type: String, default: '' },
-  deceased: {type: Number},
+  deceased: {type: String},
   last: {type: String}
 })
 
@@ -46,7 +46,6 @@ function sendToAllSelected() {
     message.value = 'Please select at least one member first.'
     return
   }
-
   const memberIds = selectedMembers.value.map(m => m.id)
 
   router.post(route(`smsSelectMember.${messageType.value}`), {

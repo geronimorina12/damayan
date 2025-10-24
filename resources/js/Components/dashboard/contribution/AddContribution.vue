@@ -9,6 +9,10 @@ const getCollectors = ref([]);
 const getUsers = ref([]);
 const getDeceasedMembersData = ref([]);
 
+// Alert state
+const showAlert = ref(false);
+const alertMessage = ref("");
+
 const form = useForm({
     member_id: "",
     amount: 100,
@@ -19,18 +23,16 @@ const form = useForm({
     deceased_id: "",
 });
 
-// Fetch all the members, users, and deceased members
+// Fetch members, users, deceased data
 const fetchMembersData = async () => {
     try {
         const response = await axios.get(route("contributions.members.data"));
         const { members, users, deceasedMembers } = response.data;
 
-        // Raw data
         getMembers.value = members || [];
         getUsers.value = users || [];
         getDeceasedMembersData.value = deceasedMembers || [];
 
-        // Build full names
         const memberFullNames = (members || []).map((m) => ({
             id: m.id,
             fullName: `${m.first_name} ${m.middle_name ?? ""} ${m.last_name}`
@@ -43,53 +45,64 @@ const fetchMembersData = async () => {
             fullName: u.name,
         }));
 
-        // Combine both
         getFullName.value = [...memberFullNames, ...userFullNames];
-
-        // Filter collectors
         getCollectors.value = (users || []).filter((u) => u.role === "collector");
     } catch (error) {
-        console.error("Error fetching members data:", error);
+        console.error(error);
     }
 };
 
-// Run fetch on mount
 onMounted(fetchMembersData);
 
-// Form submit
+// Submit form
 const submit = () => {
     form.post(route("contributions.store"), {
-        onSuccess: () => alert("Contribution created!"),
-        onError: (err) => console.log("An error occurred:", err),
+        preserveScroll: true,
+        onSuccess: () => {
+            alertMessage.value = "Contribution successfully created!";
+            showAlert.value = true;
+
+            // Auto-hide after 3 seconds
+            setTimeout(() => (showAlert.value = false), 3000);
+
+            // Reset form fields
+            form.reset();
+        },
     });
 };
 </script>
 
-
 <template>
     <div>
-         <div class="contri-container py-1">
+        <div class="contri-container py-1">
             <div class="row justify-content-center">
                 <div class="col-md-8">
-                    <div class="card rounded-4 shadow-none border-0 ">
-                        <div class="card-header text-center ">
+                    <div class="card rounded-4 shadow-none border-0">
+                        <div class="card-header text-center">
                             <h4 class="mb-0">Create Contribution</h4>
                         </div>
 
                         <div class="card-body p-4">
+
+                            <!--  Bootstrap Alert -->
+                            <div
+                                v-if="showAlert"
+                                class="alert alert-success text-center fw-semibold"
+                                role="alert"
+                            >
+                                {{ alertMessage }}
+                            </div>
+
                             <form @submit.prevent="submit">
-                                <!-- Member Name Dropdown -->
+                                <!-- Member Dropdown -->
                                 <div class="mb-3">
-                                    <label for="member_id" class="form-label">Member Name</label>
+                                    <label class="form-label">Member Name</label>
                                     <select
                                         v-model="form.member_id"
-                                        id="member_id"
                                         class="form-select"
                                         :class="{ 'is-invalid': form.errors.member_id }"
                                     >
-                                        <option disabled value="">
-                                            -- Select Member --
-                                        </option>
+                                        <option disabled value="">-- Select Member --</option>
                                         <option
                                             v-for="member in getFullName"
                                             :key="member.id"
@@ -103,14 +116,12 @@ const submit = () => {
                                     </div>
                                 </div>
 
-
                                 <!-- Payment Date -->
                                 <div class="mb-3">
-                                    <label for="payment_date" class="form-label">Payment Date</label>
+                                    <label class="form-label">Payment Date</label>
                                     <input
                                         v-model="form.payment_date"
                                         type="datetime-local"
-                                        id="payment_date"
                                         class="form-control"
                                         :class="{ 'is-invalid': form.errors.payment_date }"
                                     />
@@ -119,18 +130,15 @@ const submit = () => {
                                     </div>
                                 </div>
 
-                                <!-- Collector Dropdown (new placement after Payment Date) -->
+                                <!-- Collector -->
                                 <div class="mb-3">
-                                    <label for="collector" class="form-label">Collector</label>
+                                    <label class="form-label">Collector</label>
                                     <select
                                         v-model="form.collector"
-                                        id="collector"
                                         class="form-control"
                                         :class="{ 'is-invalid': form.errors.collector }"
                                     >
-                                        <option disabled value="">
-                                            -- Select Collector --
-                                        </option>
+                                        <option disabled value="">-- Select Collector --</option>
                                         <option
                                             v-for="collector in getCollectors"
                                             :key="collector.id"
@@ -144,10 +152,9 @@ const submit = () => {
                                     </div>
                                 </div>
 
-
                                 <!-- Purok -->
                                 <div class="mb-3">
-                                    <label for="purok" class="form-label">Purok</label>
+                                    <label class="form-label">Purok</label>
                                     <select v-model="form.purok" class="form-control">
                                         <option value="purok1">Purok 1</option>
                                         <option value="purok2">Purok 2</option>
@@ -156,9 +163,9 @@ const submit = () => {
                                     </select>
                                 </div>
 
-                                <!-- Select deceased member  -->
-                                 <div class="mb-3">
-                                    <label for="deceased_member" class="form-label">Select Deceased Member</label>
+                                <!-- Deceased Member -->
+                                <div class="mb-3">
+                                    <label class="form-label">Select Deceased Member</label>
                                     <select v-model="form.deceased_id" class="form-control">
                                         <option disabled value="">-- Select Deceased Member --</option>
                                         <option
@@ -171,16 +178,22 @@ const submit = () => {
                                     </select>
                                 </div>
 
-                                <!-- Submit Button -->
+                                <!-- Submit Button with Loader -->
                                 <div class="d-flex justify-content-end">
                                     <button
                                         type="submit"
-                                        class="btn btn-success px-4 rounded-pill"
+                                        class="btn btn-success px-4 rounded-pill d-flex align-items-center gap-2"
+                                        :disabled="form.processing"
                                     >
-                                        Submit
+                                        <span
+                                            v-if="form.processing"
+                                            class="spinner-border spinner-border-sm"
+                                        ></span>
+                                        {{ form.processing ? "Submitting..." : "Submit" }}
                                     </button>
                                 </div>
                             </form>
+
                         </div>
                     </div>
                 </div>

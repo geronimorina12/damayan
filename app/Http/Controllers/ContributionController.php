@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ArchiveContributions;
 use App\Models\ContributionModel;
 use App\Models\DeathReportModel;
 use App\Models\memberModel;
 use App\Models\User;
 use App\Services\SmsNotificationSender;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -153,6 +155,16 @@ public function toggleContributionPurok($purok, $deceasedId)
         'deceased_id' => $request->deceased_id,
     ]);
 
+     ArchiveContributions::create([
+        'member_id' => $request->member_id,
+        'amount' => $request->amount,
+        'payment_date' => $request->payment_date,
+        'updated_by' => Auth::id(),
+        'collector' => $request->collector ?: "",
+        'purok' => $request->purok,
+        'status' => $request->status,
+        'deceased_id' => $request->deceased_id,
+    ]);
     return redirect()->back()->with('success', 'Contribution created successfully.');
 }
   public function toggle($id, $purok)
@@ -193,11 +205,45 @@ public function toggleContributionPurok($purok, $deceasedId)
     }
 }
 
-   public function getContributions()
-    {
-        $contributions = ContributionModel::orderBy('payment_date', 'desc')->get();
-        return response()->json($contributions);
+public function sendReminderBeforeLastNight()
+{
+    $today = Carbon::today();
+
+    // Fetch reports where last_night is exactly 2 days ahead
+    $reports = DeathReportModel::whereDate('last_night', $today->copy()->addDays(2))
+        ->where('iscurrent', 1)
+        ->get();
+
+    if ($reports->isEmpty()) {
+        Log::info("No death reports found for reminder sending.");
+        return;
     }
+
+    // Fetch all members with a contact number
+    $members = MemberModel::whereNotNull('contact_number')
+        ->where('contact_number', '!=', '')
+        ->get();
+
+    if ($members->isEmpty()) {
+        Log::warning("No members with contact number available to send reminders.");
+        return;
+    }
+
+    foreach ($reports as $report) {
+
+        $formattedDate = Carbon::parse($report->last_night)->format('F d, Y');
+
+        foreach ($members as $member) {
+
+            $message = "Reminder: The Last Night viewing for {$report->deceased_name} "
+                     . "will be on {$formattedDate}. Please join us in prayer.";
+
+            $this->sendAndLog($message, $member->contact_number, $report->report_id);
+
+            Log::info("Reminder SMS queued | Member: {$member->id} | Report: {$report->report_id}");
+        }
+    }
+}
 
 private function sendAndLog(string $message, string $number, int $notificationId): void
     {

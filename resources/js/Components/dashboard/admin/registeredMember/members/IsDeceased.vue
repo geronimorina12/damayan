@@ -41,6 +41,7 @@ watch([lastNight, startOfContribution], ([last, start]) => {
 
 // Send reminders
 function sendReminders() {
+
   router.post(
     route("smsNotification.sendReminders"),
     { message: form.message },

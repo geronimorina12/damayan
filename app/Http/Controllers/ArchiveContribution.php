@@ -28,4 +28,11 @@ class ArchiveContribution extends Controller
             'message' => 'Archived contribution added successfully!'
         ], 201);
     }
+     public function getContributions()
+    {
+        $contributions = ArchiveContributions::orderBy('payment_date', 'desc')->get();
+        if($contributions){
+            return response()->json($contributions);
+        }
+    }
 }
