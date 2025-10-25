@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from "vue";
+import { ref, computed, defineModel } from "vue";
 import { router } from "@inertiajs/vue3";
 
 const props = defineProps({
@@ -20,6 +20,7 @@ const props = defineProps({
 // current report unique identifiers
 const currentReportId = ref(props.data.report_id ?? null);
 const currentMemberId = ref(props.data.member_id ?? null);
+const selectedDeceased = defineModel('deceased');
 
 // find exact index of the current report (use report_id because member_id may repeat)
 const currentIndex = computed(() =>
@@ -92,7 +93,7 @@ const nextName = () => {
   const nextMember = props.allDeceased[nextIdx];
   if (!nextMember) return;
 
-  console.log("Next member:", nextMember);
+  selectedDeceased.value = nextMember;
     router.get(
   route("filterContribution.toggle", { 
     id: nextMember.member_id,

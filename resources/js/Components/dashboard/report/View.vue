@@ -9,7 +9,7 @@ const selectedDeceasedName = ref(null);
 const deceasedName = ref("");
 const showDocument = ref(false);
 const contributions = ref([]);
-const pdfContent = ref(null); // ✅ Reference to content for PDF
+const pdfContent = ref(null); //  Reference to content for PDF
 
 const fetchContributions = async (id) => {
   try {
@@ -47,7 +47,7 @@ const totalAmount = computed(() => {
   }, 0);
 });
 
-// ✅ Download PDF Function
+//  Download PDF Function
 const downloadAsPDF = () => {
   const element = pdfContent.value;
   const options = {
@@ -83,7 +83,7 @@ const downloadAsPDF = () => {
   <!-- STEP 2: Display Document -->
   <div v-if="showDocument">
 
-    <!-- ✅ Download button (NOT included in PDF) -->
+    <!--  Download button (NOT included in PDF) -->
             <button @click="downloadAsPDF" class="download-btn" title="Download PDF">
         <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -102,7 +102,7 @@ const downloadAsPDF = () => {
         </button>
 
 
-    <!-- ✅ PDF Content only -->
+    <!--  PDF Content only -->
     <div ref="pdfContent" class="document-container">
       <div class="header">
         <div class="organization-name">BULAN P.R.O.T.E.C DAMAYAN FERERATION</div>

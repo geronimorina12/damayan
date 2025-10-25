@@ -4,6 +4,7 @@ import CollectorLayout from '@/Layouts/CollectorLayout.vue';
 import { defineProps, watch, ref, computed } from 'vue';
 import PurokComponentForCollector from '@/Components/dashboard/contribution/PurokComponentForCollector.vue';
 import ToggleContribution from '@/Components/dashboard/contribution/ToggleContribution.vue';
+import ViewAsCollector from '@/Components/dashboard/report/ViewAsCollector.vue';
 
 const props = defineProps({
   member: Array,
@@ -37,7 +38,6 @@ watch(() => props.collectors, (newData) => (getCollectors.value = newData), { im
 watch(() => props.paidMembersId, (newData) => (getPaidMembersId.value = newData), { immediate: true });
 watch(() => props.currentCollector, (newData) => {
   getCurrentCollector.value = newData;
-  console.log('current collector:', newData);
 }, { immediate: true });
 
 watch(
@@ -51,14 +51,13 @@ watch(
   () => props.currentDeceasedMember,
   (newData) => {
     getCurrentDeceasedMember.value = newData;
+    console.log("current deceased: ", getCurrentDeceasedMember.value)
   },
   { immediate: true }
 );
 
-// 🧭 SEARCH BAR (reactive)
 const searchQuery = ref('');
 
-// Computed filtered data based on search
 const filteredMembers = computed(() => {
   if (!searchQuery.value.trim()) {
     return getMember.value;
@@ -144,6 +143,16 @@ const unPaidFunc = (memberId) => {
     });
   }
 };
+const showReportModal = ref(false);
+
+const openReportModal = () => {
+  showReportModal.value = true;
+};
+
+const closeReportModal = () => {
+  showReportModal.value = false;
+};
+
 </script>
 
 <template>
@@ -173,9 +182,11 @@ const unPaidFunc = (memberId) => {
             :allDeceased="getCurrentDeceasedMembers" 
             :purok="getSelectedPurok"
             :data="getCurrentDeceasedMember"
+            v-model:deceased="getCurrentDeceasedMember"
           />
        
 
+          <button class="btn btn-dark view-report" @click="openReportModal">View Reports</button>
         <!-- Table Section -->
         <div class="table-wrapper mt-3" v-if="filteredMembers.length > 0">
           <div class="table-responsive" style="max-height: 600px; min-height: 800px; overflow-y: auto;">
@@ -266,6 +277,25 @@ const unPaidFunc = (memberId) => {
         </div>
       </div>
     </div>
+
+
+      <!-- Modal -->
+     <div 
+        v-if="showReportModal" 
+        class="custom-modal-overlay"
+        @click.self="closeReportModal"
+      >
+        <div class="custom-modal">
+          <button class="close-btn" @click="closeReportModal">×</button>
+
+          <!-- Mounts only when modal is open -->
+          <ViewAsCollector 
+            :deceased="getCurrentDeceasedMember"
+            :purok="getSelectedPurok"
+          />
+        </div>
+      </div>
+
   </CollectorLayout>
 </template>
 
@@ -292,5 +322,44 @@ const unPaidFunc = (memberId) => {
 }
 .search-container{
   min-width: 50%;
+}
+.custom-modal-overlay {
+  position: fixed;
+  height: 100vh;
+  overflow-y: scroll;
+  inset: 0;
+  background-color: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding-top: 10rem;
+  padding-bottom: 1rem;
+}
+
+.custom-modal {
+  background: white;
+  border-radius: 10px;
+  width: 70%;
+  max-width: 900px;
+  padding: 20px;
+  position: relative;
+  animation: fadeIn 0.2s ease-in-out;
+}
+
+.close-btn {
+  position: absolute;
+  top: 0;
+  right: 15px;
+  font-size: 20px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 2.5rem;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
 }
 </style>
