@@ -6,6 +6,7 @@ import ContributionReportForAdmin from "@/Components/dashboard/report/Contributi
 import RecentContributionForAdmin from "@/Components/dashboard/report/RecentContributionForAdmin.vue";
 import ReportHomeButton from "@/Components/dashboard/report/ReportHomeButton.vue";
 import AddCollector from "@/Components/dashboard/report/AddCollector.vue";
+import View from "@/Components/dashboard/report/View.vue";
 
 const props = defineProps({
     contributions: {
@@ -221,8 +222,6 @@ const filterData = (deceasedId) => {
                         <div class="modal-content modern-modal-content">
                             <div class="modal-header modern-modal-header">
                                 <div class="header-content">
-                                    <h2 class="modal-title">Generate Report</h2>
-                                    <p class="modal-subtitle">Select a deceased person to view their contribution report</p>
                                 </div>
                                 <button
                                     type="button"
@@ -232,161 +231,8 @@ const filterData = (deceasedId) => {
                                 ></button>
                             </div>
 
-                            <div class="modal-body modern-modal-body">
-                                <div class="selection-section">
-                                    <label class="form-label">Select Deceased Person</label>
-                                    <select
-                                        class="modern-select"
-                                        v-model="selectedDeceased"
-                                        @change="filterData(selectedDeceased.member_id)"
-                                    >
-                                        <option value="" disabled>
-                                            Select Deceased
-                                        </option>
-                                        <option
-                                            v-for="data in getDeathReports"
-                                            :key="data.id"
-                                            :value="data"
-                                        >
-                                            {{ data.deceased_name }} -
-                                            {{ formatDate(data.date_of_death) }}
-                                        </option>
-                                    </select>
-                                </div>
-
-                                <!-- PDF export area -->
-                                <div class="pdf-export-area" id="report-pdf-content">
-                                    <div class="pdf-header">
-                                        <div class="organization-info">
-                                            <h1 class="org-name">Protect Damayan</h1>
-                                            <p class="org-subtitle">Mutual Aid Society</p>
-                                        </div>
-                                        <div class="report-title-section">
-                                            <h2 class="report-title">Contribution Report</h2>
-                                            <p class="report-date">Generated on {{ formatDate(new Date()) }}</p>
-                                        </div>
-                                    </div>
-
-                                    <div class="deceased-info">
-                                        <div class="deceased-name">
-                                            {{ selectedDeceased != null
-                                                ? selectedDeceased.deceased_name
-                                                : deathReports[deathReports.length - 1]?.deceased_name || 'No deceased selected'
-                                            }}
-                                        </div>
-                                        <div class="deceased-date">
-                                            Date of Death: {{
-                                                selectedDeceased != null
-                                                    ? formatDate(selectedDeceased.date_of_death)
-                                                    : deathReports[deathReports.length - 1] 
-                                                        ? formatDate(deathReports[deathReports.length - 1].date_of_death)
-                                                        : 'N/A'
-                                            }}
-                                        </div>
-                                    </div>
-
-                                    <div class="contributions-section">
-                                        <h3 class="section-title">List of Contributions</h3>
-                                        
-                                        <div v-if="getMemberContributions.length !== 0">
-                                            <div class="modern-table-container">
-                                                <table class="modern-pdf-table">
-                                                    <thead>
-                                                        <tr>
-                                                            <th class="text-center">#</th>
-                                                            <th>Contributor Name</th>
-                                                            <th>Purok</th>
-                                                            <th>Status</th>
-                                                            <th class="text-end">Amount</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                        <tr
-                                                            v-for="(data, index) in getMemberContributions"
-                                                            :key="data.id"
-                                                        >
-                                                            <td class="text-center">{{ index + 1 }}</td>
-                                                            <td>
-                                                                {{
-                                                                    data.member_contribution?.first_name || 'N/A'
-                                                                }}
-                                                                {{
-                                                                    data.member_contribution?.last_name || ''
-                                                                }}
-                                                            </td>
-                                                            <td>{{ data.purok }}</td>
-                                                            <td>
-                                                                <span class="status-badge" :class="data.status.toLowerCase()">
-                                                                    {{ data.status }}
-                                                                </span>
-                                                            </td>
-                                                            <td class="text-end">₱{{ Math.floor(data.amount) }}</td>
-                                                        </tr>
-                                                    </tbody>
-                                                    <tfoot>
-                                                        <tr class="total-row">
-                                                            <td colspan="4" class="text-end total-label">Total Amount:</td>
-                                                            <td class="text-end total-amount">₱{{ totalAmount }}</td>
-                                                        </tr>
-                                                    </tfoot>
-                                                </table>
-                                            </div>
-                                        </div>
-
-                                        <div class="empty-state" v-else>
-                                            <div class="empty-icon">
-                                                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                    <path d="M9 17H15" stroke="#6B7280" stroke-width="2" stroke-linecap="round"/>
-                                                    <path d="M9 13H15" stroke="#6B7280" stroke-width="2" stroke-linecap="round"/>
-                                                    <path d="M9 9H13" stroke="#6B7280" stroke-width="2" stroke-linecap="round"/>
-                                                    <path d="M3 5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H19C19.5304 3 20.0391 3.21071 20.4142 3.58579C20.7893 3.96086 21 4.46957 21 5V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V5Z" stroke="#6B7280" stroke-width="2"/>
-                                                </svg>
-                                            </div>
-                                            <h4>No Contributions Found</h4>
-                                            <p>There are no contributions recorded for this deceased person.</p>
-                                        </div>
-                                    </div>
-
-                                    <div class="signature-section">
-                                        <div class="signature-line"></div>
-                                        <div class="president-name">{{ president }}</div>
-                                        <div class="signature-label">President, Protect Damayan</div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Footer -->
-                            <div class="modal-footer modern-modal-footer">
-                                <button
-                                    type="button"
-                                    class="btn btn-secondary"
-                                    data-bs-dismiss="modal"
-                                >
-                                    Close
-                                </button>
-                                <button
-                                    type="button"
-                                    class="btn btn-primary"
-                                    @click="downloadPDF"
-                                    :disabled="isDownloading || getMemberContributions.length === 0"
-                                >
-                                    <span
-                                        v-if="isDownloading"
-                                        class="spinner-border spinner-border-sm me-2"
-                                        role="status"
-                                        aria-hidden="true"
-                                    ></span>
-                                    <svg v-else width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="me-2">
-                                        <path d="M12 16L12 4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                                        <path d="M8 8L12 4L16 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                        <path d="M16 12V18C16 18.5304 15.7893 19.0391 15.4142 19.4142C15.0391 19.7893 14.5304 20 14 20H10C9.46957 20 8.96086 19.7893 8.58579 19.4142C8.21071 19.0391 8 18.5304 8 18V12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                                    </svg>
-                                    {{
-                                        isDownloading
-                                            ? "Downloading..."
-                                            : "Download as PDF"
-                                    }}
-                                </button>
+                            <div class="modal-body">
+                                <View />
                             </div>
                         </div>
                     </div>

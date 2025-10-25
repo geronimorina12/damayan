@@ -72,6 +72,8 @@ Route::prefix('reports')->name('reports.')->middleware('auth')->group(function (
     Route::get('/view-reports', [ReportController::class, 'index'])->name('index');
     Route::get('/add-collector-route', [ReportController::class, 'addCollector'])->name('addCollector');
      Route::post('/add-collector', [ReportController::class, 'storeCollector'])->name('storeCollector');
+    Route::get('/deceased', [ReportController::class, 'getDeceased'])->name('deceased');
+    Route::get('/contributions/{id}', [ReportController::class, 'getContributions'])->name('contributions');
 });
     
 // Official

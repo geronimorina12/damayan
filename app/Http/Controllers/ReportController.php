@@ -122,5 +122,40 @@ class ReportController extends Controller
         
         return redirect()->back()->with('success', 'Collector added successfully!');
     }
+        public function getDeceased()
+        {
+            try {
+                $deceased = DeathReportModel::select('member_id', 'deceased_name')->get();
+
+                return response()->json([
+                    'success' => true,
+                    'deceased' => $deceased
+                ], 200); 
+            } catch (\Exception $e) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to fetch deceased records.',
+                    'error' => $e->getMessage()
+                ], 500); 
+            }
+        }
+
+        public function getContributions($id)
+        {
+            try {
+                $contributions = ContributionModel::where('deceased_id', $id)
+                ->with('memberContribution')
+                ->get();
+
+                return response()->json([
+                    'contributions' => $contributions
+                ], 200);
+            } catch (\Exception $e) {
+                return response()->json([
+                    'message' => 'Failed to fetch contributions.',
+                    'error' => $e->getMessage()
+                ], 500);
+            }
+        }
 
 }
