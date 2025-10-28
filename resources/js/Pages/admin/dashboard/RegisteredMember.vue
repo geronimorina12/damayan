@@ -137,8 +137,9 @@ onUnmounted(() => document.removeEventListener('click', closePopup))
 
 //  Pagination
 const goToPage = (url) => {
-  if (url) router.get(url, {}, { preserveScroll: true, preserveState: true })
+  if (url) router.visit(url)
 }
+
 
 //  Custom deceased modal
 const isDead = (member) => {
@@ -155,6 +156,33 @@ const EditMemberFunc = (member) => {
   showActionsPopup.value = false
   editMemberValue.value = { ...member } // make it reactive and assign directly
 }
+const searchResult = ref(null)
+const searching = ref(false)
+const searchError = ref("")
+
+watch(searchQuery, async (newQuery) => {
+  if (!newQuery) {
+    searchResult.value = null
+    searchError.value = ""
+    return
+  }
+
+  searching.value = true
+  try {
+    const response = await axios.get(route('members.search'), { params: { query: newQuery } })
+    searchResult.value = response.data
+    searchError.value = ""
+  } catch (error) {
+    searchResult.value = null
+    searchError.value = error.response?.data?.message || "No member found"
+  } finally {
+    searching.value = false
+  }
+})
+const searchPage = (page) => {
+  router.visit(route('members.searchPage') + `?page=${page}`)
+}
+
 </script>
 
 <template>
@@ -166,13 +194,36 @@ const EditMemberFunc = (member) => {
 
       <div class="container table-container">
         <div class="mb-3">
-          <input 
-            type="text" 
-            class="form-control w-50" 
-            placeholder="Search members by name, contact, or purok..." 
-            v-model="searchQuery"
-          />
-        </div>
+  <!-- Always visible search box -->
+  <input 
+    type="text" 
+    class="form-control w-50"
+    placeholder="Search members by name, contact, or purok..." 
+    v-model="searchQuery"
+  />
+
+  <!-- Search status messages -->
+  <div v-if="searching" class="text-muted mt-2">Searching...</div>
+
+  <div v-else-if="searchResult" class="alert alert-success mt-2">
+    <strong>Found:</strong> {{ searchResult.member.first_name }} {{ searchResult.member.last_name }} 
+    <br>
+    <small>Appears on page: {{ searchResult.page }}</small>
+  <button
+  class="btn btn-sm btn-primary ms-2"
+  @click="searchPage(searchResult.page)"
+>
+  Go to Page {{ searchResult.page }}
+</button>
+
+
+  </div>
+
+  <div v-else-if="searchError" class="alert alert-warning mt-2">
+    {{ searchError }}
+  </div>
+</div>
+
 
         <div class="table-responsive">
           <table class="table table-bordered align-middle text-center">
@@ -274,7 +325,7 @@ const EditMemberFunc = (member) => {
       </div>
     </div>
 
-    <!-- ✅ Action Popup -->
+    <!--  Action Popup -->
     <div
       v-if="showActionsPopup"
       class="actions-popup bg-white border rounded shadow-sm p-2"

@@ -37,6 +37,9 @@ use Inertia\Inertia;
 
 Route::get('/dashboard', [DashboardController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard');
 Route::get('/registered-member', [DashboardController::class, 'registeredMember'])->name('members.registered');
+Route::get('/members/search', [DashboardController::class, 'search'])->name('members.search');
+Route::get('/members/search-page', [DashboardController::class, 'searchPage'])
+    ->name('members.searchPage');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

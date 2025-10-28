@@ -137,4 +137,45 @@ class DashboardController extends Controller
         'deceasedMember' => $deceasedMember,
       ]);
     }
+    public function searchPage(Request $request)
+{
+    $page = $request->query('page', 1);
+
+    $members = memberModel::orderBy('first_name', 'asc')->paginate(10, ['*'], 'page', $page);
+
+    $deceasedMember = DeathReportModel::select('member_id', 'deceased_name')->get();
+
+    return Inertia::render('admin/dashboard/RegisteredMember', [
+        'members' => $members,
+        'deceasedMember' => $deceasedMember,
+    ]);
+}
+
+    public function search(Request $request)
+    {
+        $query = $request->query('query');
+
+    $member = memberModel::whereRaw("CONCAT(first_name, ' ', middle_name, ' ', last_name) LIKE ?", ["%{$query}%"])
+        ->orWhere('contact_number', 'like', "%{$query}%")
+        ->orWhere('purok', 'like', "%{$query}%")
+        ->orderBy('first_name', 'asc')
+        ->first();
+
+    if (!$member) {
+        return response()->json(['message' => 'No member found'], 404);
+    }
+
+    $perPage = 10;
+
+    $position = memberModel::where('first_name', '<', $member->first_name)
+        ->count();
+
+    $page = intval(floor($position / $perPage)) + 1;
+
+    return response()->json([
+        'member' => $member,
+        'page' => $page
+    ]);
+    }
+
 }

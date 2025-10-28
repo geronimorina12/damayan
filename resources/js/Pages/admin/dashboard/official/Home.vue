@@ -52,7 +52,7 @@ const formatDate = (dateString) => {
             <div class="modern-container">
               <div class="header-section">
                 <h1 class="page-title">Protect Damayan Officials</h1>
-                <p class="page-subtitle">Manage organization officials and their information</p>
+                <!-- <p class="page-subtitle">Manage organization officials and their information</p> -->
               </div>
               
               <div class="content-wrapper">

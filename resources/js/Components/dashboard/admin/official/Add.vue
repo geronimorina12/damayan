@@ -217,18 +217,18 @@ function closeModal() {
 
           <!-- Collector Email & Password -->
           <div v-if="isCollector" class="mb-3">
-            <label for="email" class="form-label fw-semibold">Collector Email</label>
+            <label for="email" class="form-label fw-semibold"> Email</label>
             <input
               v-model="form.email"
               type="email"
               id="email"
               class="form-control"
-              placeholder="Enter collector email"
+              placeholder="juan45@gmail.com"
             />
           </div>
 
           <div v-if="isCollector" class="mb-3">
-            <label for="email" class="form-label fw-semibold">Collector password</label>
+            <label for="email" class="form-label fw-semibold"> password</label>
             <input
               v-model="form.password"
               type="password"
