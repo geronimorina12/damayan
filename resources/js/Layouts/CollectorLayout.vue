@@ -34,7 +34,7 @@ const sidebarStyles = computed(() => {
       position: 'absolute',
       top: 0,
       left: toggleSidebar.value ? '-100%' : '0%',
-      width: '50%',
+      width: '70%',
       height: '100vh',
       zIndex: 999,
       transition: 'left 0.3s ease-in-out',

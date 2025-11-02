@@ -191,14 +191,18 @@ const searchPage = (page) => router.visit(route('members.searchPage') + `?page=$
                   </div>
                 </td>
 
-                <td>
-                  <div class="form-check form-switch d-inline-flex justify-content-center">
-                    <input 
-                      class="form-check-input" 
-                      type="checkbox"
-                      :checked="getDeceasedMember.some(d => d.member_id === member.id)"
-                      @click="isDead(member)"
-                    />
+                 <td class="status-cell">
+                  <div class="status-toggle">
+                    <label class="toggle-switch">
+                      <input
+                        type="checkbox"
+                        :checked="getDeceasedMember.some(d => d.member_id === member.id)"
+                       @click="isDead(member)"
+                      >
+                      <span class="toggle-slider"></span>
+                    </label>
+                    <span class="status-label" :class="member.status === 'active' ? 'active' : 'inactive'">
+                    </span>
                   </div>
                 </td>
 
