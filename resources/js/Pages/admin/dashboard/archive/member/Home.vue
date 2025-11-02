@@ -102,7 +102,10 @@ const undoMember = (id) => {
            </div>
 
            <div>
-            <Link :href="route('archive.viewDeceasedMember')" class="btn btn-dark">View Deceased Member</Link>
+            <Link :href="route('archive.viewDeceasedMember')" class="btn btn-dark">
+            <span class="d-none d-md-none d-lg-inline">View Deceased Member</span>
+            <i class="bi bi-eye d-inline d-md-inline d-lg-none"></i>
+            </Link>
            </div>
      </div>
 

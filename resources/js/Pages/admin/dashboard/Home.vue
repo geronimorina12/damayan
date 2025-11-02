@@ -94,11 +94,6 @@ watch(
         <Head title="Dashboard" />
         <div class="container-fluid mx-0 px-0 home-container">
             <h2 class="fw-normal fs-5 my-4 ms-3">Analytics Dashboard</h2>
-
-            <DashboardHeader 
-            :data="getCurrentDeceasedMember"
-            :allDeceased="getAllDeceased"
-            />
              <div class="row g-4">
             <!-- Bar Chart -->
             <div class="col-md-8 responsive-card">

@@ -19,13 +19,26 @@ const updateChart = () => {
 
   const monthlyData = Array(12).fill(0);
 
-  props.records.forEach(r => {
+  props.records.forEach((r) => {
     const month = new Date(r.date_of_death).getMonth();
     monthlyData[month]++;
   });
 
+  // Limit and truncate chart title
+  const titleText = 'Count Of Deceased Members Recorded In This System';
+  const maxTitleLength = 35;
+  const shortTitle = titleText.length > maxTitleLength ? titleText.slice(0, maxTitleLength) + '...' : titleText;
+
   chartInstance.setOption({
-    title: { text: 'Count Of Deceased Members Recorded In This System', left: 'center' },
+    title: {
+      text: shortTitle,
+      left: 'center',
+      textStyle: {
+        fontSize: 16, // 1rem ≈ 16px
+        overflow: 'truncate',
+        width: 250, // controls max width before truncating
+      },
+    },
     tooltip: { trigger: 'axis' },
     xAxis: { type: 'category', data: monthLabels },
     yAxis: { type: 'value', minInterval: 1 },
@@ -75,7 +88,8 @@ onUnmounted(() => {
   <div>
     <div class="d-flex justify-content-end view-all-btn me-2">
       <button type="button" class="btn btn-primary view-all-btn" data-bs-toggle="modal" data-bs-target="#viewAll">
-        View All
+        <span class="d-none d-sm-none d-lg-block">View All</span>
+        <span class="d-block d-sm-block d-lg-none bi bi-eye"></span>
       </button>
     </div>
 

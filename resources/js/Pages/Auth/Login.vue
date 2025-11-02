@@ -6,7 +6,9 @@ import InputLabel from '@/Components/InputLabel.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
+import { ref } from 'vue';
 import { toggleLoginButton } from '@/piniaStore/ToggleLoginButtonDisable';
+
 defineProps({
     canResetPassword: {
         type: Boolean,
@@ -24,6 +26,12 @@ const form = useForm({
     remember: false,
 });
 
+const showPassword = ref(false);
+
+const togglePassword = () => {
+    showPassword.value = !showPassword.value;
+};
+
 const submit = () => {
     form.post(route('login.store'), {
         onFinish: () => form.reset('password'),
@@ -35,12 +43,13 @@ const submit = () => {
     <Head title="Log in" />
 
     <div class="main-container d-flex align-items-center justify-content-center">
-        <div class="card p-4 " style="width: 100%; max-width: 400px;">
+        <div class="card p-4" style="width: 100%; max-width: 400px;">
             <div class="text-center mb-4">
                 <img src="../../../images/logo1.png" alt="Logo" class="logo" />
             </div>
 
             <form @submit.prevent="submit" class="form p-3">
+                <!-- Email -->
                 <div class="mb-3">
                     <InputLabel for="email" value="Email" />
                     <TextInput
@@ -55,29 +64,43 @@ const submit = () => {
                     <InputError class="text-danger small mt-1" :message="form.errors.email" />
                 </div>
 
-                <div class="mb-3">
+                <!-- Password with toggle -->
+                <div class="mb-3 position-relative">
                     <InputLabel for="password" value="Password" />
-                    <TextInput
-                        id="password"
-                        type="password"
-                        class="form-control"
-                        v-model="form.password"
-                        required
-                        autocomplete="current-password"
-                    />
+                    <div class="input-group">
+                        <input
+                            :type="showPassword ? 'text' : 'password'"
+                            id="password"
+                            class="form-control"
+                            v-model="form.password"
+                            required
+                            autocomplete="current-password"
+                        />
+                        <span
+                            class="input-group-text bg-white border-start-0"
+                            role="button"
+                            @click="togglePassword"
+                        >
+                            <i
+                                :class="showPassword ? 'bi bi-eye-slash' : 'bi bi-eye'"
+                            ></i>
+                        </span>
+                    </div>
                     <InputError class="text-danger small mt-1" :message="form.errors.password" />
                 </div>
 
+                <!-- Button -->
                 <div class="d-grid mb-3">
                     <PrimaryButton
                         class="btn btn-dark py-2"
-                        :class="{ 'disabled': form.processing || useToggleButton.attemptError == true}"
+                        :class="{ 'disabled': form.processing || useToggleButton.attemptError == true }"
                         :disabled="form.processing"
                     >
                         Sign in
                     </PrimaryButton>
                 </div>
 
+                <!-- Forgot password -->
                 <div class="text-center">
                     <Link
                         v-if="canResetPassword"
@@ -112,8 +135,8 @@ const submit = () => {
     margin: auto;
     object-fit: contain;
 }
-.form{
+
+.form {
     background: #7FEAFE;
 }
 </style>
-

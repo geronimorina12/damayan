@@ -93,10 +93,10 @@ watch(
     <div class="container-fluid mx-0 px-0 home-container">
       <h2 class="fw-normal fs-5 my-4 ps-3">Analytics Dashboard</h2>
 
-        <DashboardHeader 
+        <!-- <DashboardHeader 
             :data="getCurrentDeceasedMember"
             :allDeceased="getCurrentDeceasedMembers"
-            />
+            /> -->
 
       <div class="row g-4">
         <!-- Bar Chart -->

@@ -87,7 +87,8 @@ const toggleStatus = (status) => {
           <tr>
             <th class="bg-light">ID</th>
             <th class="bg-light">NAME</th>
-            <th class="bg-light">CONTACT NO.</th>
+            <th class="bg-light">CONTACT 
+            </th>
             <th class="bg-light">PUROK</th>
             <th class="bg-light">STATUS</th>
           </tr>

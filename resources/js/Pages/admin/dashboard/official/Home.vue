@@ -51,7 +51,7 @@ const formatDate = (dateString) => {
         <AdminLayout>
             <div class="modern-container">
               <div class="header-section">
-                <h1 class="page-title">Protect Damayan Officials</h1>
+                <h1 class="page-title">Protec Damayan Officials</h1>
                 <!-- <p class="page-subtitle">Manage organization officials and their information</p> -->
               </div>
               
@@ -70,8 +70,8 @@ const formatDate = (dateString) => {
                         </tr>
                       </thead>
                       <tbody>
-                        <tr v-for="official in getOfficials" :key="official.id">
-                          <td class="id-cell">{{ official.id }}</td>
+                        <tr v-for="(official, index) in getOfficials" :key="official.id">
+                          <td class="id-cell">{{ index +1  }}</td>
                           <td class="name-cell">{{ official.name }}</td>
                           <td class="position-cell">{{ official.position }}</td>
                           <td class="term-cell">{{ formatDate(official.term_start) }} - {{ formatDate(official.term_end) }}</td>

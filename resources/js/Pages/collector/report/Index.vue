@@ -63,7 +63,7 @@ const getMembersCount = computed(() => getMembers.value.length);
         <CollectorLayout>
             <div class="head container">
                 <h5 class="mb-0">Report</h5>
-                <p>Contribution Report</p>
+                <p class="d-none d-lg-block">Contribution Report</p>
             </div>
 
             <div class="purok-container container-fluid d-flex justify-content-end align-items-center">

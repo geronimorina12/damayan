@@ -24,7 +24,10 @@ window.addEventListener('click', (e) => {
   <div>
     <div class="container-fluid d-flex flex-row justify-content-between align-items-center mb-2">
       <div>
-        <h5 class="ms-3 fw-light">Registered Members</h5>
+        <h5 class="ms-3 fw-light">
+          <span class="d-none d-sm-none d-lg-inline-block me-2">Registered</span>
+          <span>Members</span>
+        </h5>
       </div>
       <div>
         <!-- Add Member Button -->

@@ -95,7 +95,7 @@ onMounted(fetchContributions);
 </template>
 
 <style scoped>
-/* ✅ Exact styling from your original component */
+/*  Exact styling from your original component */
 .table-card {
   flex: 1;
   min-width: 350px;

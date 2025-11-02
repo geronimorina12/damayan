@@ -69,7 +69,10 @@ const goToPage = (url) => {
   <CollectorLayout>
     <div class="main-section bg-light">
       <div>
-        <h5 class="mb-3 ms-3 fw-light">Registered Members</h5>
+        <h5 class="ms-3 fw-light">
+          <span class="d-none d-sm-none d-lg-inline-block me-2">Registered</span>
+          <span>Members</span>
+        </h5>
       </div>
 
       <!-- 🔍 Search -->

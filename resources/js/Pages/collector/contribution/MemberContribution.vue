@@ -160,8 +160,8 @@ const closeReportModal = () => {
   <CollectorLayout>
     <div class="container main-container">
       <div class="bg-light p-2 pt-0">
-       <div class="container-fluid d-flex justify-content-between align-items-center px-0">
-         <div>
+       <div class="container-fluid d-flex justify-content-between align-items-center px-0 header-container">
+         <div class="page-title">
           <h6 class="mt-1 ms-2 fs-3">Payment Contribution</h6>
          </div>
          <div class="mt-3 mb-3 search-container">
@@ -178,18 +178,22 @@ const closeReportModal = () => {
         :activePurok="getSelectedPurok"
         :deceasedId="getCurrentDeceasedMember.member_id"
         />
-       <ToggleContribution 
+        <div class="mt-5">
+          <ToggleContribution 
             :allDeceased="getCurrentDeceasedMembers" 
             :purok="getSelectedPurok"
             :data="getCurrentDeceasedMember"
             v-model:deceased="getCurrentDeceasedMember"
-          />
+        />
+        </div>
        
-
+        <div class="action-buttons">
           <button class="btn btn-dark view-report" @click="openReportModal">View Reports</button>
-        <!-- Table Section -->
-        <div class="table-wrapper mt-3" v-if="filteredMembers.length > 0">
-          <div class="table-responsive" style="max-height: 600px; min-height: 800px; overflow-y: auto;">
+        </div>
+
+        <!-- Desktop Table View -->
+        <div class="table-wrapper mt-3 desktop-view" v-if="filteredMembers.length > 0">
+          <div class="table-responsive">
             <table class="table table-bordered table-hover align-middle text-center mb-0">
               <thead class="table-light">
                 <tr>
@@ -230,6 +234,50 @@ const closeReportModal = () => {
                 </tr>
               </tbody>
             </table>
+          </div>
+        </div>
+
+        <!-- Mobile Card View -->
+        <div class="mobile-view" v-if="filteredMembers.length > 0">
+          <div class="mobile-cards-container">
+            <div class="mobile-card" v-for="(mem, index) in filteredMembers" :key="index">
+              <div class="mobile-card-header">
+                <div class="mobile-member-id">ID: {{ mem?.id }}</div>
+                <div class="mobile-purok">{{ mem?.purok || 'N/A' }}</div>
+              </div>
+              
+              <div class="mobile-card-body">
+                <div class="mobile-field">
+                  <label>Name:</label>
+                  <span class="mobile-value">{{ mem?.first_name }} {{ mem?.middle_name }} {{ mem?.last_name }}</span>
+                </div>
+                
+                <div class="mobile-field">
+                  <label>Contact:</label>
+                  <span class="mobile-value">{{ mem?.contact_number || 'undefined' }}</span>
+                </div>
+                
+                <div class="mobile-actions">
+                  <button
+                    v-if="!(getPaidMembersId || []).includes(mem?.id)"
+                    class="btn btn-danger btn-sm mobile-pay-btn"
+                    @click="preparePayment(mem.id, mem.purok, mem.contact_number)"
+                    title="Mark member as paid"
+                    :class="{ disabled: mem.purok.slice(-1) !== getCurrentCollector?.purok }"
+                  >
+                    Mark as Paid
+                  </button>
+                  <button
+                    v-else
+                    class="btn btn-success btn-sm mobile-paid-btn"
+                    @click="unPaidFunc(mem.id)"
+                    title="Mark member as unpaid"
+                  >
+                    <i class="bi bi-check-lg"></i> Paid
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -278,24 +326,20 @@ const closeReportModal = () => {
       </div>
     </div>
 
-
-      <!-- Modal -->
-     <div 
-        v-if="showReportModal" 
-        class="custom-modal-overlay"
-        @click.self="closeReportModal"
-      >
-        <div class="custom-modal">
-          <button class="close-btn" @click="closeReportModal">×</button>
-
-          <!-- Mounts only when modal is open -->
-          <ViewAsCollector 
-            :deceased="getCurrentDeceasedMember"
-            :purok="getSelectedPurok"
-          />
-        </div>
+    <!-- Report Modal -->
+    <div 
+      v-if="showReportModal" 
+      class="custom-modal-overlay"
+      @click.self="closeReportModal"
+    >
+      <div class="custom-modal">
+        <button class="close-btn" @click="closeReportModal">×</button>
+        <ViewAsCollector 
+          :deceased="getCurrentDeceasedMember"
+          :purok="getSelectedPurok"
+        />
       </div>
-
+    </div>
   </CollectorLayout>
 </template>
 
@@ -320,7 +364,7 @@ const closeReportModal = () => {
 .main-container::-webkit-scrollbar {
   display: none;
 }
-.search-container{
+.search-container {
   min-width: 50%;
 }
 .custom-modal-overlay {
@@ -336,7 +380,6 @@ const closeReportModal = () => {
   padding-top: 10rem;
   padding-bottom: 1rem;
 }
-
 .custom-modal {
   background: white;
   border-radius: 10px;
@@ -346,7 +389,6 @@ const closeReportModal = () => {
   position: relative;
   animation: fadeIn 0.2s ease-in-out;
 }
-
 .close-btn {
   position: absolute;
   top: 0;
@@ -357,9 +399,223 @@ const closeReportModal = () => {
   cursor: pointer;
   font-size: 2.5rem;
 }
-
 @keyframes fadeIn {
   from { opacity: 0; transform: scale(0.95); }
   to { opacity: 1; transform: scale(1); }
+}
+
+/* Desktop Table Styles */
+.desktop-view {
+  display: block;
+}
+.table-responsive {
+  max-height: 600px;
+  min-height: 400px;
+  overflow-y: auto;
+}
+.table-wrapper {
+  margin-top: 1rem;
+}
+
+/* Mobile Card Styles */
+.mobile-view {
+  display: none;
+}
+.mobile-cards-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 0 8px;
+  margin-top: 1rem;
+}
+.mobile-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e9ecef;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.mobile-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+.mobile-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #f1f3f4;
+}
+.mobile-member-id {
+  font-weight: 600;
+  color: #4a6fa5;
+  font-size: 0.9rem;
+}
+.mobile-purok {
+  background: #e9ecef;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+.mobile-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.mobile-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.mobile-field label {
+  font-size: 0.8rem;
+  color: #6c757d;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.mobile-value {
+  font-size: 0.95rem;
+  color: #2c3e50;
+  font-weight: 500;
+}
+.mobile-actions {
+  margin-top: 8px;
+  display: flex;
+  justify-content: flex-end;
+}
+.mobile-pay-btn, .mobile-paid-btn {
+  min-width: 120px;
+  font-size: 0.85rem;
+  padding: 6px 12px;
+}
+.action-buttons {
+  margin: 1rem 0;
+  display: flex;
+  justify-content: flex-end;
+  padding: 0 8px;
+}
+
+/* Responsive Breakpoints */
+@media (max-width: 1024px) {
+  .desktop-view table th,
+  .desktop-view table td {
+    padding: 0.5rem 0.3rem;
+    font-size: 0.9rem;
+  }
+  .search-container {
+    min-width: 40%;
+  }
+}
+
+@media (max-width: 768px) {
+  .desktop-view {
+    display: none;
+  }
+  .mobile-view {
+    display: block;
+  }
+  .main-container {
+    height: auto;
+    min-height: 100vh;
+    padding-bottom: 20px;
+  }
+  .header-container {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+  }
+  .page-title h6 {
+    text-align: center;
+    margin: 0;
+    font-size: 1.5rem !important;
+  }
+  .search-container {
+    min-width: 100%;
+    margin-top: 0.5rem !important;
+    margin-bottom: 0.5rem !important;
+  }
+  .action-buttons {
+    justify-content: center;
+  }
+  .view-report {
+    width: 100%;
+    max-width: 200px;
+  }
+  .custom-modal {
+    width: 90%;
+    padding: 15px;
+  }
+}
+
+@media (max-width: 576px) {
+  .mobile-card {
+    padding: 12px;
+  }
+  .mobile-card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .mobile-member-id, .mobile-purok {
+    font-size: 0.85rem;
+  }
+  .mobile-value {
+    font-size: 0.9rem;
+  }
+  .mobile-actions {
+    justify-content: stretch;
+  }
+  .mobile-pay-btn, .mobile-paid-btn {
+    flex: 1;
+    min-width: auto;
+  }
+  .mobile-cards-container {
+    padding: 0 4px;
+  }
+}
+
+@media (max-width: 380px) {
+  .mobile-card {
+    padding: 10px;
+  }
+  .mobile-field label {
+    font-size: 0.75rem;
+  }
+  .mobile-value {
+    font-size: 0.85rem;
+  }
+  .mobile-pay-btn, .mobile-paid-btn {
+    font-size: 0.8rem;
+    padding: 5px 8px;
+  }
+}
+
+/* Landscape mobile optimization */
+@media (max-height: 600px) and (orientation: landscape) {
+  .table-responsive {
+    max-height: 400px;
+    min-height: 300px;
+  }
+  .mobile-cards-container {
+    max-height: 50vh;
+    overflow-y: auto;
+  }
+  .main-container {
+    height: auto;
+  }
+}
+
+/* Print Styles */
+@media print {
+  .mobile-view, .desktop-view {
+    display: block !important;
+  }
+  .action-buttons, .search-container, .view-report {
+    display: none;
+  }
 }
 </style>
