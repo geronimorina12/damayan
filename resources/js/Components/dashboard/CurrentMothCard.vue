@@ -26,23 +26,40 @@ const updateChart = () => {
 
   barChartInstance.setOption({
     title: { text: 'Current Month', left: 'center' },
-    tooltip: {},
-    xAxis: { data: ['Total', 'Disbursed', 'Balance'] },
-    yAxis: {},
+    tooltip: { trigger: 'axis' },
+    xAxis: {
+      type: 'category',
+      data: ['Total', 'Disbursed', 'Balance']
+    },
+    yAxis: {
+      type: 'value',
+      minInterval: 1
+    },
     series: [
       {
         name: 'Amount',
-        type: 'bar',
+        type: 'line',
+        smooth: true,
+        symbol: 'circle',
+        symbolSize: 8,
         data: [
           getData.value[0] || 0,
           getData.value[1] || 0,
           getData.value[2] || 0
         ],
+        lineStyle: {
+          width: 3,
+          color: '#0000ff'
+        },
         itemStyle: {
           color: function (params) {
             const colors = ['#0000ff', '#ffa500', '#00cc00'];
             return colors[params.dataIndex];
           }
+        },
+        areaStyle: {
+          opacity: 0.15,
+          color: '#0000ff'
         }
       }
     ]

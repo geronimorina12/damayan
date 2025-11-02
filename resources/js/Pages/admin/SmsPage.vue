@@ -19,7 +19,9 @@ const getMembers = ref([]);
 
 watch(() => props.deathReport, (data) => { getDeathReport.value = data }, { immediate: true })
 watch(() => props.scheduleContribution, (data) => { getScheduleContribution.value = data }, { immediate: true })
-watch(() => props.reminders, (data) => { getReminders.value = data }, { immediate: true })
+watch(() => props.reminders, (data) => { 
+  getReminders.value = data
+}, { immediate: true })
 watch(() => props.fundUpdates, (data) => { getFundUpdates.value = data }, { immediate: true })
 watch(() => props.members, (data) => { getMembers.value = data }, { immediate: true })
 
@@ -75,55 +77,17 @@ function sendFundUpdates() {
         <h4 class="mb-4 fw-bold sticky-header text-start ps-2 pt-3">SMS</h4>
 
         <div class="scroll-content">
-          <!-- Death Report -->
-          <div class="mb-4 position-relative">
-            <div>
-              <label for="deathReport" class="form-label">Death Report</label>
-            </div>
-            <textarea v-model="getDeathReport.message" id="deathReport" class="form-control"></textarea>
-
-            <div class="container-fluid d-flex flex-row align-items-center gap-3 justify-content-end mt-3">
-              <div>
-                <Link :href="route('smsNotification.sendToAllSelected', {type: 'deathReport', message: getDeathReport.message})" class="save-btn text-uppercase text-decoration-none">
-                send to all selected
-              </Link>
-
-              </div>
-              <div>
-                <button @click="sendDeathReport" class="save-btn text-uppercase text-decoration-none">
-                  send
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <!-- Schedule Contribution -->
-          <div class="mb-4 position-relative">
-            <div>
-              <label for="scheduleContribution" class="form-label">Schedule Contribution</label>
-            </div>
-            <textarea v-model="getScheduleContribution.message" id="scheduleContribution" class="form-control"></textarea>
-
-            <div class="container-fluid d-flex flex-row align-items-center gap-3 justify-content-end mt-3">
-              <Link :href="route('smsNotification.sendToAllSelected', {type: 'scheduleContribution', message: getScheduleContribution.message})" class="save-btn text-uppercase text-decoration-none">
-                send to all selected
-              </Link>
-              <div>
-                <button class="save-btn text-uppercase" @click="sendScheduleContribution">send</button>
-              </div>
-            </div>
-          </div>
 
           <!-- Reminders -->
           <div class="mb-4 position-relative">
             <div>
               <label for="reminders" class="form-label">Reminders</label>
             </div>
-            <textarea v-model="getReminders.message" id="reminders" class="form-control"></textarea>
+            <textarea v-model="getReminders" id="reminders" class="form-control" disabled></textarea>
 
             <div class="container-fluid d-flex flex-row align-items-center gap-3 justify-content-end mt-3">
               <div>
-                <Link :href="route('smsNotification.sendToAllSelected', {type: 'reminders', message: getReminders.message})" class="save-btn text-uppercase text-decoration-none">
+                <Link :href="route('smsNotification.sendToAllSelected', {type: 'reminders', message: getReminders})" class="save-btn text-uppercase text-decoration-none">
                   send to all selected
                 </Link>
               </div>
@@ -138,7 +102,7 @@ function sendFundUpdates() {
             <div>
               <label for="fundUpdates" class="form-label">Fund Updates</label>
             </div>
-            <textarea v-model="getFundUpdates.message" id="fundUpdates" class="form-control"></textarea>
+            <textarea v-model="getFundUpdates.message" id="fundUpdates" class="form-control" disabled></textarea>
 
             <div class="container-fluid d-flex flex-row align-items-center gap-3 justify-content-end mt-3">
               <div>

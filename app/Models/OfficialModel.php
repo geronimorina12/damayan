@@ -14,6 +14,7 @@ class OfficialModel extends Model
         'position',
         'term_start',
         'term_end',
-        'status'
+        'status',
+        'email'
     ];
 }

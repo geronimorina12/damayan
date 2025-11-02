@@ -4,6 +4,11 @@ import { Head } from '@inertiajs/vue3';
 import CurrentMothCard from '@/Components/dashboard/CurrentMothCard.vue';
 import CurrentYearCard from '@/Components/dashboard/CurrentYearCard.vue';
 import MonthlyOverviewCard from '@/Components/dashboard/MonthlyOverviewCard.vue';
+import CurrentDeceased from '@/Components/dashboard/admin/charts/CurrentDeceased.vue';
+import DeceasedRecorded from '@/Components/dashboard/admin/charts/DeceasedRecorded.vue';
+import DashboardHeader from '@/Components/dashboard/admin/DashboardHeader.vue';
+import Contributions from '@/Components/dashboard/admin/charts/Contributions.vue';
+
 import { ref, defineProps, watch } from 'vue';
 const props = defineProps({
   currentMonthData: {
@@ -17,12 +22,26 @@ const props = defineProps({
   monthlyOverview: {
     type: Object,
     default: () => ({})
+  },
+  currentDeceasedMembers: {
+    type: Array,
+    default: () => []
+  },
+  allDeceased: {
+    type: Array,
+    default: () => []
+  },
+  currentDeceasedMember: {
+    type: Object,
+    default: () => ({})
   }
 });
 let getCurrentMonthData = ref([]);
 let getYearData = ref([]);
 let getMothlyOverview = ref([]);
-
+const getCurrentDeceased = ref([]);
+const getAllDeceased = ref([]);
+const getCurrentDeceasedMember = ref({});
 watch(
   () => props.currentMonthData,
   (newData) => {
@@ -44,6 +63,27 @@ watch(
   },
   {immediate: true}
 )
+watch(
+  () => props.currentDeceasedMembers,
+  (newData) => {
+    getCurrentDeceased.value = newData ? Object.values(newData) : [];
+  },
+  {immediate: true}
+)
+watch(
+  () => props.allDeceased,
+  (newData) => {
+    getAllDeceased.value = newData ? Object.values(newData) : [];
+  },
+  {immediate: true}
+)
+watch(
+  () => props.currentDeceasedMember,
+  (newData) => {
+    getCurrentDeceasedMember.value = newData ? newData : {};
+  },
+  {immediate: true}
+)
 </script>
 
 
@@ -55,16 +95,20 @@ watch(
         <div class="container-fluid mx-0 px-0 home-container">
             <h2 class="fw-normal fs-5 my-4 ms-3">Analytics Dashboard</h2>
 
+            <DashboardHeader 
+            :data="getCurrentDeceasedMember"
+            :allDeceased="getAllDeceased"
+            />
              <div class="row g-4">
-        <!-- Bar Chart -->
-        <div class="col-md-8 responsive-card">
-          <CurrentMothCard :data="getCurrentMonthData"/>
-        </div>
+            <!-- Bar Chart -->
+            <div class="col-md-8 responsive-card">
+              <CurrentMothCard :data="getCurrentMonthData"/>
+            </div>
 
-        <!-- Pie Chart -->
-        <div class="col-md-4 responsive-card">
-          <CurrentYearCard :data="getYearData"/>
-        </div>
+            <!-- Pie Chart -->
+            <div class="col-md-4 responsive-card">
+              <CurrentYearCard :data="getYearData"/>
+            </div>
       </div>
 
       <!-- Monthly Line Chart -->
@@ -74,6 +118,13 @@ watch(
         </div>
       </div>
 
+      <div>
+        <Contributions />
+      </div>
+      <div class="dashboard-container">
+    <CurrentDeceased :data="getCurrentDeceased" />
+    <DeceasedRecorded :records="getAllDeceased" />
+  </div>
 
       <div class="add-space-at-bottom "></div>
         </div>

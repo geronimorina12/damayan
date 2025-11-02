@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\ContributionModel;
+use App\Models\DeathReportModel;
 use App\Models\memberModel;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
 class ContributionControllerForCollector extends Controller
@@ -17,15 +19,29 @@ class ContributionControllerForCollector extends Controller
         ->where('role', 'collector')
         ->get();
         $paidMembersId = ContributionModel::pluck('member_id')->toArray();
+        $currentCollector = User::select('id', 'name', 'purok')
+        ->where('id', Auth::id())
+        ->first();
+
+        
+          $currentDeceasedMembers = DeathReportModel::where('iscurrent', true)
+     ->get();
+     $currentDeceasedMember = DeathReportModel::where('iscurrent', true)
+     ->latest('created_at')
+     ->first();
+
         return Inertia::render('collector/contribution/MemberContribution', [
             'member' => $mem,
             'selectedPurok' => 'all',
             'collectors' => $collectors,
             'paidMembersId' => $paidMembersId,
+            'currentCollector'=> $currentCollector,
+            'currentDeceasedMembers' => $currentDeceasedMembers,
+            'currentDeceasedMember' => $currentDeceasedMember,
         ]);
     }
 
-  public function toggleContributionPurok($purok){
+  public function toggleContributionPurok($purok, $deceasedId){
         switch ($purok) {
         case 'all':
             $formatPurok = 'all';
@@ -56,12 +72,25 @@ class ContributionControllerForCollector extends Controller
     $collectors = User::select('id', 'name', 'purok')
         ->where('role', 'collector')
         ->get();
+    $currentCollector = User::select('id', 'name', 'purok')
+        ->where('id', Auth::id())
+        ->first();
+
+        
+    $currentDeceasedMembers = DeathReportModel::where('iscurrent', true)
+     ->get();
+     $currentDeceasedMember = DeathReportModel::where('member_id', $deceasedId)
+     ->latest('created_at')
+     ->first();
 
         $paidMembersId = ContributionModel::pluck('member_id')->toArray();
         return Inertia::render('collector/contribution/MemberContribution', [
             'member' => $mem,
             'selectedPurok' => $purok,
             'paidMembersId' => $paidMembersId,
+            'currentCollector' => $currentCollector,
+            'currentDeceasedMembers' => $currentDeceasedMembers,
+            'currentDeceasedMember' => $currentDeceasedMember,
         ]);
     }
 

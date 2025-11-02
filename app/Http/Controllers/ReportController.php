@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\ContributionModel;
 use App\Models\DeathReportModel;
 use App\Models\memberModel;
+use App\Models\OfficialModel;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -41,11 +42,12 @@ class ReportController extends Controller
         'date' => $matchedContributions->max('created_at'),
     ];
 });
-
+        $president = OfficialModel::where('position', 'president')->first();
         return Inertia::render('admin/dashboard/report/ReportHome', [
             'contributions' => $collectorStats,
             'memberContributions' => $memberContributions,
             'deathReports' => $deathReports,
+            'president' => $president
         ]);
     }
 
@@ -117,8 +119,43 @@ class ReportController extends Controller
             'role' => $validated['role'],
             'purok' => $validated['purok'],
         ]);
-
-        return redirect()->route('reports.addCollector')->with('success', 'Collector added successfully!');
+        
+        return redirect()->back()->with('success', 'Collector added successfully!');
     }
+        public function getDeceased()
+        {
+            try {
+                $deceased = DeathReportModel::select('member_id', 'deceased_name')->get();
+
+                return response()->json([
+                    'success' => true,
+                    'deceased' => $deceased
+                ], 200); 
+            } catch (\Exception $e) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to fetch deceased records.',
+                    'error' => $e->getMessage()
+                ], 500); 
+            }
+        }
+
+        public function getContributions($id)
+        {
+            try {
+                $contributions = ContributionModel::where('deceased_id', $id)
+                ->with('memberContribution')
+                ->get();
+
+                return response()->json([
+                    'contributions' => $contributions
+                ], 200);
+            } catch (\Exception $e) {
+                return response()->json([
+                    'message' => 'Failed to fetch contributions.',
+                    'error' => $e->getMessage()
+                ], 500);
+            }
+        }
 
 }

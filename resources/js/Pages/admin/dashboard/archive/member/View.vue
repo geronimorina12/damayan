@@ -2,7 +2,6 @@
 import { Head, Link } from '@inertiajs/vue3';
 import { defineProps, ref, watch } from 'vue';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
-import HeaderComponent from '@/Components/dashboard/HeaderComponent.vue';
 import BeneficiaryComponent from '@/Components/dashboard/BeneficiaryComponent.vue';
 const props = defineProps({
     member: {
@@ -24,7 +23,6 @@ watch(
     <Head title="View Member Info" />
     <div>
         <AdminLayout>
-            <HeaderComponent />
 
             <div class="container my-4 border p-3">
     <h6 class="text-center fw-bold mb-2 text-danger">

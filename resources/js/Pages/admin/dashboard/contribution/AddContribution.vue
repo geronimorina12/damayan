@@ -13,19 +13,24 @@ const props = defineProps({
         type: Array,
         default: () => [],
     },
+    deceasedMembers: {
+        type: Array,
+        default: () => [],
+    },
 });
 let getMembers = ref([]);
 let getFullName = ref([]);
 const getCollectors = ref([]);
 const getUsers = ref([]);
+const getDeceasedMembersData = ref([]);
 
 // Create a full name from first, middle, and last name || pero ang hali sa users full name na
 watch(
-    [() => props.members, () => props.users],
-    ([membersData, usersData]) => {
+    [() => props.members, () => props.users, () => props.deceasedMembers],
+    ([membersData, usersData, deceasedData]) => {
         // Keep raw members
         getMembers.value = membersData || [];
-
+        getDeceasedMembersData.value = deceasedData || [];
         // Map members
         const memberFullNames = (membersData || []).map((member) => ({
             id: member.id,
@@ -53,11 +58,12 @@ watch(
 
 const form = useForm({
     member_id: "",
-    amount: "",
+    amount: 100,
     payment_date: "",
     collector: "",
-    status: "",
+    status: "paid",
     purok: "",
+    deceased_id: "",
 });
 
 const submit = () => {
@@ -106,22 +112,6 @@ const submit = () => {
                                     </div>
                                 </div>
 
-                                <!-- Amount -->
-                                <div class="mb-3">
-                                    <label for="amount" class="form-label">Amount</label>
-                                    <input
-                                        v-model="form.amount"
-                                        type="number"
-                                        step="0.01"
-                                        id="amount"
-                                        class="form-control"
-                                        :class="{ 'is-invalid': form.errors.amount }"
-                                        placeholder="Enter amount"
-                                    />
-                                    <div v-if="form.errors.amount" class="invalid-feedback">
-                                        {{ form.errors.amount }}
-                                    </div>
-                                </div>
 
                                 <!-- Payment Date -->
                                 <div class="mb-3">
@@ -163,24 +153,30 @@ const submit = () => {
                                     </div>
                                 </div>
 
-                                <!-- Status -->
-                                <div class="mb-3">
-                                    <label for="status" class="form-label">Status</label>
-                                    <select v-model="form.status" class="form-control">
-                                        <option value="" disabled>Paid or Not</option>
-                                        <option value="paid">Paid</option>
-                                        <option value="not_paid">Not</option>
-                                    </select>
-                                </div>
 
                                 <!-- Purok -->
                                 <div class="mb-3">
                                     <label for="purok" class="form-label">Purok</label>
                                     <select v-model="form.purok" class="form-control">
-                                        <option value="purok1">1</option>
-                                        <option value="purok2">2</option>
-                                        <option value="purok3">3</option>
-                                        <option value="purok4">4</option>
+                                        <option value="purok1">Purok 1</option>
+                                        <option value="purok2">Purok 2</option>
+                                        <option value="purok3">Purok 3</option>
+                                        <option value="purok4">Purok 4</option>
+                                    </select>
+                                </div>
+
+                                <!-- Select deceased member  -->
+                                 <div class="mb-3">
+                                    <label for="deceased_member" class="form-label">Select Deceased Member</label>
+                                    <select v-model="form.deceased_id" class="form-control">
+                                        <option disabled value="">-- Select Deceased Member --</option>
+                                        <option
+                                            v-for="deceased in getDeceasedMembersData"
+                                            :key="deceased.id"
+                                            :value="deceased.member_id"
+                                        >
+                                            {{ deceased.deceased_name }}
+                                        </option>
                                     </select>
                                 </div>
 

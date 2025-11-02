@@ -81,4 +81,23 @@ class ReportForCollector extends Controller
     ]);
 }
 
+     public function getContributions($id, $purok)
+        {
+            try {
+                $contributions = ContributionModel::where('deceased_id', $id)
+                ->where('purok', $purok)
+                ->with('memberContribution')
+                ->get();
+
+                return response()->json([
+                    'contributions' => $contributions
+                ], 200);
+            } catch (\Exception $e) {
+                return response()->json([
+                    'message' => 'Failed to fetch contributions.',
+                    'error' => $e->getMessage()
+                ], 500);
+            }
+        }
+
 }

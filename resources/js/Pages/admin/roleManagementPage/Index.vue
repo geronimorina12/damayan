@@ -50,6 +50,14 @@ const deleteFunc = () => {
         });
     }
 };
+const getUserAcess = (role, position) => {
+    if(role === 'collector' || position === 'collector') return 'Status updates'
+    if(role === 'admin' || position === 'admin') return 'Full modules'
+    if(role === 'secretary' || position === 'secretary') return 'Records and Reports'
+    if(role === 'vise_president' || position === 'vise_president') return 'Review and Approval'
+    else return "N/A"
+
+}
 </script>
 <template>
     <div>
@@ -70,8 +78,8 @@ const deleteFunc = () => {
                                         <th>ID</th>
                                         <th>NAME</th>
                                         <th>EMAIL</th>
-                                        <th>USERS</th>
-                                        <th></th>
+                                        <th>Role</th>
+                                        <th>Access</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -83,6 +91,7 @@ const deleteFunc = () => {
                                         <td>{{ user.name }}</td>
                                         <td>{{ user.email || 'N/A' }}</td>
                                         <td>{{ user?.role || user?.position }}</td>
+                                        <td>{{ getUserAcess(user.role, user.position) }}</td>
                                         <td>
                                             <button
                                                 class="btn btn-sm btn-light"
@@ -99,9 +108,6 @@ const deleteFunc = () => {
                                 </tbody>
                             </table>
                         </div>
-                        <Link :href="route('role.add')" class="btn btn-primary float-end mt-2">
-                            Add User
-                        </Link>
                     </div>
                 </div>
                     <RoleAndPermissionTable :users="getUsers"/>

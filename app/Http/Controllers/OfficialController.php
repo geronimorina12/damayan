@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\OfficialModel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
 class OfficialController extends Controller
@@ -46,21 +47,33 @@ class OfficialController extends Controller
             'official' => $official
         ]);
      }
-     public function editData(Request $request,  $id){
-        $official = OfficialModel::findOrfail($id);
-        if(!$official){
-            abort(404, 'official not found');
-        }
-       $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'position' => 'required|string|max:255',
-            'term_start' => 'required|date',
-            'term_end' => 'required|date',
-            'status' => 'required|boolean'
-        ]);
-        $official->update($validated);
-        return redirect()->back()->with('success', 'Official updated successfully.');
+    public function editData(Request $request, $id)
+{
+    $official = OfficialModel::findOrFail($id);
+
+    if (!$official) {
+        abort(404, 'Official not found');
     }
+
+    //  Combine first, middle, and last name into one
+    $request->merge([
+        'name' => trim($request->first_name . ' ' . $request->middle_name . ' ' . $request->last_name)
+    ]);
+
+    //  Validate combined data
+    $validated = $request->validate([
+        'name' => 'required|string|max:255',
+        'position' => 'required|string|max:255',
+        'term_start' => 'required|date',
+        'term_end' => 'required|date',
+        'status' => 'required|boolean',
+        'email' => 'nullable|email',
+    ]);
+
+    $official->update($validated);
+
+    return redirect()->back()->with('success', 'Official updated successfully.');
+}
     public function delete($id){
         $official = OfficialModel::findOrFail($id);
         if(!$official){
@@ -68,6 +81,20 @@ class OfficialController extends Controller
         }
         $official->delete();    
         return redirect()->back()->with(['success' => 'official deleted!'], 201);
-        // TODO ma kadto sa archieve 
+    }
+    public function hasPresident(){
+        $hasPresident = OfficialModel::where('position', 'President')->exists();
+
+        return response()->json([
+            'has_president' => $hasPresident
+        ]);
+    }
+    public function toggleStatus($id){
+        Log::info(['official id: ' => $id]);
+        $official = OfficialModel::findOrFail($id);
+        Log::info(['official: ' => $official]);
+        $official->update([
+            'status' => !$official->status
+        ]);
     }
 }

@@ -7,15 +7,17 @@ const props = defineProps({
   members: { type: Array, default: () => [] },
   type: { type: String, default: 'deathReport' },
   message: { type: String, default: '' },
+  deceased: {type: String},
+  last: {type: String}
 })
 
 const selectedMembers = ref([])
 const searchQuery = ref('')
 const messageType = ref(props.type)
 const message = ref('')
-const smsMessage = ref(props.message || '') // this will be sent every time
+const smsMessage = ref(props.message || '')
+const showUnselectButton = ref(false)
 
-// Filter members
 const filteredMembers = computed(() => {
   if (!Array.isArray(props.members)) return []
   if (!searchQuery.value) return props.members
@@ -27,7 +29,16 @@ const filteredMembers = computed(() => {
   })
 })
 
-// Send SMS
+function selectAll() {
+  selectedMembers.value = [...filteredMembers.value]
+  showUnselectButton.value = true
+}
+
+function unselectAll() {
+  selectedMembers.value = []
+  showUnselectButton.value = false
+}
+
 function sendToAllSelected() {
   message.value = ''
 
@@ -35,16 +46,18 @@ function sendToAllSelected() {
     message.value = 'Please select at least one member first.'
     return
   }
-
   const memberIds = selectedMembers.value.map(m => m.id)
 
   router.post(route(`smsSelectMember.${messageType.value}`), {
     member_ids: memberIds,
-    message: smsMessage.value, // always included
+    message: smsMessage.value,
+    deceased: props.deceased || 0,
+    last: props.last
   }, {
     onSuccess: () => {
       message.value = `${messageType.value} SMS sent successfully.`
       selectedMembers.value = []
+      showUnselectButton.value = false
     },
     onError: (errors) => {
       console.error(errors)
@@ -61,7 +74,6 @@ function sendToAllSelected() {
     <div class="container mt-4">
       <h4 class="fw-bold mb-3">Select Multiple Members to Send SMS</h4>
 
-      <!-- Search -->
       <div class="mb-3">
         <input
           type="text"
@@ -76,15 +88,30 @@ function sendToAllSelected() {
           <p><span class="fw-bold">Type:</span> {{ messageType }}</p>
           <p><span class="fw-bold">Selected:</span> {{ selectedMembers.length }}</p>
         </div>
-        <button class="btn btn-primary" @click="sendToAllSelected">Send</button>
+        
+        <div class="d-flex flex-row gap-2">
+          <button
+            v-if="!showUnselectButton"
+            class="btn btn-success"
+            @click="selectAll"
+          >
+            Select All
+          </button>
+          <button
+            v-else
+            class="btn btn-warning"
+            @click="unselectAll"
+          >
+            Unselect All
+          </button>
+          <button class="btn btn-primary" @click="sendToAllSelected">Send</button>
+        </div>
       </div>
 
-      <!-- Alert -->
       <div v-if="message" class="alert alert-info" role="alert">
         {{ message }}
       </div>
 
-      <!-- Members Table -->
       <div class="table-scroll-container">
         <div class="table-responsive">
           <table class="table table-bordered table-hover">

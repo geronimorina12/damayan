@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\AssistanceDistribution;
 use App\Models\ContributionModel;
+use App\Models\DeathReportModel;
 use App\Models\memberModel;
 use App\Models\OfficialModel;
 use App\Models\User;
@@ -20,6 +21,9 @@ class DashboardController extends Controller
         return redirect()->route('login');
       }
 
+      $currentDeceasedMemberId = DeathReportModel::where('iscurrent', true)
+      ->latest('created_at') 
+      ->value('member_id');
       // Carbon = library san laravel para sa date and time manipulation
       $month = Carbon::now()->month;
       $year = Carbon::now()->year;
@@ -27,11 +31,13 @@ class DashboardController extends Controller
       //total san collected
       $totalCollected = ContributionModel::whereMonth('payment_date', $month)
     ->whereYear('payment_date', $year)
+    ->where('deceased_id', $currentDeceasedMemberId)
     ->sum('amount');
 
     // Total Disbursed This Month
     $totalDisbursed = ContributionModel::whereMonth('payment_date', $month)
     ->whereYear('payment_date', $year)
+    ->where('deceased_id', $currentDeceasedMemberId)
     ->sum('amount');
 
     // Balance (mag kakaiba ang table pero same cra member san damayan)
@@ -95,25 +101,81 @@ class DashboardController extends Controller
     ////////////////////////
 
     // redirect sa specific na dashboard depende sa role 
+        $currentDeceasedMembers = DeathReportModel::where('iscurrent', true)
+     ->get();
+     $currentDeceasedMember = DeathReportModel::where('iscurrent', true)
+     ->latest('created_at')
+     ->first();
+
       if(Auth::user()->role === 'admin') {
+
+       $allDeceased = DeathReportModel::all();
         return Inertia::render('admin/dashboard/Home', [
           'currentMonthData' => $currentMonthData,
           'yearData' => $yearData,
           'monthlyOverview' => $monthlyOverview,
+          'currentDeceasedMembers' => $currentDeceasedMembers,
+          'allDeceased' => $allDeceased,
+          'currentDeceasedMember' => $currentDeceasedMember,
         ]);
       }else if(Auth::user()->role === 'collector') {
         return Inertia::render('collector/dashboard/Home', [
           'currentMonthData' => $currentMonthData,
           'yearData' => $yearData,
           'monthlyOverview' => $monthlyOverview,
+          'currentDeceasedMember' => $currentDeceasedMember,
+          'currentDeceasedMembers' => $currentDeceasedMembers,
         ]);
       }
       
     }
     public function registeredMember(){
-     $members = memberModel::orderBy('first_name', 'asc')->get();
+     $members = memberModel::orderBy('first_name', 'asc')->paginate(10);
+     $deceasedMember = DeathReportModel::select('member_id', 'deceased_name')->get();
       return Inertia::render('admin/dashboard/RegisteredMember', [
-        'members' => $members
+        'members' => $members,
+        'deceasedMember' => $deceasedMember,
       ]);
     }
+    public function searchPage(Request $request)
+{
+    $page = $request->query('page', 1);
+
+    $members = memberModel::orderBy('first_name', 'asc')->paginate(10, ['*'], 'page', $page);
+
+    $deceasedMember = DeathReportModel::select('member_id', 'deceased_name')->get();
+
+    return Inertia::render('admin/dashboard/RegisteredMember', [
+        'members' => $members,
+        'deceasedMember' => $deceasedMember,
+    ]);
+}
+
+    public function search(Request $request)
+    {
+        $query = $request->query('query');
+
+    $member = memberModel::whereRaw("CONCAT(first_name, ' ', middle_name, ' ', last_name) LIKE ?", ["%{$query}%"])
+        ->orWhere('contact_number', 'like', "%{$query}%")
+        ->orWhere('purok', 'like', "%{$query}%")
+        ->orderBy('first_name', 'asc')
+        ->first();
+
+    if (!$member) {
+        return response()->json(['message' => 'No member found'], 404);
+    }
+
+    $perPage = 10;
+
+    $position = memberModel::where('first_name', '<', $member->first_name)
+        ->count();
+
+    $page = intval(floor($position / $perPage)) + 1;
+
+    return response()->json([
+        'member' => $member,
+        'page' => $page
+    ]);
+    }
+
 }
