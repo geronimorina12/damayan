@@ -26,6 +26,10 @@ use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
+Route::get('/logtest', function() {
+    Log::error('Test log: 500 error debugging');
+    return 'Check storage/logs/laravel.log';
+});
 // Route::get('/', function () {
 //     return Inertia::render('Welcome', [
 //         'canLogin' => Route::has('login'),
