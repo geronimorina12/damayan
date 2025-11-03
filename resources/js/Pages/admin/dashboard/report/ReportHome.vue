@@ -154,7 +154,7 @@ const filterData = (deceasedId) => {
                 <!-- Header -->
                 <div class="modern-header">
                     <div class="header-content">
-                        <h5 class="page-title fw-light">Reports Dashboard</h5>
+                        <h5 class=" fw-light">Reports Dashboard</h5>
                     </div>
                     <div class="header-actions">
                         <button
@@ -285,7 +285,8 @@ const filterData = (deceasedId) => {
 .modern-header {
     /* background: #D4F3F9; */
     color: #333;
-    padding: 2rem;
+    padding-left: 2rem;
+    padding-right: 2rem;
     display: flex;
     justify-content: space-between;
     align-items: center;

@@ -15,6 +15,7 @@ watch(
   () => props.data,
   (newData) => {
     currentDeceased.value = newData;
+    console.log("current deceased: ", currentDeceased.value)
   },
   { immediate: true }
 );
@@ -69,7 +70,7 @@ const formatDate = (dateString) => {
               <th>#</th>
               <th>Name</th>
               <th>Date of Death</th>
-              <th>Address</th>
+              <th>Last Night</th>
             </tr>
           </thead>
           <tbody>
@@ -87,7 +88,7 @@ const formatDate = (dateString) => {
               <td class="index-cell">{{ index + 1 }}</td>
               <td class="name-cell">{{ person.deceased_name }}</td>
               <td class="date-cell">{{ formatDate(person.date_of_death) }}</td>
-              <td class="address-cell">{{ person.address || 'Bonga, Bulan, Sor.' }}</td>
+              <td class="address-cell">{{ person.last_night || 'N/A' }}</td>
             </tr>
           </tbody>
         </table>

@@ -23,6 +23,7 @@ use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\SmsNotificationController;
 use App\Http\Controllers\SmsNotificationSavedController;
 use Illuminate\Foundation\Application;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 

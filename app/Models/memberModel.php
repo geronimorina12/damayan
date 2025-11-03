@@ -30,4 +30,7 @@ class memberModel extends Model
 public function contributions(){
     return $this->hasMany(ContributionModel::class, 'member_id');
 }
+public function member(){
+    return $this->belongsTo(MemberModel::class, 'member_id', 'member_id');
+}
 }

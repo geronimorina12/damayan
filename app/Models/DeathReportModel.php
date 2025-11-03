@@ -15,4 +15,7 @@ class DeathReportModel extends Model
         'date_of_death',
         'report_date',
     ];
+    public function member(){
+      return $this->belongsTo(memberModel::class,'member_id', 'id');
+    }
 }

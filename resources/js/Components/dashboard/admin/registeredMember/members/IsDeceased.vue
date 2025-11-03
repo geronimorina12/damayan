@@ -32,7 +32,7 @@ watch(
 watch([lastNight, startOfContribution], ([last, start]) => {
   if (last && start && getDeceasedMember.value?.first_name) {
     const m = getDeceasedMember.value;
-    form.message = `We regret to inform you that ${m.first_name} ${m.last_name} has passed away. Last night was ${formatDate(last)}, and the collection for burial assistance starts on ${formatDate(start)}.`;
+    form.message = `We regret to inform you that ${m.first_name} ${m.last_name} has passed away. Last night is on ${formatDate(last)}, and the collection for burial assistance starts on ${formatDate(start)}.`;
     form.memberId = m.id;
   } else {
     form.message = "";

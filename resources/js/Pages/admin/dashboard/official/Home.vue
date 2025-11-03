@@ -51,7 +51,7 @@ const formatDate = (dateString) => {
         <AdminLayout>
             <div class="modern-container">
               <div class="header-section">
-                <h1 class="page-title">Protec Damayan Officials</h1>
+                <h5 class="fw-light">Protec Damayan Officials</h5>
                 <!-- <p class="page-subtitle">Manage organization officials and their information</p> -->
               </div>
               

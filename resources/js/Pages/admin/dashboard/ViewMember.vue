@@ -30,7 +30,7 @@ watch(
       <div class="scroll-container">
         <div class="container my-4 border p-3">
           <h6 class="text-center fw-bold mb-2">
-            Authority Proof that you are a Member of Protect Damayan of this Barangay<br />
+            Authority Proof that you are a Member of Protec Damayan of this Barangay<br />
             Barangay Bonga, District II<br />
             Bulan, Sorsogon
           </h6>
