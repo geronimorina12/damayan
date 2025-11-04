@@ -11,7 +11,7 @@ const props = defineProps({
 
 const getMembers = ref([])
 const getPurok = ref("all")
-const localStatus = ref(props.activeStatus) // 👈 local status tracker
+const localStatus = ref(props.activeStatus) //  local status tracker
 
 // filter members based on status + contributionsIds
 const filterMembers = () => {

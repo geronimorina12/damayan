@@ -105,7 +105,7 @@ const downloadAsPDF = () => {
     <!--  PDF Content only -->
     <div ref="pdfContent" class="document-container">
       <div class="header">
-        <div class="organization-name">BULAN P.R.O.T.E.C DAMAYAN FERERATION</div>
+        <div class="organization-name">BULAN P.R.O.T.E.C DAMAYAN FEDERATION</div>
         <div class="organization-subtitle">(People's Responsible Organization Transforming Community)</div>
         <div class="chapter-info">Affiliated Bulan, Sorsogon Chapter Brgy. ______ C.Y 2021</div>
         <div class="established">Since 2016</div>

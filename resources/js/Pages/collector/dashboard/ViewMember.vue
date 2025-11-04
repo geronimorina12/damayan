@@ -81,6 +81,9 @@ watch(
 </template>
 
 <style scoped>
+.table tbody tr th{
+  font-size: .8rem;
+}
 table th,
 table td {
   vertical-align: middle;

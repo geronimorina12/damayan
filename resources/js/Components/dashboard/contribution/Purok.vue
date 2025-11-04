@@ -21,7 +21,7 @@ watch(
 );
 const puroks = ["purok1", "purok2", "purok3", "purok4"];
 const togglePurok = (purok) => {
-    router.get(route("contributions.togglePurok", { purok: purok, deceasedId: props.currentDeceasedId }), {
+    router.get(route("contributions.togglePurok", { purok: purok, deceasedId: props.currentDeceasedId || 0 }), {
         onSuccess: () => console.log("changing purok"),
         onError: (err) => console.log("An error occured: ", err),
     });

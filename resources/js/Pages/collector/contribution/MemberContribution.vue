@@ -176,9 +176,9 @@ const closeReportModal = () => {
 
         <PurokComponentForCollector 
         :activePurok="getSelectedPurok"
-        :deceasedId="getCurrentDeceasedMember.member_id"
+        :deceasedId="getCurrentDeceasedMember?.member_id"
         />
-        <div class="mt-5">
+        <div class="mt-5" v-if="getCurrentDeceasedMember">
           <ToggleContribution 
             :allDeceased="getCurrentDeceasedMembers" 
             :purok="getSelectedPurok"

@@ -155,7 +155,7 @@ const searchPage = (page) => router.visit(route('members.searchPage') + `?page=$
           <table class="table table-bordered align-middle text-center">
             <thead class="table-light">
               <tr>
-                <th>ID</th>
+                <th >ID</th>
                 <th>NAME</th>
                 <th>GENDER</th>
                 <th>AGE</th>
@@ -231,16 +231,20 @@ const searchPage = (page) => router.visit(route('members.searchPage') + `?page=$
           </table>
         </div>
 
-        <div class="pagination-controls d-flex justify-content-center mt-3 mb-5">
-          <button
-            v-for="(link, index) in props.members.links"
-            :key="index"
-            class="btn"
-            :class="link.active ? 'btn-primary' : 'btn-outline-primary'"
-            @click="goToPage(link.url)"
-            v-html="link.label"
-          />
+       <div class="pagination-wrapper mt-3 mb-5">
+          <div class="pagination-controls">
+            <button
+              v-for="(link, index) in props.members.links"
+              :key="index"
+              class="btn pagination-btn"
+              :class="link.active ? 'btn-primary' : 'btn-outline-primary'"
+              @click="goToPage(link.url)"
+              v-html="link.label"
+            />
+          </div>
         </div>
+
+
       </div>
     </div>
 
@@ -624,4 +628,31 @@ input:checked + .toggle-slider:before {
 }
 .custom-modal-header { display: flex; justify-content: space-between; background: #007bff; color: white; padding: 15px 20px; }
 .close-icon { cursor: pointer; font-size: 1.6rem; }
+.pagination-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.pagination-controls {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  flex-wrap: nowrap;
+  min-width: max-content; /* prevents buttons from squishing */
+  padding: 0.5rem 1rem;
+}
+
+.pagination-btn {
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* On small screens, align pagination to left for better visibility */
+@media (max-width: 768px) {
+  .pagination-controls {
+    justify-content: flex-start;
+  }
+}
+
 </style>

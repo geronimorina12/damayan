@@ -86,6 +86,9 @@ watch(
 </template>
 
 <style scoped>
+.table tbody tr th{
+  font-size: .8rem;
+}
 .scroll-container {
   max-height: 100vh;
   overflow-y: auto;

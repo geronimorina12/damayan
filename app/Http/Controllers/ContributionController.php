@@ -75,9 +75,14 @@ public function toggleContributionPurok($purok, $deceasedId)
 
     $currentDeceasedMembers = DeathReportModel::where('iscurrent', true)
      ->get();
-     $currentDeceasedMember = DeathReportModel::where('member_id', $deceasedId)
+     
+     if($deceasedId !== 0){
+        $currentDeceasedMember = DeathReportModel::where('member_id', $deceasedId)
      ->latest('created_at')
      ->first();
+     }else{
+        $currentDeceasedMember = null;
+     }
 
     return Inertia::render('admin/dashboard/contribution/MemberContribution', [
         'member'        => $mem,

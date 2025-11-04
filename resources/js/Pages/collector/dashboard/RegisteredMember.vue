@@ -1,27 +1,31 @@
 <script setup>
-import { ref, defineProps, watch, computed } from 'vue'
+import { ref, defineProps, watch, computed, onMounted, nextTick } from 'vue'
 import { router, Head, Link } from '@inertiajs/vue3'
 import CollectorLayout from '@/Layouts/CollectorLayout.vue'
 
 const props = defineProps({
   members: {
-    type: Object, // must be paginated response
+    type: Object,
     default: () => ({ data: [], links: [], prev_page_url: null, next_page_url: null })
   }
 })
 
 let getMembers = ref([])
-const searchQuery = ref("") // 🔍 search input
+const searchQuery = ref("") //  search input
+const paginationContainer = ref(null) //  for responsive scrolling
 
 watch(
   () => props.members,
-  (newMember) => {
+  async (newMember) => {
     getMembers.value = newMember.data || []
+
+    await nextTick()
+    centerActivePagination()
   },
   { immediate: true }
 )
 
-// 🔍 Filter members
+//  Filter members
 const filteredMembers = computed(() => {
   if (!searchQuery.value) return getMembers.value
   return getMembers.value.filter((member) => {
@@ -37,18 +41,14 @@ const filteredMembers = computed(() => {
 const trashMember = (id) => {
   if (confirm('Are you sure you want to trash this member?')) {
     router.delete(route('deleteMember', { id }), {
-      onSuccess: () => {
-        console.log('Member trashed')
-      },
+      onSuccess: () => console.log('Member trashed')
     })
   }
 }
 
 const toggleMemberStatus = (member) => {
   const newStatus = member.status === 'active' ? 'inactive' : 'active'
-  router.put(route('toggleMemberStatus', { id: member.id }), {
-    status: newStatus
-  }, {
+  router.put(route('toggleMemberStatus', { id: member.id }), { status: newStatus }, {
     onSuccess: () => {
       member.status = newStatus
       console.log(`Member ${member.id} status changed to ${newStatus}`)
@@ -60,6 +60,24 @@ const toggleMemberStatus = (member) => {
 const goToPage = (url) => {
   if (url) {
     router.get(url, {}, { preserveScroll: true, preserveState: true })
+  }
+}
+
+// 📱 Center the active pagination on mobile
+const centerActivePagination = () => {
+  const container = paginationContainer.value
+  if (!container) return
+
+  const activeBtn = container.querySelector('.btn.btn-primary')
+  if (activeBtn) {
+    const containerRect = container.getBoundingClientRect()
+    const activeRect = activeBtn.getBoundingClientRect()
+    const scrollOffset = activeRect.left - containerRect.left - containerRect.width / 2 + activeRect.width / 2
+
+    container.scrollTo({
+      left: container.scrollLeft + scrollOffset,
+      behavior: 'smooth'
+    })
   }
 }
 </script>
@@ -120,16 +138,18 @@ const goToPage = (url) => {
         </table>
       </div>
 
-      <!-- 📄 Pagination -->
-      <div class="pagination-controls d-flex justify-content-center mt-3 mb-5 pb-5 pt-3">
-        <button
-          v-for="(link, index) in props.members.links"
-          :key="index"
-          class="btn"
-          :class="link.active ? 'btn-primary' : 'btn-outline-primary'"
-          @click="goToPage(link.url)"
-          v-html="link.label"
-        />
+      <!-- 📄 Responsive Pagination -->
+      <div class="pagination-wrapper mt-3 mb-5 pb-5 pt-3">
+        <div class="pagination-controls" ref="paginationContainer">
+          <button
+            v-for="(link, index) in props.members.links"
+            :key="index"
+            class="btn pagination-btn"
+            :class="link.active ? 'btn-primary' : 'btn-outline-primary'"
+            @click="goToPage(link.url)"
+            v-html="link.label"
+          />
+        </div>
       </div>
     </div>
   </CollectorLayout>
@@ -146,5 +166,34 @@ const goToPage = (url) => {
 .table th,
 .table td {
   vertical-align: middle;
+}
+
+/* ✅ Responsive pagination fix */
+.pagination-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.pagination-controls {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  flex-wrap: nowrap;
+  min-width: max-content;
+  padding: 0.5rem 1rem;
+  scroll-behavior: smooth;
+}
+
+.pagination-btn {
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* On smaller screens, align to start for easy scroll */
+@media (max-width: 768px) {
+  .pagination-controls {
+    justify-content: flex-start;
+  }
 }
 </style>

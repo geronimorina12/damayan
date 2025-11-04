@@ -23,7 +23,7 @@ const form = useForm({
   term_end: '',
   status: 1,
   role: 'collector', // used only if collector
-  purok: '1', // used only if collector
+  purok: '', // used only if collector
 })
 
 async function checkHasPresident() {
@@ -40,7 +40,6 @@ async function checkHasPresident() {
         }
         const data = await response.json();
         hasPresident.value = data.has_president;
-        console.log("has president: ", hasPresident.value)
         return hasPresident;
 
     } catch (error) {
@@ -70,7 +69,7 @@ function submit() {
       email: form.email,
       password: form.password,
       role: 'collector',
-      purok: '1',
+      purok: form.purok,
     })
 
     if(form.email == ''){
@@ -228,7 +227,7 @@ function closeModal() {
           </div>
 
           <div v-if="isCollector" class="mb-3">
-            <label for="email" class="form-label fw-semibold"> password</label>
+            <label for="email" class="form-label fw-semibold"> Password</label>
             <input
               v-model="form.password"
               type="password"
@@ -236,6 +235,17 @@ function closeModal() {
               class="form-control"
               placeholder="I@mJuan45_"
             />
+          </div>
+
+           <div v-if="isCollector" class="mb-3">
+            <label for="email" class="form-label fw-semibold"> Purok</label>
+            <select class="form-control" v-model="form.purok">
+              <option value="1">Purok 1</option>
+              <option value="2">Purok 2</option>
+              <option value="3">Purok 3</option>
+              <option value="4">Purok 4</option>
+
+            </select>
           </div>
 
             <div class="mb-3" v-if="!isCollector">

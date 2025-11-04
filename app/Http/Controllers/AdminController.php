@@ -99,7 +99,9 @@ class AdminController extends Controller
     }
      public function newlyRegistered()
     {
-        $latestMember = memberModel::orderBy('created_at', 'desc')->first();
+        $latestMember = memberModel::orderBy('created_at', 'desc')
+        ->take(5)
+        ->get();
 
         if (!$latestMember) {
             return response()->json([

@@ -104,7 +104,7 @@ function goToPage(url) {
             :activePurok="getSelectedPurok" 
             :currentDeceasedId="getCurrentDeceasedMember?.member_id"
           />
-         <div class="mt-3">
+         <div class="mt-3" v-if="getCurrentDeceasedMember">
            <ToggleContribution 
             :allDeceased="getCurrentDeceasedMembers" 
             :data="getCurrentDeceasedMember"

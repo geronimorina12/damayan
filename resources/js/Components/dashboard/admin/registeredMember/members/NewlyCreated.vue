@@ -11,7 +11,7 @@
       {{ error }}
     </div>
 
-    <div v-else-if="member" class="table-responsive">
+    <div v-else-if="members.length" class="table-responsive">
       <table class="table table-striped table-bordered shadow-sm">
         <thead class="table-primary">
           <tr>
@@ -24,7 +24,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr>
+          <tr v-for="member in members" :key="member.id">
             <td>{{ member.first_name }} {{ member.middle_name }} {{ member.last_name }}</td>
             <td>{{ member.address }}</td>
             <td>{{ member.contact_number }}</td>
@@ -37,7 +37,7 @@
     </div>
 
     <div v-else class="alert alert-info">
-      No newly registered member found.
+      No newly registered members found.
     </div>
   </div>
 </template>
@@ -46,16 +46,16 @@
 import { ref, onMounted } from 'vue'
 import axios from 'axios'
 
-const member = ref(null)
+const members = ref([])     // changed from 'member' to 'members'
 const loading = ref(true)
 const error = ref(null)
 
-const fetchLatestMember = async () => {
+const fetchLatestMembers = async () => {
   try {
     const response = await axios.get('/member/new')
-    member.value = response.data.data
+    members.value = response.data.data   // assign array
   } catch (err) {
-    error.value = err.response?.data?.message || 'Failed to fetch latest member.'
+    error.value = err.response?.data?.message || 'Failed to fetch latest members.'
   } finally {
     loading.value = false
   }
@@ -70,7 +70,7 @@ const formatDate = (dateString) => {
   })
 }
 
-onMounted(fetchLatestMember)
+onMounted(fetchLatestMembers)
 </script>
 
 <style scoped>

@@ -6,7 +6,7 @@ auth.json
 
 # Ignore dependencies and build artifacts
 /node_modules
-/public/hot
+# /public/hot
 /npm-debug.log
 /yarn-error.log
 
