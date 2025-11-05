@@ -74,7 +74,7 @@ Route::prefix('contribution')->name('contributions.')->middleware('auth')->group
     Route::get('/toggle-purok/{purok}/{deceasedId}', [ContributionController::class, 'toggleContributionPurok'])->name('togglePurok');
     Route::get('/members-data', [ContributionController::class, 'getMembersData'])
     ->name('members.data');
-    Route::get('/list', [ArchiveContribution::class, 'getContributions'])
+    Route::get('/list/{id}', [ArchiveContribution::class, 'getContributions'])
     ->name('list');
 });
 
@@ -193,6 +193,7 @@ Route::prefix('deathReport')->name('deathReport.')->middleware('auth')->group(fu
 });
 Route::prefix('officialArchived')->name('officialArchived.')->middleware('auth')->group(function (){
     Route::post('/restore/{id}', [OfficialArchive::class, 'restoreOfficial'])->name('restoreOfficial');
+    Route::post('/collectors/restore/{id}', [OfficialArchive::class, 'restoreCollector'])->name('collector.restore');
 });
 Route::prefix('filterAnalytics')->name('filterAnalytics.')->middleware('auth')->group(function (){
     Route::get('/deceased/next/{id}', [FilterAnalytics::class, 'next'])->name('next');

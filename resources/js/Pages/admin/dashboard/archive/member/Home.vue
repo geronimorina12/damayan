@@ -83,8 +83,7 @@ watch(
 watch(
   () => props.officials,
   (newData) => {
-    getOfficials.value = newData
-    getOfficials.value.push(getOtherOfficial.value);
+    getOfficials.value = [...newData, ...getOtherOfficial.value]
     console.log("Official: ", getOfficials.value)
   },
   { immediate: true }

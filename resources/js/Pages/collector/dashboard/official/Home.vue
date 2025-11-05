@@ -51,7 +51,7 @@ const formatDate = (dateString) => {
         <CollectorLayout>
             <div class="modern-container">
               <div class="header-section">
-                <h1 class="page-title">Protec Damayan Officials</h1>
+                <h1 class="page-title fw-light fs-5">Protec Damayan Officials</h1>
                 <!-- <p class="page-subtitle">Manage organization officials and their information</p> -->
               </div>
               

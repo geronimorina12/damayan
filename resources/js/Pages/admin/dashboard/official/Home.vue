@@ -50,7 +50,8 @@ const formatDate = (dateString) => {
     <div>
         <AdminLayout>
             <div class="modern-container">
-              <div class="header-section">
+              <div class="scroll-content">
+                <div class="header-section">
                 <h5 class="fw-light">Protec Damayan Officials</h5>
                 <!-- <p class="page-subtitle">Manage organization officials and their information</p> -->
               </div>
@@ -150,6 +151,7 @@ const formatDate = (dateString) => {
                   </button>
                 </div>
               </div>
+              </div>
             </div>
         </AdminLayout>
 
@@ -189,9 +191,19 @@ const formatDate = (dateString) => {
 
 <style scoped>
 .modern-container {
+  height: 100vh;
+  overflow-y: auto;
+  overflow-x: hidden;
   padding: 2rem;
-  max-width: 1200px;
-  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+.scroll-content {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding-bottom: 5rem;
 }
 
 .header-section {
@@ -492,5 +504,12 @@ input:checked + .toggle-slider:before {
     flex-direction: column;
     gap: 0.5rem;
   }
+  .scroll-content {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding-bottom: 10rem;
+}
 }
 </style>

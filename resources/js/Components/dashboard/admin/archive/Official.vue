@@ -1,6 +1,7 @@
 <script setup>
 import { ref, defineProps, watch } from 'vue'
 import { router, Head, Link } from '@inertiajs/vue3'
+import axios from 'axios'
 
 const props = defineProps({
   officials: {
@@ -10,13 +11,15 @@ const props = defineProps({
 })
 
 let getOfficials = ref([])
-
 const showModal = ref(false)
 const modalTitle = ref('')
 const modalMessage = ref('')
-const modalType = ref('') 
+const modalType = ref('')
 const modalAction = ref(null)
 const modalData = ref(null)
+const contributions = ref(null)
+const totalAmount = ref(0)
+const selectedOfficial = ref(null)
 
 const showConfirmation = (title, message, action, data = null) => {
   modalTitle.value = title
@@ -27,7 +30,6 @@ const showConfirmation = (title, message, action, data = null) => {
   showModal.value = true
 }
 
-// Show alert modal
 const showAlert = (title, message) => {
   modalTitle.value = title
   modalMessage.value = message
@@ -35,7 +37,6 @@ const showAlert = (title, message) => {
   showModal.value = true
 }
 
-// Execute modal action
 const executeModalAction = () => {
   if (modalAction.value && modalData.value) {
     modalAction.value(modalData.value)
@@ -45,11 +46,12 @@ const executeModalAction = () => {
   showModal.value = false
 }
 
-// Close modal
 const closeModal = () => {
   showModal.value = false
   modalAction.value = null
   modalData.value = null
+  contributions.value = null
+  totalAmount.value = 0
 }
 
 watch(
@@ -81,17 +83,19 @@ const performDeletePermanently = (id) => {
   })
 }
 
-const restoreOfficial = (id) => {
+const restoreOfficial = (id, position) => {
   showConfirmation(
     'Restore Official',
     'Are you sure you want to restore this official?',
     performRestoreOfficial,
-    id
+    {id, position}
   )
 }
 
-const performRestoreOfficial = (id) => {
-  router.post(route('officialArchived.restoreOfficial', { id: id }), {
+const performRestoreOfficial = (data) => {
+      const { id, position } = data
+  if(position !== 'collector'){
+    router.post(route('officialArchived.restoreOfficial', { id: id }), {
     onSuccess: () => {
       showAlert('Success', 'Official restored successfully...')
     },
@@ -100,11 +104,46 @@ const performRestoreOfficial = (id) => {
       showAlert('Error', 'An error occurred while restoring the official.')
     }
   })
+  }else{
+    router.post(route('officialArchived.collector.restore', { id: id }), {
+    onSuccess: () => {
+      showAlert('Success', 'Official restored successfully...')
+    },
+    onError: (err) => {
+      console.log('An error occurred while restoring data.', err)
+      showAlert('Error', 'An error occurred while restoring the official.')
+    }
+  })
+  }
 }
 
 const formatDate = (date) => {
-  const option = { year: 'numeric' }
-  return new Date(date).toLocaleDateString(undefined, option)
+  if (!date) return 'N/A'
+  const parsedDate = new Date(date)
+  if (isNaN(parsedDate)) return 'N/A'
+  const options = { year: 'numeric' }
+  return parsedDate.toLocaleDateString(undefined, options)
+}
+
+const showTransactionInfo = async (official) => {
+  selectedOfficial.value = official
+  await getContributionsList(official.id)
+  modalTitle.value = `Transaction Info - ${official.name}`
+  modalType.value = 'transaction'
+  showModal.value = true
+}
+
+const getContributionsList = async (id) => {
+  try {
+    const response = await axios.get(`/contribution/list/${id}`)
+    contributions.value = Array.isArray(response.data)
+      ? response.data
+      : [response.data]
+    totalAmount.value = contributions.value.reduce((sum, c) => sum + Number(c.amount || 0), 0)
+  } catch (error) {
+    console.error('Error fetching contributions:', error)
+    showAlert('Error', 'Unable to fetch contribution data.')
+  }
 }
 </script>
 
@@ -134,7 +173,7 @@ const formatDate = (date) => {
           <tr v-for="(official, index) in getOfficials" :key="index">
             <td>{{ index + 1 }}</td>
             <td>{{ official?.name }}</td>
-            <td>{{ official.position || 'N/A' }}</td>
+            <td>{{ official.position ? official.position : official.role || 'N/A' }}</td>
             <td>
               {{ formatDate(official.term_start) }} -
               {{ formatDate(official.term_end) }}
@@ -165,11 +204,20 @@ const formatDate = (date) => {
                 </button>
 
                 <button
-                  class="btn btn-sm btn-outline-dark"
-                  @click="restoreOfficial(official.id)"
+                  class="btn btn-sm btn-outline-dark me-2"
+                  @click="restoreOfficial(official.id , official.position || official.role)"
                   title="restore"
                 >
                   <i class="bi bi-arrow-clockwise"></i>
+                </button>
+
+                <button
+                  class="btn btn-sm btn-outline-dark"
+                  :disabled="official.role !== 'collector'"
+                  @click="official.role === 'collector' ? showTransactionInfo(official) : null"
+                  title="view transaction info"
+                >
+                  <i class="bi bi-clock-history"></i>
                 </button>
               </div>
             </td>
@@ -182,38 +230,57 @@ const formatDate = (date) => {
       <h5 class="text-dark fw-light">No Official's Archive Data.</h5>
     </div>
 
-    <!-- Modal Component -->
-    <div v-if="showModal" class="modal fade show d-block" tabindex="-1" role="dialog" style="background-color: rgba(0,0,0,0.5)">
+    <!-- MODAL -->
+    <div
+      v-if="showModal"
+      class="modal fade show d-block"
+      tabindex="-1"
+      role="dialog"
+      style="background-color: rgba(0,0,0,0.5)"
+    >
       <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title">{{ modalTitle }}</h5>
             <button type="button" class="btn-close" @click="closeModal" aria-label="Close"></button>
           </div>
-          <div class="modal-body">
+
+          <!-- Transaction Info -->
+          <div v-if="modalType === 'transaction'" class="modal-body">
+            <div v-if="contributions && contributions.length > 0">
+
+              <table class="table table-bordered text-center mt-3">
+                <div v-if="contributions && contributions.length">
+               <span class="text-success fw-bold">{{ selectedOfficial?.name }}</span>
+                   has diligently served as a collector, successfully collecting a total amount 
+                   of  <span class="text-success fw-bold">₱{{ totalAmount }}</span> 
+                    during his/her service.
+              </div>
+              </table>
+            </div>
+            <div v-else>
+              <p>No contribution data found.</p>
+            </div>
+          </div>
+
+          <!-- Alert / Confirm Modal -->
+          <div v-else class="modal-body">
             <p>{{ modalMessage }}</p>
           </div>
+
           <div class="modal-footer">
-            <button 
-              v-if="modalType === 'confirm'" 
-              type="button" 
-              class="btn btn-secondary" 
-              @click="closeModal"
-            >
-              Cancel
-            </button>
-            <button 
-              v-if="modalType === 'confirm'" 
-              type="button" 
-              class="btn btn-primary" 
+            <button
+              v-if="modalType === 'confirm'"
+              type="button"
+              class="btn btn-primary"
               @click="executeModalAction"
             >
               Confirm
             </button>
-            <button 
-              v-if="modalType === 'alert'" 
-              type="button" 
-              class="btn btn-primary" 
+            <button
+              v-if="modalType === 'alert'"
+              type="button"
+              class="btn btn-primary"
               @click="closeModal"
             >
               OK
@@ -233,7 +300,6 @@ const formatDate = (date) => {
   overflow-y: auto;
 }
 
-/* Make sure table is readable and scrollable */
 .table th,
 .table td {
   vertical-align: middle;
@@ -244,7 +310,6 @@ const formatDate = (date) => {
   overflow-x: auto;
 }
 
-/* Keep action buttons in one horizontal row */
 .action-buttons {
   flex-wrap: nowrap !important;
   gap: 0.25rem;

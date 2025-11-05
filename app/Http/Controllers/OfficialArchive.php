@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\OfficialModel;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
 class OfficialArchive extends Controller
@@ -30,4 +32,15 @@ class OfficialArchive extends Controller
         $official->restore();
         return redirect()->back()->with(['success' => 'Official restored successfully...'], 201);
     }
+    public function restoreCollector($id)
+        {
+            $collector = User::onlyTrashed()
+                ->where('role', 'collector')
+                ->where('id', $id)
+                ->firstOrFail();
+            Log::info('id: '. $collector->id);
+            $collector->restore();
+
+            return redirect()->back()->with('success', 'Collector restored successfully.');
+        }
 }
