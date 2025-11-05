@@ -29,6 +29,49 @@ const getDeceasedMembers = ref([])
 let getOfficials = ref([])
 let getOtherOfficial = ref([]);
 
+// Modal state
+const showModal = ref(false)
+const modalTitle = ref('')
+const modalMessage = ref('')
+const modalType = ref('') // 'confirm' or 'alert'
+const modalAction = ref(null)
+const modalData = ref(null)
+
+// Show confirmation modal
+const showConfirmation = (title, message, action, data = null) => {
+  modalTitle.value = title
+  modalMessage.value = message
+  modalType.value = 'confirm'
+  modalAction.value = action
+  modalData.value = data
+  showModal.value = true
+}
+
+// Show alert modal
+const showAlert = (title, message) => {
+  modalTitle.value = title
+  modalMessage.value = message
+  modalType.value = 'alert'
+  showModal.value = true
+}
+
+// Execute modal action
+const executeModalAction = () => {
+  if (modalAction.value && modalData.value) {
+    modalAction.value(modalData.value)
+  } else if (modalAction.value) {
+    modalAction.value()
+  }
+  showModal.value = false
+}
+
+// Close modal
+const closeModal = () => {
+  showModal.value = false
+  modalAction.value = null
+  modalData.value = null
+}
+
 watch(
   () => props.otherOfficial,
   (newData) => {
@@ -79,27 +122,45 @@ function filterAliveMembers(membersList = props.members) {
 }
 
 const deletePermanently = (id) => {
-  if (confirm('Are you sure you want to delete this member permanently?')) {
-    router.delete(route('archive.deleteMember', { id: id }), {
-      onSuccess: () => {
-        alert('Member deleted successfully...')
-      },
-      onError: (err) =>
-        console.log('An error occurred while deleting data.', err)
-    })
-  }
+  showConfirmation(
+    'Delete Member Permanently',
+    'Are you sure you want to delete this member permanently? This action cannot be undone.',
+    performDeletePermanently,
+    id
+  )
+}
+
+const performDeletePermanently = (id) => {
+  router.delete(route('archive.deleteMember', { id: id }), {
+    onSuccess: () => {
+      showAlert('Success', 'Member deleted successfully...')
+    },
+    onError: (err) => {
+      console.log('An error occurred while deleting data.', err)
+      showAlert('Error', 'An error occurred while deleting the member.')
+    }
+  })
 }
 
 const undoMember = (id) => {
-  if (confirm('Are you sure you want to undo this member?')) {
-    router.post(route('archive.undo', { id: id }), {
-      onSuccess: () => {
-        alert('Member restored successfully...')
-      },
-      onError: (err) =>
-        console.log('An error occurred while restoring data.', err)
-    })
-  }
+  showConfirmation(
+    'Restore Member',
+    'Are you sure you want to restore this member?',
+    performUndoMember,
+    id
+  )
+}
+
+const performUndoMember = (id) => {
+  router.post(route('archive.undo', { id: id }), {
+    onSuccess: () => {
+      showAlert('Success', 'Member restored successfully...')
+    },
+    onError: (err) => {
+      console.log('An error occurred while restoring data.', err)
+      showAlert('Error', 'An error occurred while restoring the member.')
+    }
+  })
 }
 </script>
 
@@ -111,7 +172,7 @@ const undoMember = (id) => {
         class="container-fluid d-flex flex-row justify-content-between align-items-center mb-2 flex-wrap"
       >
         <div>
-          <h5 class="fw-semibold fs-3 mb-0">Archived</h5>
+          <h5 class="fw-light fs-5 mb-0">Archived</h5>
         </div>
 
         <div class="mt-2 mt-md-0">
@@ -192,6 +253,47 @@ const undoMember = (id) => {
 
       <div class="container text-center mt-3" v-else>
         <h5 class="text-dark fw-light">No Member's Archive Data.</h5>
+      </div>
+
+      <!-- Modal Component -->
+      <div v-if="showModal" class="modal fade show d-block" tabindex="-1" role="dialog" style="background-color: rgba(0,0,0,0.5)">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">{{ modalTitle }}</h5>
+              <button type="button" class="btn-close" @click="closeModal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <p>{{ modalMessage }}</p>
+            </div>
+            <div class="modal-footer">
+              <button 
+                v-if="modalType === 'confirm'" 
+                type="button" 
+                class="btn btn-secondary" 
+                @click="closeModal"
+              >
+                Cancel
+              </button>
+              <button 
+                v-if="modalType === 'confirm'" 
+                type="button" 
+                class="btn btn-primary" 
+                @click="executeModalAction"
+              >
+                Confirm
+              </button>
+              <button 
+                v-if="modalType === 'alert'" 
+                type="button" 
+                class="btn btn-primary" 
+                @click="closeModal"
+              >
+                OK
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
 
       <Official :officials="getOfficials" />

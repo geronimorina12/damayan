@@ -11,6 +11,47 @@ const props = defineProps({
 
 let getOfficials = ref([])
 
+const showModal = ref(false)
+const modalTitle = ref('')
+const modalMessage = ref('')
+const modalType = ref('') 
+const modalAction = ref(null)
+const modalData = ref(null)
+
+const showConfirmation = (title, message, action, data = null) => {
+  modalTitle.value = title
+  modalMessage.value = message
+  modalType.value = 'confirm'
+  modalAction.value = action
+  modalData.value = data
+  showModal.value = true
+}
+
+// Show alert modal
+const showAlert = (title, message) => {
+  modalTitle.value = title
+  modalMessage.value = message
+  modalType.value = 'alert'
+  showModal.value = true
+}
+
+// Execute modal action
+const executeModalAction = () => {
+  if (modalAction.value && modalData.value) {
+    modalAction.value(modalData.value)
+  } else if (modalAction.value) {
+    modalAction.value()
+  }
+  showModal.value = false
+}
+
+// Close modal
+const closeModal = () => {
+  showModal.value = false
+  modalAction.value = null
+  modalData.value = null
+}
+
 watch(
   () => props.officials,
   (newData) => {
@@ -20,27 +61,45 @@ watch(
 )
 
 const deletePermanently = (id) => {
-  if (confirm('Are you sure you want to delete this member permanently?')) {
-    router.delete(route('officialArchive.deleteOfficial', { id: id }), {
-      onSuccess: () => {
-        alert('Member deleted successfully...')
-      },
-      onError: (err) =>
-        console.log('An error occurred while deleting data.', err)
-    })
-  }
+  showConfirmation(
+    'Delete Official Permanently',
+    'Are you sure you want to delete this official permanently? This action cannot be undone.',
+    performDeletePermanently,
+    id
+  )
+}
+
+const performDeletePermanently = (id) => {
+  router.delete(route('officialArchive.deleteOfficial', { id: id }), {
+    onSuccess: () => {
+      showAlert('Success', 'Official deleted successfully...')
+    },
+    onError: (err) => {
+      console.log('An error occurred while deleting data.', err)
+      showAlert('Error', 'An error occurred while deleting the official.')
+    }
+  })
 }
 
 const restoreOfficial = (id) => {
-  if (confirm('Are you sure you want to restore this official?')) {
-    router.post(route('officialArchived.restoreOfficial', { id: id }), {
-      onSuccess: () => {
-        alert('Official restored successfully...')
-      },
-      onError: (err) =>
-        console.log('An error occurred while restoring data.', err)
-    })
-  }
+  showConfirmation(
+    'Restore Official',
+    'Are you sure you want to restore this official?',
+    performRestoreOfficial,
+    id
+  )
+}
+
+const performRestoreOfficial = (id) => {
+  router.post(route('officialArchived.restoreOfficial', { id: id }), {
+    onSuccess: () => {
+      showAlert('Success', 'Official restored successfully...')
+    },
+    onError: (err) => {
+      console.log('An error occurred while restoring data.', err)
+      showAlert('Error', 'An error occurred while restoring the official.')
+    }
+  })
 }
 
 const formatDate = (date) => {
@@ -121,6 +180,47 @@ const formatDate = (date) => {
 
     <div class="container text-center mt-3" v-else>
       <h5 class="text-dark fw-light">No Official's Archive Data.</h5>
+    </div>
+
+    <!-- Modal Component -->
+    <div v-if="showModal" class="modal fade show d-block" tabindex="-1" role="dialog" style="background-color: rgba(0,0,0,0.5)">
+      <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">{{ modalTitle }}</h5>
+            <button type="button" class="btn-close" @click="closeModal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <p>{{ modalMessage }}</p>
+          </div>
+          <div class="modal-footer">
+            <button 
+              v-if="modalType === 'confirm'" 
+              type="button" 
+              class="btn btn-secondary" 
+              @click="closeModal"
+            >
+              Cancel
+            </button>
+            <button 
+              v-if="modalType === 'confirm'" 
+              type="button" 
+              class="btn btn-primary" 
+              @click="executeModalAction"
+            >
+              Confirm
+            </button>
+            <button 
+              v-if="modalType === 'alert'" 
+              type="button" 
+              class="btn btn-primary" 
+              @click="closeModal"
+            >
+              OK
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>

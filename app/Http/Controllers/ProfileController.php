@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ProfileUpdateRequest;
+use App\Models\OfficialModel;
 use App\Models\User;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Http\RedirectResponse;
@@ -72,5 +73,20 @@ class ProfileController extends Controller
         $request->session()->regenerateToken();
 
         return Redirect::to('/');
+    }
+    public function presidentProfile()
+    {
+        // Get the official whose position is 'president'
+        $president = OfficialModel::where('position', 'president')->first();
+
+        // Optional: handle case where no president record exists
+        if (!$president) {
+            return redirect()->back()->with('error', 'No president record found.');
+        }
+
+        // Return Inertia page with the president data
+        return Inertia::render('admin/dashboard/profile/Index', [
+            'president' => $president,
+        ]);
     }
 }

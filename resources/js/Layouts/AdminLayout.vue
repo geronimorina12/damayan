@@ -78,6 +78,19 @@ const overlayStyles = computed(() => {
       </div>
 
       <div class="nav flex-column">
+
+        <div class="my-0 py-0 name-info">
+          <hr class="hr">
+        <Link :href="route('presidentProfile.show')" class="nav-link my-0 text-dark align-items-start py-0 d-flex flex-row justify-content-start" @click="closeSidebar">
+          <div><i class="bi bi-person-circle me-2 fs-3"></i></div> 
+          <div class=" text-start">
+            <div class="name"> {{ user.name || 'User' }}</div>
+            <div class=" text-success">President</div>  
+          </div>
+        </Link>
+        <hr class="hr">
+        </div>
+
         <Link href="/dashboard" class="nav-link text-dark d-flex align-items-center"
           @click="closeSidebar"
           :class="{ active: currentRoute.includes('/dashboard') }"
@@ -183,5 +196,14 @@ const overlayStyles = computed(() => {
 }
 .logo-container {
   cursor: pointer;
+}
+.name{
+  font-size: 1rem;
+}
+.name-info hr {
+  margin: 0 !important;
+  height: 3px;
+  background: #333;
+  margin: 10px 0 !important;
 }
 </style>
