@@ -16,6 +16,8 @@ const props = defineProps({
 let getUsers = ref([]);
 let getAdmins = ref([]);
 let userIdClicked = ref(null);
+let userRole = ref("");
+
 watch(
     () => props.admins,
     (newAdmins) => {
@@ -32,11 +34,16 @@ watch(
     { immediate: true }
 );
 
-const action1Func = (userId) => {
+const action1Func = (userId, role) => {
     userIdClicked.value = userId;
+    userRole.value = role;
 };
 const editFunc = () => {
-    router.get(route('role.edit', {id: userIdClicked.value}));
+    if(userRole.value === 'admin' || userRole.value === 'collector'){
+      router.get(route('role.edit', {id: userIdClicked.value}));
+    }else{
+      router.get(route('role.official.edit', {official: userIdClicked.value}));
+    }
 };
 const deleteFunc = () => {
     if(confirm("Are you sure you want to delete this user?")) {
@@ -100,7 +107,7 @@ const getUserAcess = (role, position) => {
                                                     class="bi bi-three-dots-vertical action1"
                                                     data-bs-toggle="modal"
                                                     data-bs-target="#action1Modal"
-                                                    @click="action1Func(user.id)"
+                                                    @click="action1Func(user.id, user.role || user.position)"
                                                 ></i>
                                             </button>
                                         </td>

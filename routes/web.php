@@ -122,7 +122,9 @@ Route::prefix('settings')->name('settings.')->middleware('auth')->group(function
 Route::prefix('role')->name('role.')->middleware('auth')->group(function () {
     Route::get('/view-roles', [RoleController::class, 'index'])->name('index');
     Route::get('/users/{user}/edit', [RoleController::class, 'edit'])->name('edit');
+    Route::get('/officials/{official}/edit', [RoleController::class, 'editOfficial'])->name('official.edit');
     Route::put('/users/{user}', [RoleController::class, 'update'])->name('update');
+    Route::put('/officials/{official}', [RoleController::class, 'updateOfficial'])->name('official.update');
     Route::get('/add-user-route', [RoleController::class, 'add'])->name('add');
     Route::post('/add-user-post', [RoleController::class, 'addUser'])->name('addUser');
     Route::delete('/delete-user/{user}', [RoleController::class, 'destroy'])->name('deleteUser');

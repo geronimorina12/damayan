@@ -26,6 +26,12 @@ class RoleController extends Controller
             'user' => $user
         ]);
     }
+      public function editOfficial(OfficialModel $official)
+    {
+        return Inertia::render('admin/roleManagementPage/EditOfficial', [
+            'official' => $official
+        ]);
+    }
 
     public function update(Request $request, User $user)
     {
@@ -45,6 +51,46 @@ class RoleController extends Controller
         }
 
         $user->save();
+
+        return redirect()->back()->with('success', 'User updated successfully.');
+    }
+
+     public function updateOfficial(Request $request, OfficialModel $official)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|max:255|unique:officials,email,' . $official->id,
+            'position' => 'required|',
+            'password' => 'nullable|string|min:6',
+        ]);
+
+        if($validated['position'] === 'president'){
+        $official->name = $validated['name'];
+        $official->email = $validated['email'];
+        $official->position = $validated['position'];
+
+        // Update also the admin credentials since c president mismo ang admin
+        $admin = User::where('role', 'admin')->first();
+        $admin->update([
+            'name' => $validated['name'] ?: $admin->name,
+            'email' => $validated['email'] ?: $admin->email,
+            'password' => $validated['password'] ?: $admin->password,
+        ]);
+        $official->save();
+        $admin->save();
+        return redirect()->back()->with('success', 'User updated successfully.');
+
+        }
+
+        $official->name = $validated['name'];
+        $official->email = $validated['email'];
+        $official->position = $validated['position'];
+
+        if (!empty($validated['password'])) {
+            $official->password = Hash::make($validated['password']);
+        }
+
+        $official->save();
 
         return redirect()->back()->with('success', 'User updated successfully.');
     }

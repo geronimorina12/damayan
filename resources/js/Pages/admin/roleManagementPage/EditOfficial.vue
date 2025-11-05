@@ -5,26 +5,26 @@ import AdminLayout from '@/Layouts/AdminLayout.vue';
 import { ref } from 'vue';
 
 const props = defineProps({
-  user: {
+  official: {
     type: Object,
     default: () => ({}),
   },
 });
 
 const form = useForm({
-  name: props.user.name || '',
-  email: props.user.email || '',
-  role: props.user.role || '',
+  name: props.official.name || '',
+  email: props.official.email || '',
+  position: props.official.position || '',
   password: '',
 });
 
 const showSuccessAlert = ref(false);
 
 const submit = () => {
-  form.put(route('role.update', { user: props?.user.id }), {
+  form.put(route('role.official.update', { official: props?.official.id }), {
     onSuccess: () => {
       showSuccessAlert.value = true;
-      setTimeout(() => (showSuccessAlert.value = false), 3000); // Auto-hide after 3s
+      setTimeout(() => (showSuccessAlert.value = false), 3000); // auto-hide after 3 seconds
     },
     onError: (e) => {
       console.log('Failed to update user. Please check the form for errors.', e);
@@ -85,18 +85,23 @@ const submit = () => {
           </div>
 
           <div class="mb-3">
-            <label for="role" class="form-label">Role</label>
+            <label for="role" class="form-label">Position</label>
             <select
               id="role"
-              v-model="form.role"
+              v-model="form.position"
               class="form-select"
-              :class="{ 'is-invalid': form.errors.role }"
+              :class="{ 'is-invalid': form.errors.position }"
             >
-              <option value="" disabled>Select Role</option>
-              <!-- <option value="admin">Admin</option> -->
-              <option value="collector">Collector</option>
+              <option value="" disabled>Select Position</option>
+              <option value="admin">Admin</option>
+              <option value="president">President</option>
+              <option value="vice-president">Vice President</option>
+              <option value="secretary">Secretary</option>
+              <option value="treasurer">Treasurer</option>
+              <option value="purok-leader">Purok Leader</option>
+              <option value="member">Member</option>
             </select>
-            <div class="invalid-feedback">{{ form.errors.role }}</div>
+            <div class="invalid-feedback">{{ form.errors.position }}</div>
           </div>
 
           <div class="mb-3">
