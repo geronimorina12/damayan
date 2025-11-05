@@ -113,9 +113,9 @@ watch(
         </div>
       </div>
 
-      <div>
+      <!-- <div>
         <Contributions />
-      </div>
+      </div> -->
       <div class="dashboard-container">
     <CurrentDeceased :data="getCurrentDeceased" />
     <DeceasedRecorded :records="getAllDeceased" />

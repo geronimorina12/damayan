@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\DeathReportModel;
 use App\Models\memberModel;
 use App\Models\OfficialModel;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -16,11 +17,13 @@ class ArchiveController extends Controller
         ->orderBy('date_of_death', 'desc')
         ->get();
         $officials = OfficialModel::onlyTrashed()->get();
+        $otherOfficial = User::onlyTrashed()->get();
 
         return Inertia::render('admin/dashboard/archive/member/Home', [
             'members' => $members,
             'deceasedMembers' => $deceasedMembers,
             'officials' => $officials,
+            'otherOfficial' => $otherOfficial
         ]);
     }
     public function view($id){

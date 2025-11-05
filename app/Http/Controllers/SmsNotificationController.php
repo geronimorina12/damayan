@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\ArchiveContributions;
+use App\Models\AssistanceDistribution;
 use App\Models\BeneficiaryModel;
 use App\Models\ContributionModel;
 use App\Models\memberModel;
@@ -35,11 +36,13 @@ class SmsNotificationController extends Controller
         $deathReport = SmsNotificationSaved::where('type', 'deathReport')->latest()->first();
         $scheduleContribution = SmsNotificationSaved::where('type', 'scheduleContribution')->latest()->first();
         $reminders = SmsNotificationSaved::where('type', 'reminders')->latest()->first();
-        $fundUpdates = SmsNotificationSaved::where('type', 'fundUpdates')->latest()->first();
+        $currentFund = AssistanceDistribution::sum('total_amount');
+
+        $fundUpdates = "Total money disbursed so far is " . $currentFund . ". Thank you for your continuous support.";
         return Inertia::render('admin/SmsPage', [
             'deathReport' => $deathReport,
             'scheduleContribution' => $scheduleContribution,
-            'reminders' => "Hello, our records show you still have an unpaid balance for the contribution (Damayan). Please settle it at your earliest convenience. Thank you.",
+            'reminders' => "Hello! You still have an unpaid Damayan contribution. Please settle as soon as possible. If already paid, please ignore this message. Thank you",
             'fundUpdates' => $fundUpdates,
             'members' => memberModel::select('id', 'first_name', 'last_name')->get()->toArray(),
         ]);

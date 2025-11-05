@@ -52,7 +52,7 @@ const deleteFunc = () => {
 };
 const getUserAcess = (role, position) => {
     if(role === 'collector' || position === 'collector') return 'Status updates'
-    if(role === 'admin' || position === 'admin') return 'Full modules'
+    if(role === 'admin' || position === 'president') return 'Full modules'
     if(role === 'secretary' || position === 'secretary') return 'Records and Reports'
     if(role === 'vise_president' || position === 'vise_president') return 'Review and Approval'
     else return "N/A"

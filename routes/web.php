@@ -59,6 +59,7 @@ Route::delete('/delete-member/{id}', [MembersController::class, 'destroy'])->nam
 Route::post('/add-new-member-post', [AdminController::class, 'addMemberPost'])->name('addMemberPost');
 Route::post('/add-beneficiary', [AdminController::class, 'addBeneficiary'])->name('addBeneficiary');
 Route::delete('/delete-beneficiary/{id}', [AdminController::class, 'deleteBeneficiary'])->name('deleteBeneficiary');
+Route::get('/beneficiaries/{member}', [MembersController::class, 'fetchBeneficiary'])->name('beneficiaries.fetch');
 Route::get('/view-member-info/{id}', [MembersController::class, 'viewMemberInfo'])->name('viewMemberInfo');
 Route::get('/edit-member-route/{id}', [MembersController::class, 'editMember'])->name('editMember');
 Route::put('/members/{id}', [MembersController::class, 'update'])->name('members.update');

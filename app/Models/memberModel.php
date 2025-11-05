@@ -21,7 +21,8 @@ class memberModel extends Model
         'age',
         'middle_name',
         'status',
-        'occupation'
+        'occupation',
+        'gender'
     ];
     public function beneficiaries()
 {

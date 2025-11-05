@@ -53,7 +53,8 @@ class DailyTask extends Command
     }
 
     //  Message (formal)
-    $message = "Good day. We would like to inform you in advance that an individual is expected to be laid to rest soon, based on our records from two days prior. Let us keep the bereaved family in our thoughts.";
+    // $message = "Good day. We would like to inform you in advance that an individual is expected to be laid to rest soon, based on our records from two days prior. Let us keep the bereaved family in our thoughts.";
+    $message = "Hello! You still have an unpaid Damayan contribution. Please settle as soon as possible. If already paid, please ignore this message. Thank you";
 
     //  Get members with contact numbers
     $members = memberModel::whereNotNull('contact_number')->get();

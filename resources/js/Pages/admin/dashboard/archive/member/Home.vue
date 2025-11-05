@@ -17,17 +17,32 @@ const props = defineProps({
   officials: {
     type: Array,
     default: () => []
+  },
+  otherOfficial: {
+    type: Array,
+    default: () => []
   }
 })
 
 let getMembers = ref([])
 const getDeceasedMembers = ref([])
 let getOfficials = ref([])
+let getOtherOfficial = ref([]);
+
+watch(
+  () => props.otherOfficial,
+  (newData) => {
+    getOtherOfficial.value = newData
+  },
+  { immediate: true }
+)
 
 watch(
   () => props.officials,
   (newData) => {
     getOfficials.value = newData
+    getOfficials.value.push(getOtherOfficial.value);
+    console.log("Official: ", getOfficials.value)
   },
   { immediate: true }
 )

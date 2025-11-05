@@ -61,7 +61,7 @@ function sendReminders() {
 
 function sendFundUpdates() {
   router.post(route('smsNotification.sendFundUpdates'), {
-    message: getFundUpdates.value.message,
+    message: getFundUpdates,
   }, {
     onSuccess: () => alert('Fund Updates sent successfully!'),
     onError: () => alert('Error sending Fund Updates')
@@ -78,37 +78,18 @@ function sendFundUpdates() {
 
         <div class="scroll-content">
 
-          <!-- Reminders -->
-          <div class="mb-4 position-relative">
-            <div>
-              <label for="reminders" class="form-label">Reminders</label>
-            </div>
-            <textarea v-model="getReminders" id="reminders" class="form-control" disabled></textarea>
-
-            <div class="container-fluid d-flex flex-row align-items-center gap-3 justify-content-end mt-3">
-              <div>
-                <Link :href="route('smsNotification.sendToAllSelected', {type: 'reminders', message: getReminders})" class="save-btn text-uppercase text-decoration-none">
-                  send to all selected
-                </Link>
-              </div>
-              <div>
-                <button class="save-btn text-uppercase" @click="sendReminders">send</button>
-              </div>
-            </div>
-          </div>
-
           <!-- Fund Updates -->
           <div class="mb-4 position-relative">
             <div>
               <label for="fundUpdates" class="form-label">Fund Updates</label>
             </div>
-            <textarea v-model="getFundUpdates.message" id="fundUpdates" class="form-control" disabled></textarea>
+            <textarea v-model="getFundUpdates" id="fundUpdates" class="form-control" disabled></textarea>
 
             <div class="container-fluid d-flex flex-row align-items-center gap-3 justify-content-end mt-3">
               <div>
-                <Link :href="route('smsNotification.sendToAllSelected', {type: 'fundUpdates', message: getFundUpdates.message})" class="save-btn text-uppercase text-decoration-none">
+                <!-- <Link :href="route('smsNotification.sendToAllSelected', {type: 'fundUpdates', message: getFundUpdates})" class="save-btn text-uppercase text-decoration-none">
                   send to all selected
-                </Link>
+                </Link> -->
               </div>
               <div>
                 <button class="save-btn text-uppercase" @click="sendFundUpdates">send</button>

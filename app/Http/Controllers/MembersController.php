@@ -87,10 +87,35 @@ class MembersController extends Controller
         $member = memberModel::findOrFail($id);
         $member->status = $request->status;
         $member->save();
-
+        
         return redirect()->back()->with([
             'message' => 'Member status updated successfully.',
         ]);
     }
 
+    public function fetchBeneficiary(Request $request, $memberId)
+    {
+        try {
+            
+            $beneficiaries = BeneficiaryModel::where('user_id', $memberId)->get();
+            
+            
+            return response()->json([
+                'success' => true,
+                'data' => $beneficiaries,
+                'debug' => [
+                    'member_id' => $memberId,
+                    'count' => $beneficiaries->count()
+                ],
+                'message' => 'Beneficiaries fetched successfully'
+            ]);
+        } catch (\Exception $e) {
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to fetch beneficiaries',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
 }
