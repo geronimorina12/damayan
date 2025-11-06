@@ -6,6 +6,7 @@ use App\Models\ArchiveContributions;
 use App\Models\AssistanceDistribution;
 use App\Models\BeneficiaryModel;
 use App\Models\ContributionModel;
+use App\Models\DeathReportModel;
 use App\Models\memberModel;
 use App\Models\SmsNotificationSaved;
 use App\Models\User;
@@ -192,10 +193,13 @@ class SmsNotificationController extends Controller
      */
     public function sendReminders(Request $request)
     {
-        $request->validate([
-            'message' => 'required|string'
-        ]);
-
+         $validated = $request->validate([
+        'message' => 'required|string',
+        'type' => 'required|string',
+        'memberId' => 'required|integer',
+        'lastNight' => 'required|date',
+        'startOfContribution' => 'required|date',
+         ]);
         $members = memberModel::whereNotNull('contact_number')->get();
         if ($members->isEmpty()) {
             return redirect()->back()->with('error', 'No members with contact numbers.');
@@ -203,14 +207,32 @@ class SmsNotificationController extends Controller
 
         $message = $request->input('message');
 
+         $deceased = memberModel::find($validated['memberId']);
+        if (!$deceased) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Member not found.',
+            ], 404);
+        }
+
         $notification = SmsNotificationSaved::create([
-            'message' => $message,
+            'message' => $validated['message'],
             'type' => 'reminders',
         ]);
+              DeathReportModel::create([
+                'reported_by' => Auth::id(),
+                'member_id' => $validated['memberId'],
+                'deceased_name' => $deceased->first_name . ' ' . $deceased->last_name,
+                'date_of_death' => $validated['startOfContribution'],
+                'report_date' => now(),
+                'last_night' => $validated['lastNight'],
+            ]);
+            $deceased->delete();
 
-        foreach ($members as $member) {
-            $this->sendAndLog($message, $member->contact_number, $notification->id);
-        }
+        // foreach ($members as $member) {
+        //     $this->sendAndLog($message, $member->contact_number, $notification->id);
+        // }
+            $this->sendAndLog($message, '09811986323', 1);
 
         return redirect()->back()->with('success', 'Reminders saved and SMS sent to all members.');
     }

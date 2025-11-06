@@ -56,10 +56,9 @@ const toggleMemberStatus = (member) => {
   })
 }
 
-// 📄 Pagination navigation
 const goToPage = (url) => {
   if (url) {
-    router.get(url, {}, { preserveScroll: true, preserveState: true })
+    router.visit(url, { preserveState: true })
   }
 }
 

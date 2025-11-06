@@ -12,8 +12,7 @@ class ReportForCollector extends Controller
 {
     public function index()
     {
-        $contributions = ContributionModel::where('purok', 'purok1')
-            ->with(['memberContribution' => function ($query) {
+        $contributions = ContributionModel::with(['memberContribution' => function ($query) {
                 $query->select('id', 'first_name','middle_name', 'last_name', 'purok', 'contact_number');
             }])
             ->latest('created_at')

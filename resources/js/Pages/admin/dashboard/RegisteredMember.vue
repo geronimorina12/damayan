@@ -117,7 +117,11 @@ const closePopup = (event) => {
 onMounted(() => document.addEventListener('click', closePopup))
 onUnmounted(() => document.removeEventListener('click', closePopup))
 
-const goToPage = (url) => { if (url) router.visit(url) }
+const goToPage = (url) => {
+  if (url) {
+    router.visit(url, { preserveState: true })
+  }
+}
 
 const isDead = (member) => {
   deceasedMember.value = member || null

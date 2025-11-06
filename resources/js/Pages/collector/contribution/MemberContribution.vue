@@ -120,28 +120,28 @@ const confirmPayment = () => {
   form.purok = normalizePurok(selectedMemberPurok.value);
   form.collector = selectedCollector.value;
 
-  form.post(route('contributions.store'), {
-    onSuccess: () => {
-      const member = getMember.value.find((m) => m.id === selectedMemberId.value);
-      if (member) member.paid = true;
-    },
-  });
+ form.post(route('contributions.store'), {
+  onSuccess: () => {
+    const member = getMember.value.find((m) => m.id === selectedMemberId.value);
+    if (member) member.paid = true;
+
+    if (!getPaidMembersId.value.includes(selectedMemberId.value)) {
+      getPaidMembersId.value.push(selectedMemberId.value);
+    }
+  },
+});
 };
 
 // Mark as unpaid
 const unPaidFunc = (memberId) => {
   const member = getMember.value.find((m) => m.id === memberId);
-  if (member) {
-    member.paid = false;
-    router.delete(route('collectorContribution.deleteContribution', memberId), {
-      onSuccess: () => {
-        alert('Member marked as unpaid successfully.');
-      },
-      onError: () => {
-        alert('An error occurred, please try again.');
-      },
-    });
-  }
+  if (member) member.paid = false;
+
+  router.delete(route('collectorContribution.deleteContribution', memberId), {
+    onSuccess: () => {
+      getPaidMembersId.value = getPaidMembersId.value.filter(id => id !== memberId);
+    },
+  });
 };
 const showReportModal = ref(false);
 
