@@ -19,13 +19,15 @@ watch(
     },
     { immediate: true }
 );
-const puroks = ["purok1", "purok2", "purok3", "purok4"];
+const puroks = ['Purok 1', 'Purok 2', 'Purok 3', 'Purok 4']
 const togglePurok = (purok) => {
-    router.get(route("contributions.togglePurok", { purok: purok, deceasedId: props.currentDeceasedId || 0 }), {
+    const cleanedPurok = purok.toLowerCase().replace(/\s+/g, '');
+    router.get(route("contributions.togglePurok", { purok: cleanedPurok, deceasedId: props.currentDeceasedId || 0 }), {
         onSuccess: () => console.log("changing purok"),
         onError: (err) => console.log("An error occured: ", err),
     });
 };
+const formatPurok = (purok) => purok.toLowerCase().replace(/\s+/g, '');
 </script>
 
 <template>
@@ -42,7 +44,7 @@ const togglePurok = (purok) => {
                     v-for="purok in puroks"
                     :key="purok"
                     class="mx-2 purok"
-                    :class="{ 'fw-bold active': purok === getActivePurok }"
+                    :class="{ 'fw-bold active': formatPurok(purok) === getActivePurok }"
                     @click="togglePurok(purok)"
                 >
                     {{ purok }}

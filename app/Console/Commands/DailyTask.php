@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Models\AssistanceDistribution;
 use App\Models\ContributionModel;
 use App\Models\DeathReportModel;
 use App\Models\memberModel;
@@ -52,7 +53,6 @@ class DailyTask extends Command
         return;
     }
 
-    //  Message (formal)
     // $message = "Good day. We would like to inform you in advance that an individual is expected to be laid to rest soon, based on our records from two days prior. Let us keep the bereaved family in our thoughts.";
     $message = "Hello! You still have an unpaid Damayan contribution. Please settle as soon as possible. If already paid, please ignore this message. Thank you";
 
@@ -64,7 +64,7 @@ class DailyTask extends Command
         return;
     }
 
-    // 5 Send SMS to each member
+    //  Send SMS to each member
     foreach ($members as $member) {
         $this->sendAndLog($message, $member->contact_number, 0);
     }
@@ -94,41 +94,55 @@ class DailyTask extends Command
          }
     }
 
+    // Make a distributions record based on data in ContributionModel
+    public function makeDistribution(){
+        $groupedContributions = ContributionModel::select('deceased_id')
+        ->selectRaw('SUM(amount) as total_amount')
+        ->groupBy('deceased_id')
+        ->get();
+
+    foreach ($groupedContributions as $group) {
+        AssistanceDistribution::create([
+            'report_id' => $group->deceased_id, 
+            'total_amount' => $group->total_amount,
+            'distribution_date' => now(),
+        ]);
+    }
+    }
     /**
- * Cleanup contributions & deceased records whose last_night was 1 day ago
+ * Cleanup contributions & deceased records whose last_night == today
  */
 private function cleanupDeceasedContributions(): void
 {
     Log::info("Starting cleanupDeceasedContributions...");
 
-    $yesterday = now()->subDay()->startOfDay();
-    $today = now()->startOfDay();
+    $todayStart = now()->startOfDay();
+    $todayEnd = now()->endOfDay();
 
-    // Get deceased whose last_night is exactly yesterday
+    // Get deceased whose 'last_night' is exactly today
     $toCleanup = DeathReportModel::whereNotNull('last_night')
-        ->whereDate('last_night', $yesterday)
+        ->whereBetween('last_night', [$todayStart, $todayEnd])
         ->get();
 
     if ($toCleanup->isEmpty()) {
-        Log::info("No deceased found for cleanup (last_night = yesterday).");
+        Log::info("No deceased found for cleanup (last_night = today).");
         return;
     }
 
     foreach ($toCleanup as $deceased) {
         Log::info("Cleaning records for deceased with ID: {$deceased->id}");
 
-        // 1️⃣ Delete contributions for this deceased
+        // 1️ Delete all contributions for this deceased member
         $deletedContributions = ContributionModel::where('deceased_id', $deceased->member_id)->delete();
         Log::info("Deleted {$deletedContributions} contributions for deceased member_id: {$deceased->member_id}");
 
-        // 2️⃣ Delete the deceased record
+        // 2️ Delete the deceased record itself
         $deceased->delete();
         Log::info("Deleted deceased record with ID: {$deceased->id}");
     }
 
     Log::info("cleanupDeceasedContributions completed.");
 }
-
 
 
 }

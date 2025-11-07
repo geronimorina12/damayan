@@ -43,7 +43,8 @@ watch(() => props.activePurok, (newPurok) => {
 }, { immediate: true });
 
 watch(() => props.paidMembers, (newPaid) => {
-  getPaidMembers.value = newPaid.toString() + (newPaid === 1 ? ' Member' : ' Members');
+  // getPaidMembers.value = newPaid.toString() + (newPaid === 1 ? ' Member' : ' Members');
+  getPaidMembers.value = getAmount.value / 100;
 }, { immediate: true });
 
 watch(() => props.unpaidMembers, (newUnpaid) => {
@@ -68,7 +69,7 @@ watch(() => props.unpaidMembers, (newUnpaid) => {
           <tr style="border-top: 1px solid #000; border-bottom: 1px solid #000;">
             <td class="bg-light">{{ getMembersCount }} Members</td>
             <td class="bg-light">{{ getAmount }}</td>
-            <td class="bg-light">{{ getActivePurok[5] }}</td>
+            <td class="bg-light">{{ getActivePurok[5] || 'All'}}</td>
             <td class="bg-light">{{ getPaidMembers }}</td>
             <td class="bg-light">{{ getUnpaidMembers }}</td>
           </tr>

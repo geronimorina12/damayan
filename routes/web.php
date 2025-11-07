@@ -58,6 +58,7 @@ Route::middleware('auth')->group(function () {
 Route::get('/add-new-member', [AdminController::class, 'addNewMember'])->name('addNewMember');
 Route::get('/member/new', [AdminController::class, 'newlyRegistered'])->name('newlyRegistered');
 Route::delete('/delete-member/{id}', [MembersController::class, 'destroy'])->name('deleteMember');
+Route::get('/members', [MembersController::class, 'getAllMembers']);
 Route::post('/add-new-member-post', [AdminController::class, 'addMemberPost'])->name('addMemberPost');
 Route::post('/add-beneficiary', [AdminController::class, 'addBeneficiary'])->name('addBeneficiary');
 Route::delete('/delete-beneficiary/{id}', [AdminController::class, 'deleteBeneficiary'])->name('deleteBeneficiary');

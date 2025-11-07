@@ -118,4 +118,10 @@ class MembersController extends Controller
             ], 500);
         }
     }
+    public function getAllMembers()
+    {
+        $members = memberModel::all();
+
+        return response()->json($members);
+    }
 }

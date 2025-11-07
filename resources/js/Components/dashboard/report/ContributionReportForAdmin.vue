@@ -1,5 +1,5 @@
 <script setup>
-import { defineProps, ref, watch } from "vue";
+import { defineProps, onMounted, ref, watch } from "vue";
 const props = defineProps({
     contributions: {
         type: Array,
@@ -11,7 +11,7 @@ const purok1Count = ref([]);
 const purok2Count = ref([]);
 const purok3Count = ref([]);
 const purok4Count = ref([]);
-
+const members = ref([]);
 watch(
     () => props.contributions,
     (data) => {
@@ -31,6 +31,44 @@ watch(
     },
     { immediate: true }
 );
+const getAllMembers = async () => {
+  try {
+    const response = await axios.get("/members");
+    members.value = response.data;
+
+    // Normalize and filter
+    const purok1 = members.value.filter(
+      (item) => item.purok.toLowerCase().replace(/\s/g, "") === "purok1"
+    );
+    const purok2 = members.value.filter(
+      (item) => item.purok.toLowerCase().replace(/\s/g, "") === "purok2"
+    );
+    const purok3 = members.value.filter(
+      (item) => item.purok.toLowerCase().replace(/\s/g, "") === "purok3"
+    );
+    const purok4 = members.value.filter(
+      (item) => item.purok.toLowerCase().replace(/\s/g, "") === "purok4"
+    );
+
+    // assign counts
+    purok1Count.value = purok1.length;
+    purok2Count.value = purok2.length;
+    purok3Count.value = purok3.length;
+    purok4Count.value = purok4.length;
+
+    console.log("Purok 1:", purok1Count.value);
+    console.log("Purok 2:", purok2Count.value);
+    console.log("Purok 3:", purok3Count.value);
+    console.log("Purok 4:", purok4Count.value);
+
+  } catch (error) {
+    console.error("Error fetching members:", error);
+  }
+};
+
+onMounted(() => {
+    getAllMembers();
+})
 </script>
 
 <template>
@@ -57,7 +95,7 @@ watch(
                                 <td data-label="Purok">{{ item.purok }}</td>
                                 <td data-label="Assigned Members">{{ item.members }}</td>
                                 <td data-label="Paid">{{ item.paid }}</td>
-                                <td data-label="Unpaid">{{ item.not_paid }}</td>
+                                <td data-label="Unpaid">{{ item.members - item.paid }}</td>
                             </tr>
                         </tbody>
                     </table>

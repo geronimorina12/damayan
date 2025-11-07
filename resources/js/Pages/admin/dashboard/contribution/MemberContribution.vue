@@ -1,7 +1,7 @@
 <script setup>
 import { Head, Link, router } from '@inertiajs/vue3';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
-import { defineProps, watch, ref } from 'vue';
+import { defineProps, watch, ref, computed } from 'vue';
 import Purok from '@/Components/dashboard/contribution/Purok.vue';
 import Header from '@/Components/dashboard/contribution/Header.vue';
 import Collector from '@/Components/dashboard/contribution/Collector.vue';
@@ -91,6 +91,27 @@ function goToPage(url) {
     router.get(url, {}, { preserveScroll: true, preserveState: true });
   }
 }
+
+// ✅ Realtime search functionality
+const searchQuery = ref('');
+
+const filteredMembers = computed(() => {
+  if (!searchQuery.value.trim()) {
+    return getMember.value;
+  }
+
+  const keyword = searchQuery.value.toLowerCase();
+  return getMember.value.filter(mem => {
+    return (
+      (mem.first_name && mem.first_name.toLowerCase().includes(keyword)) ||
+      (mem.last_name && mem.last_name.toLowerCase().includes(keyword)) ||
+      (mem.middle_name && mem.middle_name.toLowerCase().includes(keyword)) ||
+      (mem.purok && mem.purok.toLowerCase().includes(keyword)) ||
+      (mem.contributions?.[0]?.collector && mem.contributions[0].collector.toLowerCase().includes(keyword)) ||
+      (mem.contributions?.[0]?.status && mem.contributions[0].status.toLowerCase().includes(keyword))
+    );
+  });
+});
 </script>
 
 <template>
@@ -98,22 +119,37 @@ function goToPage(url) {
   <div>
     <AdminLayout>
       <div class="main-container">
+        <div class="container-fluid d-flex justify-content-end">
+                 <!--  Search Input -->
+            <div class="search-container w-50">
+              <input
+                v-model="searchQuery"
+                type="text"
+                class="form-control"
+                placeholder="Search by name, purok, collector, or status..."
+              />
+            </div>
+        </div>
         <div class="bg-light p-2">
-          <Header />
+          <div class="">
+            <Header />
+          </div>
+
           <Purok 
             :activePurok="getSelectedPurok" 
             :currentDeceasedId="getCurrentDeceasedMember?.member_id"
           />
-         <div class="mt-3" v-if="getCurrentDeceasedMember">
-           <ToggleContribution 
-            :allDeceased="getCurrentDeceasedMembers" 
-            :data="getCurrentDeceasedMember"
-            :purok="getSelectedPurok"
-          />
-         </div>
+
+          <div class="mt-3" v-if="getCurrentDeceasedMember">
+            <ToggleContribution 
+              :allDeceased="getCurrentDeceasedMembers" 
+              :data="getCurrentDeceasedMember"
+              :purok="getSelectedPurok"
+            />
+          </div>
 
           <!-- Desktop Table View -->
-          <div class="table-responsive mt-3 desktop-view" v-if="Array.isArray(getMember) && getMember.length > 0">
+          <div class="table-responsive mt-3 desktop-view" v-if="Array.isArray(filteredMembers) && filteredMembers.length > 0">
             <table class="table table-bordered table-hover align-middle text-center">
               <thead class="table-light">
                 <tr>
@@ -127,7 +163,7 @@ function goToPage(url) {
                 </tr>
               </thead>
               <tbody class="scrollable-tbody">
-                <tr v-for="(mem, index) in getMember" :key="index">
+                <tr v-for="(mem, index) in filteredMembers" :key="index">
                   <td>{{ mem?.id }}</td>
                   <td class="text-start">
                     {{ mem?.first_name }} {{ mem?.middle_name }} {{ mem?.last_name }}
@@ -177,9 +213,9 @@ function goToPage(url) {
           </div>
 
           <!-- Mobile Card View -->
-          <div class="mobile-view" v-if="Array.isArray(getMember) && getMember.length > 0">
+          <div class="mobile-view" v-if="Array.isArray(filteredMembers) && filteredMembers.length > 0">
             <div class="mobile-cards-container">
-              <div class="mobile-card" v-for="(mem, index) in getMember" :key="index">
+              <div class="mobile-card" v-for="(mem, index) in filteredMembers" :key="index">
                 <div class="mobile-card-header">
                   <div class="mobile-member-id">ID: {{ mem?.id }}</div>
                   <div class="mobile-status">

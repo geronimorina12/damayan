@@ -35,10 +35,9 @@ class DashboardController extends Controller
     ->sum('amount');
 
     // Total Disbursed This Month
-    $totalDisbursed = ContributionModel::whereMonth('payment_date', $month)
-    ->whereYear('payment_date', $year)
-    ->where('deceased_id', $currentDeceasedMemberId)
-    ->sum('amount');
+    $totalDisbursed = AssistanceDistribution::whereMonth('distribution_date', $month)
+    ->whereYear('distribution_date', $year)
+    ->sum('total_amount');
 
     // Balance (mag kakaiba ang table pero same cra member san damayan)
     // why? may conflict kc sa data san members pag abot sa database
@@ -62,8 +61,8 @@ class DashboardController extends Controller
     $yearCollected = ContributionModel::whereYear('payment_date', $currentYear)
         ->sum('amount');
 
-    $yearDisbursed = ContributionModel::whereYear('payment_date', $currentYear)
-        ->sum('amount');
+    $yearDisbursed = AssistanceDistribution::whereYear('distribution_date', $currentYear)
+        ->sum('total_amount');
 
         // Same logic sa month balance
         $membersCount = memberModel::count();
