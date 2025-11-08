@@ -151,7 +151,7 @@ const filteredMembers = computed(() => {
           <!-- Desktop Table View -->
           <div class="table-responsive mt-3 desktop-view" v-if="Array.isArray(filteredMembers) && filteredMembers.length > 0">
             <table class="table table-bordered table-hover align-middle text-center">
-              <thead class="table-light">
+              <thead class="">
                 <tr>
                   <th>ID</th>
                   <th>NAME</th>
@@ -347,9 +347,8 @@ thead tr {
   padding: 10px 0;
 }
 table th {
-  background: #D4F3F9;
+  background: #D4F3F9 !important;
 }
-
 /* Mobile Card Styles */
 .mobile-view {
   display: none;

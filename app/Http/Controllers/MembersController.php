@@ -124,4 +124,29 @@ class MembersController extends Controller
 
         return response()->json($members);
     }
+    public function search(Request $request)
+{
+    $query = trim($request->input('query'));
+
+    if (empty($query)) {
+        return response()->json(['members' => []]);
+    }
+
+    $members = memberModel::query()
+        ->where(function ($q) use ($query) {
+            $q->where('first_name', 'LIKE', "%{$query}%")
+              ->orWhere('middle_name', 'LIKE', "%{$query}%")
+              ->orWhere('last_name', 'LIKE', "%{$query}%")
+              ->orWhereRaw("CONCAT(first_name, ' ', last_name) LIKE ?", ["%{$query}%"])
+              ->orWhereRaw("CONCAT(first_name, ' ', middle_name, ' ', last_name) LIKE ?", ["%{$query}%"])
+              ->orWhere('contact_number', 'LIKE', "%{$query}%")
+              ->orWhere('purok', 'LIKE', "%{$query}%");
+        })
+        ->orderBy('first_name', 'asc')
+        ->limit(20)
+        ->get();
+
+    return response()->json(['members' => $members]);
+}
+
 }

@@ -1,6 +1,7 @@
 <script setup>
-import { ref, defineProps, watch, onMounted, onUnmounted, nextTick, computed } from 'vue'
-import { router, Head, Link, useForm } from '@inertiajs/vue3'
+import { ref, defineProps, watch, onMounted, onUnmounted, nextTick } from 'vue'
+import { router, Head, Link } from '@inertiajs/vue3'
+import axios from 'axios'
 import AdminLayout from '@/Layouts/AdminLayout.vue'
 import Header from '@/Components/dashboard/admin/registeredMember/Header.vue'
 import Alert from '@/Components/dashboard/admin/registeredMember/Alert.vue'
@@ -22,60 +23,120 @@ const getMembers = ref([])
 const showActionsPopup = ref(false)
 const popupPosition = ref({ top: '0px', left: '0px' })
 const activeMemberId = ref(null)
-const actionButtonRefs = ref({})
 const statusChangeAlert = ref(false)
 const passNameToAlert = ref('')
-const searchQuery = ref("")
+const searchQuery = ref('')
 const getDeceasedMember = ref([])
 const deceasedMember = ref({})
 const showDeceasedModal = ref(false)
 const editMemberValue = ref({})
-const searchResult = ref(null)
 const searching = ref(false)
-const searchError = ref("")
+const searchError = ref('')
+const lastClickedDeceasedId = ref(null)
 
-watch(() => props.members, (newMember) => {
-  getMembers.value = newMember.data || []
-}, { immediate: true })
+//  Initialize members from props
+watch(
+  () => props.members,
+  (newMember) => {
+    getMembers.value = newMember.data || []
+  },
+  { immediate: true }
+)
 
-watch(() => props.deceasedMember, (newData) => {
-  getDeceasedMember.value = newData.data || []
-}, { immediate: true })
+//  Initialize deceased members
+watch(
+  () => props.deceasedMember,
+  (newData) => {
+    getDeceasedMember.value = newData.data || []
+  },
+  { immediate: true }
+)
 
-const filteredMembers = computed(() => {
-  if (!searchQuery.value) return getMembers.value
-  return getMembers.value.filter((member) => {
-    const fullName = `${member.first_name} ${member.middle_name || ''} ${member.last_name}`.toLowerCase()
-    return (
-      fullName.includes(searchQuery.value.toLowerCase()) ||
-      (member.contact_number || '').toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-      (member.purok || '').toLowerCase().includes(searchQuery.value.toLowerCase())
-    )
-  })
+// 🧠 Debounced real-time search + logging
+let searchTimer = null
+const DEBOUNCE_MS = 400
+
+watch(searchQuery, (newQuery) => {
+  if (searchTimer) clearTimeout(searchTimer)
+  searchTimer = setTimeout(() => performSearch(String(newQuery || '').trim()), DEBOUNCE_MS)
 })
 
+async function performSearch(query) {
+  if (!query) {
+    getMembers.value = props.members.data
+    console.log('Search cleared — showing default members:', getMembers.value)
+    searching.value = false
+    return
+  }
+
+  searching.value = true
+  searchError.value = ''
+  console.log(`🔍 Searching for: "${query}"`)
+
+  try {
+    const response = await axios.get(route('members.search'), {
+      params: { query }
+    })
+
+    console.log(' Raw Axios response:', response)
+    console.log(' Response data:', response.data)
+
+    let membersPayload = []
+    const d = response?.data || {}
+
+    // Normalize possible backend shapes
+    if (Array.isArray(d.members)) {
+      membersPayload = d.members
+    } else if (d.members && Array.isArray(d.members.data)) {
+      membersPayload = d.members.data
+    } else if (d.member && typeof d.member === 'object') {
+      membersPayload = [d.member]
+    } else if (Array.isArray(d.data)) {
+      membersPayload = d.data
+    } else {
+      const possible = Object.values(d).find(v => Array.isArray(v) && v[0]?.id)
+      if (possible) membersPayload = possible
+    }
+
+    console.log('🧾 Normalized members array to display:', membersPayload)
+    getMembers.value = membersPayload
+  } catch (error) {
+    console.error('❌ Search error:', error)
+    searchError.value = 'Error fetching search results.'
+  } finally {
+    searching.value = false
+  }
+}
+
+// 🗑️ Trash member
 const trashMember = (id) => {
   if (confirm('Are you sure you want to trash this member?')) {
     router.delete(route('deleteMember', { id }), {
       onSuccess: () => {
         alert('Member trashed')
         showActionsPopup.value = false
-      },
+      }
     })
   }
 }
 
+// 🔄 Toggle active/inactive status
 const toggleMemberStatus = (member) => {
   const newStatus = member.status === 'active' ? 'inactive' : 'active'
-  router.put(route('toggleMemberStatus', { id: member.id }), { status: newStatus }, {
-    onSuccess: () => {
-      member.status = newStatus
-      statusChangeAlert.value = newStatus === 'active'
-      passNameToAlert.value = `${member.first_name} ${member.middle_name} ${member.last_name}`
+  router.put(
+    route('toggleMemberStatus', { id: member.id }),
+    { status: newStatus },
+    {
+      onSuccess: () => {
+        member.status = newStatus
+        statusChangeAlert.value = newStatus === 'active'
+        passNameToAlert.value = `${member.first_name} ${member.middle_name} ${member.last_name}`
+      }
     }
-  })
+  )
 }
 
+// ⚙️ Popup logic
 const togglePopup = (event, memberId) => {
   if (showActionsPopup.value && activeMemberId.value === memberId) {
     showActionsPopup.value = false
@@ -106,9 +167,12 @@ const togglePopup = (event, memberId) => {
 }
 
 const closePopup = (event) => {
-  if (showActionsPopup.value && event.target &&
-      !event.target.closest('.actions-popup') &&
-      !event.target.closest('.three-dots-button')) {
+  if (
+    showActionsPopup.value &&
+    event.target &&
+    !event.target.closest('.actions-popup') &&
+    !event.target.closest('.three-dots-button')
+  ) {
     showActionsPopup.value = false
     activeMemberId.value = null
   }
@@ -117,25 +181,35 @@ const closePopup = (event) => {
 onMounted(() => document.addEventListener('click', closePopup))
 onUnmounted(() => document.removeEventListener('click', closePopup))
 
+// Pagination
 const goToPage = (url) => {
-  if (url) {
-    router.visit(url, { preserveState: true })
-  }
+  if (url) router.visit(url, { preserveState: true })
 }
 
+// Deceased modal
 const isDead = (member) => {
   deceasedMember.value = member || null
   showDeceasedModal.value = true
+  lastClickedDeceasedId.value = member?.id || null
+}
+const closeDeceasedModal = () => {
+  showDeceasedModal.value = false
+
+  // If user closed without saving, uncheck the deceased toggle
+  if (lastClickedDeceasedId.value) {
+    const checkbox = document.querySelector(
+      `input[type="checkbox"][data-member-id="${lastClickedDeceasedId.value}"]`
+    )
+    if (checkbox) checkbox.checked = false
+    lastClickedDeceasedId.value = null
+  }
 }
 
-const closeDeceasedModal = () => { showDeceasedModal.value = false }
-
+// Edit modal
 const EditMemberFunc = (member) => {
   showActionsPopup.value = false
   editMemberValue.value = { ...member }
 }
-
-const searchPage = (page) => router.visit(route('members.searchPage') + `?page=${page}`)
 </script>
 
 <template>
@@ -146,20 +220,24 @@ const searchPage = (page) => router.visit(route('members.searchPage') + `?page=$
       <Alert :status="statusChangeAlert" :name="passNameToAlert" />
 
       <div class="container table-container">
-        <div class="search-box mb-3">
+        <!-- 🔍 Search box -->
+        <div class="search-box mb-3 position-relative">
           <input 
             type="text" 
             class="form-control search-input"
             placeholder="Search members by name, contact, or purok..." 
             v-model="searchQuery"
           />
+          <div v-if="searching" class="spinner-border text-primary spinner-sm position-absolute end-0 top-50 translate-middle-y me-3" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
         </div>
 
         <div class="table-responsive">
           <table class="table table-bordered align-middle text-center">
             <thead class="table-light">
               <tr>
-                <th >ID</th>
+                <th>ID</th>
                 <th>NAME</th>
                 <th>GENDER</th>
                 <th>AGE</th>
@@ -171,7 +249,21 @@ const searchPage = (page) => router.visit(route('members.searchPage') + `?page=$
               </tr>
             </thead>
             <tbody>
-              <tr v-for="(member, index) in filteredMembers" :key="index">
+              <!-- Loading animation row -->
+              <tr v-if="searching">
+                <td colspan="9" class="text-center">
+                  <div class="spinner-border text-info" role="status"></div>
+                  <p class="mt-2 text-muted">Searching...</p>
+                </td>
+              </tr>
+
+              <!-- Error message -->
+              <tr v-if="searchError && !searching">
+                <td colspan="9" class="text-danger text-center">{{ searchError }}</td>
+              </tr>
+
+              <!-- Results -->
+              <tr v-for="(member, index) in getMembers" :key="index">
                 <td>{{ member.id }}</td>
                 <td class="text-start">{{ member.first_name }} {{ member.middle_name }} {{ member.last_name }}</td>
                 <td>{{ member.gender || 'N/A' }}</td>
@@ -195,18 +287,17 @@ const searchPage = (page) => router.visit(route('members.searchPage') + `?page=$
                   </div>
                 </td>
 
-                 <td class="status-cell">
+                <td class="status-cell">
                   <div class="status-toggle">
                     <label class="toggle-switch">
                       <input
                         type="checkbox"
+                        :data-member-id="member.id"
                         :checked="getDeceasedMember.some(d => d.member_id === member.id)"
-                       @click="isDead(member)"
+                        @click="isDead(member)"
                       >
                       <span class="toggle-slider"></span>
                     </label>
-                    <span class="status-label" :class="member.status === 'active' ? 'active' : 'inactive'">
-                    </span>
                   </div>
                 </td>
 
@@ -228,14 +319,14 @@ const searchPage = (page) => router.visit(route('members.searchPage') + `?page=$
                 </td>
               </tr>
 
-              <tr v-if="filteredMembers.length === 0">
+              <tr v-if="!searching && getMembers.length === 0">
                 <td colspan="9" class="text-center text-muted">No members found</td>
               </tr>
             </tbody>
           </table>
         </div>
 
-       <div class="pagination-wrapper mt-3 mb-5">
+        <div class="pagination-wrapper mt-3 mb-5">
           <div class="pagination-controls">
             <button
               v-for="(link, index) in props.members.links"
@@ -247,11 +338,10 @@ const searchPage = (page) => router.visit(route('members.searchPage') + `?page=$
             />
           </div>
         </div>
-
-
       </div>
     </div>
 
+    <!-- Actions Popup -->
     <div v-if="showActionsPopup"
       class="actions-popup bg-white border rounded shadow-sm p-2"
       :style="{ top: popupPosition.top, left: popupPosition.left }">
@@ -262,6 +352,7 @@ const searchPage = (page) => router.visit(route('members.searchPage') + `?page=$
       </ul>
     </div>
 
+    <!-- Edit Member Modal -->
     <div class="modal fade" id="editMember" tabindex="-1">
       <div class="modal-dialog modal-lg">
         <div class="modal-content">
@@ -274,6 +365,7 @@ const searchPage = (page) => router.visit(route('members.searchPage') + `?page=$
       </div>
     </div>
 
+    <!-- Deceased Modal -->
     <div v-if="showDeceasedModal" class="custom-modal-overlay" @click.self="closeDeceasedModal">
       <div class="custom-modal">
         <div class="custom-modal-header">
@@ -287,7 +379,6 @@ const searchPage = (page) => router.visit(route('members.searchPage') + `?page=$
     </div>
   </AdminLayout>
 </template>
-
 
 <style scoped>
 .main-section {
@@ -572,9 +663,15 @@ input:checked + .toggle-slider:before {
   font-weight: 600;
   color: #1f2937;
 }
-
+table th {
+  background: #D4F3F9 !important;
+}
+table td{
+  padding-top: .5rem;
+  padding-bottom: .5rem;
+}
 .modern-modal .modal-body {
-  padding: 2rem;
+  padding: 3rem !important;
 }
 
 @media (max-width: 768px) {

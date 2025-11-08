@@ -1,6 +1,6 @@
 <script setup>
 import { useForm, Link, router } from "@inertiajs/vue3";
-import { ref, defineProps, watch, computed } from "vue";
+import { ref, defineProps, watch, computed, onMounted } from "vue";
 
 const form = useForm({
   message: "",
@@ -22,6 +22,23 @@ const alertMessage = ref("");
 const alertType = ref(""); // 'success' or 'danger'
 const showAlert = ref(false);
 
+// Reactive validation for last night date
+const lastNightError = ref("");
+const hasLastNightError = computed(() => !!lastNightError.value);
+
+// Computed property for showButtons that considers the error state
+const showButtons = computed(() => 
+  form.lastNight && 
+  form.startOfContribution && 
+  !hasLastNightError.value
+);
+
+//  Set default date when component mounts
+onMounted(() => {
+  const today = new Date();
+  form.startOfContribution = today.toISOString().split("T")[0]; // yyyy-mm-dd format
+});
+
 // Watch for selected member
 watch(
   () => props.deceasedMember,
@@ -31,11 +48,40 @@ watch(
   { immediate: true }
 );
 
+// Validate last night date
+const validateLastNight = (dateString) => {
+  if (!dateString) {
+    lastNightError.value = "";
+    return;
+  }
+
+  const selectedDate = new Date(dateString);
+  const today = new Date();
+  
+  // Set both dates to midnight for accurate comparison
+  selectedDate.setHours(0, 0, 0, 0);
+  today.setHours(0, 0, 0, 0);
+  
+  if (selectedDate <= today) {
+    lastNightError.value = "The last night date cannot be set to today or a past date.";
+  } else {
+    lastNightError.value = "";
+  }
+};
+
+// Watch lastNight for changes and validate
+watch(
+  () => form.lastNight,
+  (newDate) => {
+    validateLastNight(newDate);
+  }
+);
+
 // Auto-generate message when both fields are filled
 watch(
   [() => form.lastNight, () => form.startOfContribution],
   ([last, start]) => {
-    if (last && start && getDeceasedMember.value?.first_name) {
+    if (last && start && getDeceasedMember.value?.first_name && !hasLastNightError.value) {
       const m = getDeceasedMember.value;
       form.message = `We regret to inform you that ${m.first_name} ${m.last_name} has passed away. Last night is on ${formatDate(last)}, and the collection for burial assistance starts on ${formatDate(start)}.`;
       form.memberId = m.id;
@@ -53,6 +99,12 @@ function sendReminders() {
     return;
   }
 
+  // Prevent sending if there's a validation error
+  if (hasLastNightError.value) {
+    showBootstrapAlert("Please fix the validation errors before sending.", "danger");
+    return;
+  }
+
   router.post(
     route("smsNotification.sendReminders"),
     {
@@ -63,8 +115,8 @@ function sendReminders() {
       startOfContribution: form.startOfContribution,
     },
     {
-      onSuccess: () => showBootstrapAlert("SMS send successfully."),
-      onError: () => showBootstrapAlert("An error while sending sms."),
+      onSuccess: () => showBootstrapAlert("SMS sent successfully."),
+      onError: () => showBootstrapAlert("An error occurred while sending SMS."),
     }
   );
 }
@@ -76,8 +128,6 @@ function showBootstrapAlert(message, type) {
   showAlert.value = true;
   setTimeout(() => (showAlert.value = false), 4000);
 }
-
-const showButtons = computed(() => form.lastNight && form.startOfContribution);
 
 const formatDate = (dateString) => {
   const options = { year: "numeric", month: "long", day: "numeric" };
@@ -120,7 +170,15 @@ const formatDate = (dateString) => {
       <div class="row g-3">
         <div class="col-md-6">
           <label class="form-label fw-semibold text-secondary">Enter last night:</label>
-          <input type="date" class="form-control" v-model="form.lastNight" />
+          <input 
+            type="date" 
+            class="form-control" 
+            :class="{ 'is-invalid': hasLastNightError }"
+            v-model="form.lastNight" 
+          />
+          <div v-if="hasLastNightError" class="invalid-feedback d-block">
+            {{ lastNightError }}
+          </div>
         </div>
 
         <div class="col-md-6">
@@ -129,16 +187,23 @@ const formatDate = (dateString) => {
         </div>
       </div>
 
-      <!-- Message preview -->
-      <transition name="fade">
-        <p
-          v-if="form.message"
-          class="mt-4 bg-light p-3 rounded border-start border-4 border-primary"
-        >
-          {{ form.message }}
-        </p>
-      </transition>
+            <!-- Message input -->
+        <transition name="fade">
+          <div
+            v-if="form.message && !hasLastNightError"
+            class="mt-4"
+          >
+            <label class="form-label fw-semibold text-secondary">Message:</label>
+            <textarea 
+              class="form-control"
+              v-model="form.message"
+              rows="4"
+              style="resize: vertical; min-height: 100px;"
+            ></textarea>
+          </div>
+        </transition>
 
+        
       <!-- Action buttons -->
       <transition name="fade">
         <div

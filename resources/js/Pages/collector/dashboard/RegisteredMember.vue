@@ -1,6 +1,7 @@
 <script setup>
-import { ref, defineProps, watch, computed, onMounted, nextTick } from 'vue'
+import { ref, defineProps, watch, computed, nextTick } from 'vue'
 import { router, Head, Link } from '@inertiajs/vue3'
+import axios from 'axios'
 import CollectorLayout from '@/Layouts/CollectorLayout.vue'
 
 const props = defineProps({
@@ -11,33 +12,85 @@ const props = defineProps({
 })
 
 let getMembers = ref([])
-const searchQuery = ref("") //  search input
-const paginationContainer = ref(null) //  for responsive scrolling
+const searchQuery = ref("") // search input
+const paginationContainer = ref(null)
+const searching = ref(false)
+const searchError = ref("")
 
+//  Initialize default members
 watch(
   () => props.members,
   async (newMember) => {
     getMembers.value = newMember.data || []
-
     await nextTick()
     centerActivePagination()
   },
   { immediate: true }
 )
 
-//  Filter members
-const filteredMembers = computed(() => {
-  if (!searchQuery.value) return getMembers.value
-  return getMembers.value.filter((member) => {
-    const fullName = `${member.first_name} ${member.middle_name || ''} ${member.last_name}`.toLowerCase()
-    return (
-      fullName.includes(searchQuery.value.toLowerCase()) ||
-      (member.contact_number || '').toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-      (member.purok || '').toLowerCase().includes(searchQuery.value.toLowerCase())
-    )
-  })
+//  Debounced search logic
+let searchTimer = null
+const DEBOUNCE_MS = 400
+
+watch(searchQuery, (newQuery) => {
+  if (searchTimer) clearTimeout(searchTimer)
+  searchTimer = setTimeout(() => performSearch(newQuery.trim()), DEBOUNCE_MS)
 })
 
+async function performSearch(query) {
+  if (!query) {
+    getMembers.value = props.members.data
+    console.log('Search cleared — showing default members:', getMembers.value)
+    searching.value = false
+    return
+  }
+
+  searching.value = true
+  searchError.value = ""
+  console.log(`🔍 Searching for: "${query}"`)
+
+  try {
+    const response = await axios.get(route('members.search'), {
+      params: { query }
+    })
+
+    console.log(" Raw backend response:", response.data)
+
+    let membersPayload = []
+    const d = response.data || {}
+
+    // normalize structure
+    if (Array.isArray(d.members)) {
+      membersPayload = d.members
+    } else if (d.members && Array.isArray(d.members.data)) {
+      membersPayload = d.members.data
+    } else if (d.member && typeof d.member === 'object') {
+      membersPayload = [d.member]
+    } else if (Array.isArray(d.data)) {
+      membersPayload = d.data
+    } else {
+      const possible = Object.values(d).find(v => Array.isArray(v) && v[0]?.id)
+      if (possible) membersPayload = possible
+    }
+
+    console.log("🧾 Normalized member data:", membersPayload)
+
+    getMembers.value = Array.isArray(membersPayload) ? membersPayload : []
+  } catch (error) {
+    console.error("❌ Search error:", error)
+    searchError.value = "Error fetching search results."
+  } finally {
+    searching.value = false
+  }
+}
+
+//  Computed filtered members
+const filteredMembers = computed(() => {
+  if (searching.value) return [] // don't show while searching
+  return getMembers.value || []
+})
+
+// 🗑️ Trash member
 const trashMember = (id) => {
   if (confirm('Are you sure you want to trash this member?')) {
     router.delete(route('deleteMember', { id }), {
@@ -46,6 +99,7 @@ const trashMember = (id) => {
   }
 }
 
+// 🔄 Toggle active/inactive
 const toggleMemberStatus = (member) => {
   const newStatus = member.status === 'active' ? 'inactive' : 'active'
   router.put(route('toggleMemberStatus', { id: member.id }), { status: newStatus }, {
@@ -56,13 +110,12 @@ const toggleMemberStatus = (member) => {
   })
 }
 
+// 🔢 Pagination
 const goToPage = (url) => {
-  if (url) {
-    router.visit(url, { preserveState: true })
-  }
+  if (url) router.visit(url, { preserveState: true })
 }
 
-// 📱 Center the active pagination on mobile
+// 📱 Center active pagination
 const centerActivePagination = () => {
   const container = paginationContainer.value
   if (!container) return
@@ -71,7 +124,8 @@ const centerActivePagination = () => {
   if (activeBtn) {
     const containerRect = container.getBoundingClientRect()
     const activeRect = activeBtn.getBoundingClientRect()
-    const scrollOffset = activeRect.left - containerRect.left - containerRect.width / 2 + activeRect.width / 2
+    const scrollOffset =
+      activeRect.left - containerRect.left - containerRect.width / 2 + activeRect.width / 2
 
     container.scrollTo({
       left: container.scrollLeft + scrollOffset,
@@ -80,6 +134,8 @@ const centerActivePagination = () => {
   }
 }
 </script>
+
+
 
 <template>
   <Head title="Registered members" />
@@ -96,7 +152,7 @@ const centerActivePagination = () => {
       <div class="mb-3 px-3">
         <input 
           type="text" 
-          class="form-control" 
+          class="form-control w-50" 
           placeholder="Search members by name, contact, or purok..." 
           v-model="searchQuery"
         />
@@ -115,6 +171,19 @@ const centerActivePagination = () => {
             </tr>
           </thead>
           <tbody>
+            <!--  Loading State -->
+            <tr v-if="searching">
+              <td colspan="6" class="text-center py-4">
+                <div class="spinner-border text-primary" role="status">
+                  <span class="visually-hidden">Loading...</span>
+                </div>
+              </td>
+            </tr>
+
+            <!--  Error State -->
+            <tr v-if="searchError && !searching">
+              <td colspan="6" class="text-center text-danger">{{ searchError }}</td>
+</tr>
             <tr v-for="(member, index) in filteredMembers" :key="index">
               <td>{{ member.id }}</td>
               <td>{{ member?.first_name }} {{ member?.middle_name }} {{ member?.last_name }}</td>
@@ -167,7 +236,7 @@ const centerActivePagination = () => {
   vertical-align: middle;
 }
 
-/* ✅ Responsive pagination fix */
+/*  Responsive pagination fix */
 .pagination-wrapper {
   width: 100%;
   overflow-x: auto;
