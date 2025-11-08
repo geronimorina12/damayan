@@ -2,7 +2,8 @@
 import { Link } from '@inertiajs/vue3';
 import AddNewMember from './members/AddNewMember.vue';
 import NewlyCreated from './members/NewlyCreated.vue';
-
+import { ref, watch } from 'vue';
+const closeAddMemberModal = ref(false);
 // JS logic for opening and closing modals
 const openModal = (id) => {
   document.getElementById(id).classList.add('show');
@@ -17,6 +18,12 @@ window.addEventListener('click', (e) => {
   document.querySelectorAll('.custom-modal').forEach((modal) => {
     if (e.target === modal) modal.classList.remove('show');
   });
+});
+watch(closeAddMemberModal, (newVal) => {
+  if (newVal) {
+    closeModal('addNewMemberModal');
+    closeAddMemberModal.value = false; // reset it back
+  }
 });
 </script>
 
@@ -58,7 +65,7 @@ window.addEventListener('click', (e) => {
           <button class="close-btn" @click="closeModal('addNewMemberModal')">&times;</button>
         </div>
         <div class="modal-body">
-          <AddNewMember />
+          <AddNewMember v-model:closeAddMemberModal="closeAddMemberModal"/>
           
         </div>
       </div>

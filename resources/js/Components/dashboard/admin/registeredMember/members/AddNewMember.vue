@@ -1,6 +1,6 @@
 <script setup>
 import { Head, Link, useForm } from "@inertiajs/vue3";
-import { ref, defineProps } from "vue";
+import { ref, defineProps, computed, watch, defineModel } from "vue";
 
 // Temporary beneficiary form data
 const beneficiarytemp = ref({
@@ -9,52 +9,125 @@ const beneficiarytemp = ref({
   age: "",
   birth_date: "",
 });
-
+const closeModal = defineModel('closeAddMemberModal')
 const beneficiary = ref([]);
 const showAddBeneficiaryForm = ref(false);
 const successMessage = ref("");
+const birthDateError = ref("");
+const memberBirthDateError = ref("");
+
+// Computed property for current year
+const currentYear = computed(() => new Date().getFullYear());
+
+// Calculate age from birth date
+const calculateAge = (birthDate) => {
+  if (!birthDate) return "";
+
+  const today = new Date();
+  const birth = new Date(birthDate);
+  let age = today.getFullYear() - birth.getFullYear();
+  const monthDiff = today.getMonth() - birth.getMonth();
+
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+    age--;
+  }
+
+  return age.toString();
+};
+
+// Reactive validation for beneficiary birth date
+const validateBirthDate = (dateString, errorRef) => {
+  if (!dateString) {
+    errorRef.value = "";
+    return true;
+  }
+
+  const selectedDate = new Date(dateString);
+  const selectedYear = selectedDate.getFullYear();
+
+  if (selectedYear >= currentYear.value) {
+    errorRef.value = "Birth year cannot be the current year or in the future.";
+    return false;
+  }
+
+  errorRef.value = "";
+  return true;
+};
 
 // Member form
 const form = useForm({
   first_name: "",
   last_name: "",
-  address: "",
+  address: "Bonga, Bulan, Sorsogon",
   contact_number: "",
   date_of_birth: "",
   purok: "",
   age: "",
   middle_name: "",
-  status: "",
+  status: "active",
   occupation: "",
   gender: "",
   beneficiaries: [],
 });
 
+// --- Watch for member birth_date changes (reactive validation + age calc)
+watch(
+  () => form.date_of_birth,
+  (newDate) => {
+    validateBirthDate(newDate, memberBirthDateError);
+    if (newDate && !memberBirthDateError.value) {
+      form.age = calculateAge(newDate);
+    } else {
+      form.age = "";
+    }
+  }
+);
+
+// --- Watch for beneficiary birth_date changes (reactive validation + age calc)
+watch(
+  () => beneficiarytemp.value.birth_date,
+  (newDate) => {
+    validateBirthDate(newDate, birthDateError);
+    if (newDate && !birthDateError.value) {
+      beneficiarytemp.value.age = calculateAge(newDate);
+    } else {
+      beneficiarytemp.value.age = "";
+    }
+  }
+);
+
 //  Submit form with validation
 const submit = () => {
   form.clearErrors();
-
   const phoneRegex = /^0\d{10}$/;
   if (!phoneRegex.test(form.contact_number)) {
     form.setError("contact_number", "Contact number must start with 0 and be exactly 11 digits.");
     return;
   }
 
+  if (!validateBirthDate(form.date_of_birth, memberBirthDateError)) return;
+
   form.beneficiaries = beneficiary.value;
 
   form.post(route("addMemberPost"), {
     onSuccess: () => {
       successMessage.value = "Member added successfully!";
+      closeModal.value = true;
       setTimeout(() => (successMessage.value = ""), 4000);
     },
     onError: (err) => console.log("An error occurred => ", err),
   });
 };
 
-//  Add beneficiary
+//  Add beneficiary with validation
 const addBeneficiaryFunc = () => {
+  if (!validateBirthDate(beneficiarytemp.value.birth_date, birthDateError)) {
+    return;
+  }
+
   beneficiary.value.push({ ...beneficiarytemp.value });
   beneficiarytemp.value = { name: "", relation: "", age: "", birth_date: "" };
+  birthDateError.value = "";
   showAddBeneficiaryForm.value = false;
 };
 
@@ -86,16 +159,25 @@ const formatDate = (dateString) => {
           <div class="col-md-6">
             <input type="text" class="form-control" placeholder="Last name" v-model="form.last_name" />
           </div>
+
           <div class="col-md-6">
             <label class="form-label">Birth date</label>
-            <input type="date" class="form-control" v-model="form.date_of_birth" />
+            <input
+              type="date"
+              class="form-control"
+              :class="{ 'is-invalid': memberBirthDateError }"
+              v-model="form.date_of_birth"
+            />
+            <div v-if="memberBirthDateError" class="invalid-feedback d-block">
+              {{ memberBirthDateError }}
+            </div>
           </div>
 
           <div class="col-md-6">
             <input type="text" class="form-control" placeholder="First name" v-model="form.first_name" required />
           </div>
           <div class="col-md-6">
-            <input type="number" class="form-control" placeholder="Age" v-model="form.age" required />
+            <input type="number" class="form-control" placeholder="Age" v-model="form.age" required disabled />
           </div>
 
           <div class="col-md-6">
@@ -110,14 +192,21 @@ const formatDate = (dateString) => {
           </div>
 
           <div class="col-md-6">
-            <select class="form-select" v-model="form.status" required>
-              <option value="" disabled>Status</option>
-              <option value="active">Active</option>
-              <option value="inactive">Inactive</option>
-            </select>
+            <select class="form-select" v-model="form.status" disabled>
+            <option value="active" selected>Active</option>
+            <option value="inactive">Inactive</option>
+          </select>
+
           </div>
           <div class="col-md-6">
-            <input type="number" class="form-control" placeholder="Purok" v-model="form.purok" required />
+           <select class="form-select" v-model="form.purok" required>
+              <option value="" disabled selected>Select Purok</option>
+              <option value="Purok 1">Purok 1</option>
+              <option value="Purok 2">Purok 2</option>
+              <option value="Purok 3">Purok 3</option>
+              <option value="Purok 4">Purok 4</option>
+            </select>
+
           </div>
 
           <div class="col-md-6">
@@ -203,18 +292,40 @@ const formatDate = (dateString) => {
             <input type="text" placeholder="Relation" class="form-control" v-model="beneficiarytemp.relation" required />
           </div>
           <div class="col-md-6">
-            <input type="number" placeholder="Age" class="form-control" v-model="beneficiarytemp.age" required />
+            <input 
+              type="number" 
+              placeholder="Age" 
+              class="form-control" 
+              v-model="beneficiarytemp.age" 
+              disabled 
+              required 
+            />
           </div>
           <div class="col-md-6">
             <label class="form-label small">Birthdate</label>
-            <input type="date" class="form-control" v-model="beneficiarytemp.birth_date" required />
+            <input 
+              type="date" 
+              class="form-control" 
+              :class="{ 'is-invalid': birthDateError }"
+              v-model="beneficiarytemp.birth_date" 
+              required 
+            />
+            <div v-if="birthDateError" class="invalid-feedback d-block">
+              {{ birthDateError }}
+            </div>
           </div>
 
           <div class="col-12 d-flex justify-content-end gap-2 mt-3">
             <button type="button" class="btn btn-secondary" @click="showAddBeneficiaryForm = false">
               Cancel
             </button>
-            <button type="submit" class="btn btn-primary">Save Beneficiary</button>
+            <button 
+              type="submit" 
+              class="btn btn-primary"
+              :disabled="!!birthDateError || !beneficiarytemp.birth_date"
+            >
+              Save Beneficiary
+            </button>
           </div>
         </form>
       </div>
@@ -234,13 +345,11 @@ const formatDate = (dateString) => {
   -webkit-overflow-scrolling: touch;
 }
 
-/* Form fields adapt well on any screen */
 .form-control,
 .form-select {
   font-size: 0.95rem;
 }
 
-/* For very small devices */
 @media (max-width: 576px) {
   .form-control,
   .form-select {
