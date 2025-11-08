@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, watch } from "vue";
 import axios from "axios";
 import { useForm } from "@inertiajs/vue3";
 
@@ -46,13 +46,39 @@ const fetchMembersData = async () => {
         }));
 
         getFullName.value = [...memberFullNames, ...userFullNames];
+
+        // Only users with role = collector
         getCollectors.value = (users || []).filter((u) => u.role === "collector");
+
+        console.log("Collectors:", getCollectors.value);
     } catch (error) {
         console.error(error);
     }
 };
 
 onMounted(fetchMembersData);
+
+// Watch for purok selection change
+watch(
+    () => form.purok,
+    (newPurok) => {
+        if (!newPurok) return;
+
+        // Extract the number part (e.g., "purok1" -> "1")
+        const purokNumber = newPurok.replace("purok", "");
+
+        // Find collector with the same purok number
+        const collector = getCollectors.value.find(
+            (c) => String(c.purok) === String(purokNumber)
+        );
+
+        if (collector) {
+            form.collector = collector.name;
+        } else {
+            form.collector = "";
+        }
+    }
+);
 
 // Submit form
 const submit = () => {
@@ -62,10 +88,8 @@ const submit = () => {
             alertMessage.value = "Contribution successfully created!";
             showAlert.value = true;
 
-            // Auto-hide after 3 seconds
             setTimeout(() => (showAlert.value = false), 3000);
 
-            // Reset form fields
             form.reset();
         },
     });
@@ -83,8 +107,7 @@ const submit = () => {
                         </div>
 
                         <div class="card-body p-4">
-
-                            <!--  Bootstrap Alert -->
+                            <!-- Alert -->
                             <div
                                 v-if="showAlert"
                                 class="alert alert-success text-center fw-semibold"
@@ -130,38 +153,30 @@ const submit = () => {
                                     </div>
                                 </div>
 
-                                <!-- Collector -->
-                                <div class="mb-3">
-                                    <label class="form-label">Collector</label>
-                                    <select
-                                        v-model="form.collector"
-                                        class="form-control"
-                                        :class="{ 'is-invalid': form.errors.collector }"
-                                    >
-                                        <option disabled value="">-- Select Collector --</option>
-                                        <option
-                                            v-for="collector in getCollectors"
-                                            :key="collector.id"
-                                            :value="collector.name"
-                                        >
-                                            {{ collector.name }}
-                                        </option>
-                                    </select>
-                                    <div v-if="form.errors.collector" class="invalid-feedback">
-                                        {{ form.errors.collector }}
-                                    </div>
-                                </div>
-
                                 <!-- Purok -->
                                 <div class="mb-3">
                                     <label class="form-label">Purok</label>
                                     <select v-model="form.purok" class="form-control">
+                                        <option disabled value="">-- Select Purok --</option>
                                         <option value="purok1">Purok 1</option>
                                         <option value="purok2">Purok 2</option>
                                         <option value="purok3">Purok 3</option>
                                         <option value="purok4">Purok 4</option>
                                     </select>
                                 </div>
+
+                                <!-- Collector -->
+                                <div class="mb-3" v-if="form.collector">
+                                    <label class="form-label">Collector</label>
+                                    <input
+                                        type="text"
+                                        class="form-control"
+                                        v-model="form.collector"
+                                        readonly
+                                    />
+                                </div>
+
+                                <div class="text-danger" v-else>No Collector for that purok.</div>
 
                                 <!-- Deceased Member -->
                                 <div class="mb-3">
@@ -178,12 +193,12 @@ const submit = () => {
                                     </select>
                                 </div>
 
-                                <!-- Submit Button with Loader -->
+                                <!-- Submit -->
                                 <div class="d-flex justify-content-end">
                                     <button
                                         type="submit"
                                         class="btn btn-success px-4 rounded-pill d-flex align-items-center gap-2"
-                                        :disabled="form.processing"
+                                        :disabled="form.processing || !form.collector"
                                     >
                                         <span
                                             v-if="form.processing"
@@ -193,15 +208,10 @@ const submit = () => {
                                     </button>
                                 </div>
                             </form>
-
                         </div>
                     </div>
                 </div>
             </div>
-
-            <div class="container-bottom"></div>
         </div>
     </div>
 </template>
-
-<style></style>

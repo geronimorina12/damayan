@@ -117,7 +117,7 @@ public function toggleContributionPurok($purok, $deceasedId)
         ->orderBy('first_name', 'asc')
         ->get();
 
-    $users = User::select('id', 'name', 'role')
+    $users = User::select('id', 'name', 'role', 'purok')
         ->orderBy('name', 'asc')
         ->get();
 

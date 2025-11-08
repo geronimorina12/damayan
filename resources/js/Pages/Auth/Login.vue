@@ -82,7 +82,7 @@ const submit = () => {
                             @click="togglePassword"
                         >
                             <i
-                                :class="showPassword ? 'bi bi-eye-slash' : 'bi bi-eye'"
+                                :class="showPassword ? 'bi bi-eye' : 'bi bi-eye-slash'"
                             ></i>
                         </span>
                     </div>

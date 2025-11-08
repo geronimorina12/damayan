@@ -1,15 +1,13 @@
 <script setup>
 import { useForm } from '@inertiajs/vue3'
 import { Head } from '@inertiajs/vue3'
-import { ref, watch, defineProps } from 'vue'
-import { errorMessages } from 'vue/compiler-sfc'
-
+import { ref, watch, computed } from 'vue'
 
 const isCollector = ref(false)
 const successMessage = ref('')
-let hasError = ref(false);
-let errorMessage = ref("");
-let hasPresident = ref(false);
+let hasError = ref(false)
+let errorMessage = ref('')
+let hasPresident = ref(false)
 
 const form = useForm({
   first_name: '',
@@ -18,52 +16,79 @@ const form = useForm({
   name: '', // combined before submitting
   email: '',
   password: '',
+  re_password: '', // new field for re-enter password
   position: '',
   term_start: '',
   term_end: '',
   status: 1,
-  role: 'collector', // used only if collector
-  purok: '', // used only if collector
+  role: 'collector',
+  purok: '',
 })
 
+// Check if president already exists
 async function checkHasPresident() {
-    try {
-        const response = await fetch('/officials/president/has', {
-            method: 'GET', 
-            headers: {
-                'Content-Type': 'application/json',
-            }
-        });
-
-        if (!response.ok) {
-            throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-        const data = await response.json();
-        hasPresident.value = data.has_president;
-        return hasPresident;
-
-    } catch (error) {
-        console.error("Error fetching president status:", error);
-        return false;
-    }
+  try {
+    const response = await fetch('/officials/president/has', {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
+    })
+    if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`)
+    const data = await response.json()
+    hasPresident.value = data.has_president
+  } catch (error) {
+    console.error('Error fetching president status:', error)
+  }
 }
-checkHasPresident();
+checkHasPresident()
+
+// Toggle collector based on position
+watch(
+  () => form.position,
+  (newVal) => {
+    isCollector.value = newVal === 'purok_leader'
+  },
+  { immediate: true }
+)
+
+// When manually toggled as collector
 watch(isCollector, (newVal) => {
   if (newVal) {
     form.term_start = ''
     form.term_end = ''
-    form.position = 'Purok Leader'
+    form.position = 'purok_leader'
   } else {
+    if (form.position === 'purok_leader') form.position = ''
     form.email = ''
     form.password = ''
+    form.re_password = ''
   }
 })
+
+// ✅ Computed property for password match validation
+const passwordsMatch = computed(() => form.password === form.re_password)
+
+// Submit form
 function submit() {
+  if (!passwordsMatch.value && isCollector.value) {
+    hasError.value = true
+    errorMessage.value = "Passwords do not match."
+    return
+  }
+
   const middle = form.middle_initial ? ` ${form.middle_initial}.` : ''
   form.name = `${form.first_name}${middle} ${form.last_name}`.trim()
 
-  // If collector toggle ON → send to collector route
   if (isCollector.value) {
+    if (form.email === '') {
+      hasError.value = true
+      errorMessage.value = 'Please provide an email.'
+      return
+    } else if (form.password === '') {
+      hasError.value = true
+      errorMessage.value = 'Please provide a password.'
+      return
+    }
+
     const collectorForm = useForm({
       name: form.name,
       email: form.email,
@@ -72,13 +97,6 @@ function submit() {
       purok: form.purok,
     })
 
-    if(form.email == ''){
-      hasError.value  = true;
-      errorMessage.value = "Please provide a email."
-    }else if(form.password == ''){
-      hasError.value  = true;
-      errorMessage.value = "Please provide a password."
-    }
     collectorForm.post(route('reports.storeCollector'), {
       onSuccess: () => {
         successMessage.value = 'Collector added successfully!'
@@ -90,7 +108,7 @@ function submit() {
       onError: (errors) => console.log(errors),
     })
   } else {
-    // Otherwise → send to officials route
+    // Officials submission
     form.post(route('officials.add'), {
       onSuccess: () => {
         successMessage.value = 'Official added successfully!'
@@ -103,7 +121,7 @@ function submit() {
   }
 }
 
-// Helper to close the modal
+// Close modal helper
 function closeModal() {
   const modalEl = document.getElementById('addOfficialModal')
   if (modalEl) {
@@ -119,209 +137,112 @@ function closeModal() {
     <div class="container border-0 pt-2">
       <div class="card-body px-3">
         <!-- Success Alert -->
-        <div
-          v-if="successMessage"
-          class="alert alert-success alert-dismissible fade show"
-          role="alert"
-        >
+        <div v-if="successMessage" class="alert alert-success alert-dismissible fade show" role="alert">
           <i class="bi bi-check-circle-fill me-2"></i> {{ successMessage }}
-          <button
-            type="button"
-            class="btn-close"
-            data-bs-dismiss="alert"
-            aria-label="Close"
-            @click="successMessage = ''"
-          ></button>
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" @click="successMessage = ''"></button>
         </div>
 
-        <div
-          v-if="hasError"
-          class="alert alert-warning alert-dismissible fade show"
-          role="alert"
-        >
-          <i class="bi bi-check-circle-fill me-2"></i> {{ errorMessage }}
-          <button
-            type="button"
-            class="btn-close"
-            data-bs-dismiss="alert"
-            aria-label="Close"
-            @click="errorMessage = ''"
-          ></button>
+        <!-- Error Alert -->
+        <div v-if="hasError" class="alert alert-warning alert-dismissible fade show" role="alert">
+          <i class="bi bi-exclamation-circle-fill me-2"></i> {{ errorMessage }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" @click="errorMessage = ''"></button>
         </div>
 
         <form @submit.prevent="submit">
-          <!-- Name Fields -->
+          <!-- Full Name -->
           <label class="form-label fw-semibold">Full Name</label>
           <div class="row mb-3">
             <div class="col-md-4 mb-2 mb-md-0">
-              <input
-                v-model="form.first_name"
-                type="text"
-                class="form-control"
-                placeholder="e.g. Juan"
-                required
-              />
+              <input v-model="form.first_name" type="text" class="form-control" placeholder="e.g. Juan" required />
             </div>
             <div class="col-md-4 mb-2 mb-md-0">
-              <input
-                v-model="form.middle_initial"
-                type="text"
-                maxlength="1"
-                class="form-control"
-                placeholder="M.I. (optional)"
-              />
+              <input v-model="form.middle_initial" type="text" maxlength="1" class="form-control" placeholder="M.I. (optional)" />
             </div>
             <div class="col-md-4">
-              <input
-                v-model="form.last_name"
-                type="text"
-                class="form-control"
-                placeholder="e.g. Reyes"
-                required
-              />
+              <input v-model="form.last_name" type="text" class="form-control" placeholder="e.g. Reyes" required />
             </div>
           </div>
 
           <!-- Position -->
           <div class="mb-3">
             <label for="position" class="form-label fw-semibold">Position</label>
-            <select
-              id="position"
-              class="form-control"
-              v-model="form.position"
-              required
-              :disabled="isCollector"
-            >
+            <select id="position" class="form-control" v-model="form.position" required>
               <option disabled value="">Select a position</option>
               <option value="president" v-if="!hasPresident">President</option>
               <option value="vice_president">Vice President</option>
               <option value="secretary">Secretary</option>
               <option value="treasurer">Treasurer</option>
               <option value="auditor">Auditor</option>
+              <option value="purok_leader">Purok Leader</option>
             </select>
           </div>
 
           <!-- Collector Toggle -->
           <div class="form-check form-switch mb-4">
-            <input
-              class="form-check-input"
-              type="checkbox"
-              id="collector"
-              v-model="isCollector"
-            />
-            <label class="form-check-label" for="collector">
-              Register as Collector
-            </label>
+            <input class="form-check-input" type="checkbox" id="collector" v-model="isCollector" />
+            <label class="form-check-label" for="collector">Register as Collector</label>
           </div>
 
-          <!-- Collector Email & Password -->
-          <div v-if="isCollector" class="mb-3">
-            <label for="email" class="form-label fw-semibold"> Email</label>
-            <input
-              v-model="form.email"
-              type="email"
-              id="email"
-              class="form-control"
-              placeholder="juan45@gmail.com"
-            />
-          </div>
+          <!-- Collector Section -->
+          <div v-if="isCollector">
+            <div class="mb-3">
+              <label for="email" class="form-label fw-semibold">Email</label>
+              <input v-model="form.email" type="email" id="email" class="form-control" placeholder="juan45@gmail.com" />
+            </div>
 
-          <div v-if="isCollector" class="mb-3">
-            <label for="email" class="form-label fw-semibold"> Password</label>
-            <input
-              v-model="form.password"
-              type="password"
-              id="password"
-              class="form-control"
-              placeholder="I@mJuan45_"
-            />
-          </div>
+            <div class="mb-3">
+              <label for="password" class="form-label fw-semibold">Password</label>
+              <input v-model="form.password" type="password" id="password" class="form-control" placeholder="I@mJuan45_" />
+            </div>
 
-           <div v-if="isCollector" class="mb-3">
-            <label for="email" class="form-label fw-semibold"> Purok</label>
-            <select class="form-control" v-model="form.purok">
-              <option value="1">Purok 1</option>
-              <option value="2">Purok 2</option>
-              <option value="3">Purok 3</option>
-              <option value="4">Purok 4</option>
+            <div class="mb-3">
+              <label for="re_password" class="form-label fw-semibold">Re-enter Password</label>
+              <input v-model="form.re_password" type="password" id="re_password" class="form-control" placeholder="Re-enter password" />
+              <small v-if="!passwordsMatch" class="text-danger">Passwords do not match</small>
+            </div>
 
-            </select>
-          </div>
-
-            <div class="mb-3" v-if="!isCollector">
-            <label for="email" class="form-label fw-semibold">Email</label>
-            <input
-              v-model="form.email"
-              type="email"
-              id="email"
-              class="form-control"
-              placeholder="juan45@gmail.com"
-            />
-          </div>
-
-        <div class="d-flex justify-content-between gap-2">
-            <!-- Term Dates -->
-          <div v-if="!isCollector" class="w-50">
-            <label for="term_start" class="form-label fw-semibold">Term Start</label>
-            <input
-              v-model="form.term_start"
-              type="date"
-              id="term_start"
-              class="form-control"
-              :class="{ 'is-invalid': form.errors.term_start }"
-              required
-            />
-            <div v-if="form.errors.term_start" class="invalid-feedback">
-              {{ form.errors.term_start }}
+            <div class="mb-3">
+              <label for="purok" class="form-label fw-semibold">Purok</label>
+              <select class="form-control" v-model="form.purok">
+                <option value="1">Purok 1</option>
+                <option value="2">Purok 2</option>
+                <option value="3">Purok 3</option>
+                <option value="4">Purok 4</option>
+              </select>
             </div>
           </div>
 
-          <div v-if="!isCollector" class="mb-3 w-50">
-            <label for="term_end" class="form-label fw-semibold">Term End</label>
-            <input
-              v-model="form.term_end"
-              type="date"
-              id="term_end"
-              class="form-control"
-              :class="{ 'is-invalid': form.errors.term_end }"
-              required
-            />
-            <div v-if="form.errors.term_end" class="invalid-feedback">
-              {{ form.errors.term_end }}
+          <!-- Officials Section -->
+          <div v-else>
+            <div class="mb-3">
+              <label for="email" class="form-label fw-semibold">Email</label>
+              <input v-model="form.email" type="email" id="email" class="form-control" placeholder="juan45@gmail.com" />
+            </div>
+
+            <div class="d-flex justify-content-between gap-2">
+              <div class="w-50">
+                <label for="term_start" class="form-label fw-semibold">Term Start</label>
+                <input v-model="form.term_start" type="date" id="term_start" class="form-control" required />
+              </div>
+
+              <div class="w-50">
+                <label for="term_end" class="form-label fw-semibold">Term End</label>
+                <input v-model="form.term_end" type="date" id="term_end" class="form-control" required />
+              </div>
             </div>
           </div>
 
-
-        </div>
           <!-- Active Status -->
           <div class="form-check form-switch mb-4">
-            <input
-              class="form-check-input"
-              type="checkbox"
-              id="status"
-              v-model="form.status"
-              true-value="1"
-              false-value="0"
-              :disabled="isCollector"
-            />
+            <input class="form-check-input" type="checkbox" id="status" v-model="form.status" true-value="1" false-value="0" />
             <label class="form-check-label" for="status">Active Status</label>
           </div>
 
           <!-- Submit Button -->
-          <button
-            type="submit"
-            class="btn btn-primary w-100 py-2 shadow-sm"
-            :disabled="form.processing"
-          >
-            <span v-if="!form.processing">
-              <i class="bi bi-save me-2"></i> Save Record
-            </span>
+          <button type="submit" class="btn btn-primary w-100 py-2 shadow-sm" :disabled="form.processing || (isCollector && !passwordsMatch)">
+            <span v-if="!form.processing"><i class="bi bi-save me-2"></i> Save Record</span>
             <span v-else>
-              <span
-                class="spinner-border spinner-border-sm me-2"
-                role="status"
-                aria-hidden="true"
-              ></span>
+              <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
               Saving...
             </span>
           </button>
