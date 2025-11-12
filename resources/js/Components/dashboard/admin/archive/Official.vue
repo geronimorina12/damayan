@@ -295,9 +295,7 @@ const getContributionsList = async (id) => {
 <style scoped>
 .main-section {
   width: 100%;
-  height: 100%;
-  overflow-x: hidden;
-  overflow-y: auto;
+  height: 30% !important;
 }
 
 .table th,
@@ -314,7 +312,9 @@ const getContributionsList = async (id) => {
   flex-wrap: nowrap !important;
   gap: 0.25rem;
 }
-
+table th {
+  background: #D4F3F9 !important;
+}
 @media (max-width: 768px) {
   .table th,
   .table td {

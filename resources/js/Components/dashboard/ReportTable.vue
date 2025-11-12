@@ -103,11 +103,16 @@ const toggleStatus = (status) => {
             <td class="bg-light">{{ member.contact_number }}</td>
             <td class="bg-light">{{ member.purok }}</td>
             <td class="bg-light text-center">
-              <i
-                class="bi bi-check-circle text-success fs-5"
+              <span
+                class="bg-success rounded px-2 py-1 text-light"
                 v-if="props.contributionsIds.includes(member.id)"
-              ></i>
-              <i class="bi bi-ban text-danger fs-5" v-else></i>
+              >
+            paid</span>
+              <span
+                class="bg-danger rounded px-2 py-1 text-light"
+                v-else
+              >
+            unpaid</span>
             </td>
           </tr>
         </tbody>

@@ -160,3 +160,8 @@ const viewFunc = () => {
         </div>
     </div>
 </template>
+<style scoped>
+table th {
+  background: #D4F3F9 !important;
+}
+</style>

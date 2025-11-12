@@ -237,7 +237,6 @@ const EditMemberFunc = (member) => {
           <table class="table table-bordered align-middle text-center">
             <thead class="table-light">
               <tr>
-                <th>ID</th>
                 <th>NAME</th>
                 <th>GENDER</th>
                 <th>AGE</th>
@@ -264,7 +263,6 @@ const EditMemberFunc = (member) => {
 
               <!-- Results -->
               <tr v-for="(member, index) in getMembers" :key="index">
-                <td>{{ member.id }}</td>
                 <td class="text-start">{{ member.first_name }} {{ member.middle_name }} {{ member.last_name }}</td>
                 <td>{{ member.gender || 'N/A' }}</td>
                 <td>{{ member.age }}</td>

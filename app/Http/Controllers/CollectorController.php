@@ -4,9 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\DeathReportModel;
 use App\Models\NotificationModel;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
 class CollectorController extends Controller
@@ -44,5 +46,9 @@ class CollectorController extends Controller
         $notification->save();
 
         return response()->json(['message' => 'Notification marked as read successfully']);
+    }
+    public function collectorCount(){
+        $collectors = User::where('role', 'collector')->count();
+        return response()->json(['collectors' => $collectors],200);
     }
 }

@@ -108,7 +108,7 @@ const submit = () => {
   if (!validateBirthDate(form.date_of_birth, memberBirthDateError)) return;
 
   form.beneficiaries = beneficiary.value;
-
+  // form.purok = "Purok " + form.purok;
   form.post(route("addMemberPost"), {
     onSuccess: () => {
       successMessage.value = "Member added successfully!";
@@ -157,7 +157,8 @@ const formatDate = (dateString) => {
         <!--  Member Info -->
         <div class="row g-3">
           <div class="col-md-6">
-            <input type="text" class="form-control" placeholder="Last name" v-model="form.last_name" />
+            <label class="form-label">Last name</label>
+            <input type="text" class="form-control" placeholder="Marinda" v-model="form.last_name" />
           </div>
 
           <div class="col-md-6">
@@ -174,24 +175,29 @@ const formatDate = (dateString) => {
           </div>
 
           <div class="col-md-6">
-            <input type="text" class="form-control" placeholder="First name" v-model="form.first_name" required />
+            <label class="form-label">First name</label>
+            <input type="text" class="form-control" placeholder="Jovan" v-model="form.first_name" required />
           </div>
           <div class="col-md-6">
-            <input type="number" class="form-control" placeholder="Age" v-model="form.age" required disabled />
+            <label class="form-label">Age</label>
+            <input type="number" class="form-control" placeholder="0" v-model="form.age" required disabled />
           </div>
 
           <div class="col-md-6">
-            <input type="text" class="form-control" placeholder="Middle name" v-model="form.middle_name" />
+            <label class="form-label">Middle name</label>
+            <input type="text" class="form-control" placeholder="Munticalbo" v-model="form.middle_name" />
           </div>
           <div class="col-md-6">
+            <label class="form-label">Gender</label>
             <select class="form-select" v-model="form.gender" required>
-              <option value="" disabled>Gender</option>
+              <option value="" disabled>Select gender</option>
               <option value="Male">Male</option>
               <option value="Female">Female</option>
             </select>
           </div>
 
           <div class="col-md-6">
+            <label class="form-label">status</label>
             <select class="form-select" v-model="form.status" disabled>
             <option value="active" selected>Active</option>
             <option value="inactive">Inactive</option>
@@ -199,6 +205,7 @@ const formatDate = (dateString) => {
 
           </div>
           <div class="col-md-6">
+            <label class="form-label">Purok</label>
            <select class="form-select" v-model="form.purok" required>
               <option value="" disabled selected>Select Purok</option>
               <option value="Purok 1">Purok 1</option>
@@ -210,13 +217,15 @@ const formatDate = (dateString) => {
           </div>
 
           <div class="col-md-6">
-            <input type="text" class="form-control" placeholder="Occupation" v-model="form.occupation" required />
+            <label class="form-label">Occupation</label>
+            <input type="text" class="form-control" placeholder="Farmer" v-model="form.occupation" required />
           </div>
           <div class="col-md-6">
+            <label class="form-label">Contact no.</label>
             <input
               type="text"
               class="form-control"
-              placeholder="Contact no."
+              placeholder="09768734123"
               v-model="form.contact_number"
               pattern="[0-9]*"
               inputmode="numeric"
@@ -227,7 +236,8 @@ const formatDate = (dateString) => {
           </div>
 
           <div class="col-12">
-            <input type="text" class="form-control" placeholder="Address" v-model="form.address" required />
+            <label class="form-label">Address</label>
+            <input type="text" class="form-control" placeholder="Bonga, Bulan, Sorsogon" v-model="form.address" required />
           </div>
         </div>
 

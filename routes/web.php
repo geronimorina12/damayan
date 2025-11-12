@@ -75,7 +75,7 @@ Route::prefix('contribution')->name('contributions.')->middleware('auth')->group
     Route::get('/toggle-purok/{purok}/{deceasedId}', [ContributionController::class, 'toggleContributionPurok'])->name('togglePurok');
     Route::get('/members-data', [ContributionController::class, 'getMembersData'])
     ->name('members.data');
-    Route::get('/list/{id}', [ArchiveContribution::class, 'getContributions'])
+    Route::get('/list', [ArchiveContribution::class, 'getContributions'])
     ->name('list');
 });
 
@@ -203,4 +203,6 @@ Route::prefix('filterAnalytics')->name('filterAnalytics.')->middleware('auth')->
 Route::prefix('filterContribution')->name('filterContribution.')->middleware('auth')->group(function (){
     Route::get('/contribution/toggle/{id}/{purok}', [ContributionController::class, 'toggle'])->name('toggle');
 });
+Route::get('/collectors/count', [CollectorController::class, 'collectorCount'])->name('collector.count');
+
 require __DIR__.'/auth.php';

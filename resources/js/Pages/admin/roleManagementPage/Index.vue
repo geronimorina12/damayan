@@ -17,6 +17,9 @@ let getUsers = ref([]);
 let getAdmins = ref([]);
 let userIdClicked = ref(null);
 let userRole = ref("");
+const searching = ref(false)
+const searchError = ref('')
+const searchQuery = ref('')
 
 watch(
     () => props.admins,
@@ -77,7 +80,24 @@ const getUserAcess = (role, position) => {
                 <!-- User Management Table -->
                 <div class="card mt-3">
                     <div class="card-body">
-                        <h6 class="fw-semibold">User Management</h6>
+                        <div class="container-fluid d-flex align-items-center justify-content-between px-0">
+                          <div>
+                          <h6 class="fw-semibold">User Management</h6>
+                        </div>
+
+                         <div class="search-box mb-3 position-relative">
+                            <input 
+                              type="text" 
+                              class="form-control search-input"
+                              placeholder="Search..." 
+                              v-model="searchQuery"
+                            />
+                            <div v-if="searching" class="spinner-border text-primary spinner-sm position-absolute end-0 top-50 translate-middle-y me-3" role="status">
+                              <span class="visually-hidden">Loading...</span>
+                            </div>
+                          </div>
+                        </div>
+
                         <div class="table-responsive">
                             <table class="table table-bordered align-middle">
                                 <thead class="table-light">
@@ -87,6 +107,7 @@ const getUserAcess = (role, position) => {
                                         <th>EMAIL</th>
                                         <th>Role</th>
                                         <th>Access</th>
+                                        <th></th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -326,7 +347,9 @@ const getUserAcess = (role, position) => {
   transform: translateY(0) scale(1);
   opacity: 1;
 }
-
+table th {
+  background: #D4F3F9 !important;
+}
 /* Responsive adjustments */
 @media (max-width: 576px) {
   .action-buttons {

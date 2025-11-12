@@ -1,13 +1,15 @@
 <script setup>
 import { useForm } from '@inertiajs/vue3'
 import { Head } from '@inertiajs/vue3'
-import { ref, watch, computed } from 'vue'
+import { ref, watch, computed, defineModel } from 'vue'
 
 const isCollector = ref(false)
 const successMessage = ref('')
 let hasError = ref(false)
 let errorMessage = ref('')
 let hasPresident = ref(false)
+let close = defineModel('closeModal')
+const collectors = ref(0);
 
 const form = useForm({
   first_name: '',
@@ -39,8 +41,20 @@ async function checkHasPresident() {
     console.error('Error fetching president status:', error)
   }
 }
+async function countCollectors() {
+  try {
+    const response = await fetch('/collectors/count', {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
+    })
+    const data = await response.json()
+    collectors.value = data.collectors
+  } catch (error) {
+    console.error('Error fetching collectos status:', error)
+  }
+}
 checkHasPresident()
-
+countCollectors()
 // Toggle collector based on position
 watch(
   () => form.position,
@@ -173,14 +187,30 @@ function closeModal() {
               <option value="secretary">Secretary</option>
               <option value="treasurer">Treasurer</option>
               <option value="auditor">Auditor</option>
-              <option value="purok_leader">Purok Leader</option>
+              <option value="purok_leader" v-if="!collectors > 4">Purok Leader</option>
             </select>
           </div>
 
           <!-- Collector Toggle -->
-          <div class="form-check form-switch mb-4">
-            <input class="form-check-input" type="checkbox" id="collector" v-model="isCollector" />
-            <label class="form-check-label" for="collector">Register as Collector</label>
+          <div class="mb-4 d-flex align-items-center justify-content-start">
+              <div class="collector-toggle">
+                    <label class="toggle-switch">
+                      <input
+                        type="checkbox"
+                        :checked="isCollectorClicked === isCollector"
+                        v-model="isCollector"
+                        :disabled="collectors > 4"
+                      >
+                      <span class="toggle-slider"></span>
+                    </label>
+                    <span class="status-label" :class="isCollector === 'active' ? 'active' : 'inactive'">
+                    </span>
+                  </div>
+                    <div>
+                       <label class="form-check-label" for="collector">Register as Collector
+                        <p class="text-danger">Purok leader/ Collector limit has been reached.</p>
+                       </label>
+                    </div>
           </div>
 
           <!-- Collector Section -->
@@ -233,9 +263,23 @@ function closeModal() {
           </div>
 
           <!-- Active Status -->
-          <div class="form-check form-switch mb-4">
-            <input class="form-check-input" type="checkbox" id="status" v-model="form.status" true-value="1" false-value="0" />
-            <label class="form-check-label" for="status">Active Status</label>
+          <div class="d-flex justify-content-start align-items-center  my-4">
+             <div class="collector-toggle">
+                    <label class="toggle-switch">
+                      <input
+                        type="checkbox"
+                        :checked="isCollectorClicked === form.status"
+                        id="status" v-model="form.status" true-value="1" false-value="0" 
+                      >
+                      <span class="toggle-slider"></span>
+                    </label>
+                    <span class="status-label" :class="isCollector === 'active' ? 'active' : 'inactive'">
+                    </span>
+                  </div>
+
+                  <div>
+                    <label class="form-check-label" for="status">Active Status</label>
+                  </div>
           </div>
 
           <!-- Submit Button -->
@@ -251,3 +295,88 @@ function closeModal() {
     </div>
   </div>
 </template>
+
+<style scoped>
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 24px;
+}
+
+.toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #e5e7eb;
+  transition: .3s;
+  border-radius: 24px;
+}
+
+.toggle-slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: .3s;
+  border-radius: 50%;
+}
+
+input:checked + .toggle-slider {
+  background-color: #10b981;
+}
+
+input:checked + .toggle-slider:before {
+  transform: translateX(20px);
+}
+
+.status-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.collector-cell {
+  text-align: center;
+}
+
+.collector-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+}
+.collector-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.collector-label.active {
+  color: #10b981;
+}
+
+.collector-label.inactive {
+  color: #ef4444;
+}
+
+@media (max-width: 768px) {
+  .collector-toggle {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+}
+@media (max-width: 576px) {
+  .collector-toggle { flex-direction: column; gap: 0.3rem; }
+}
+</style>

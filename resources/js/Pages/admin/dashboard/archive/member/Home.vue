@@ -4,6 +4,7 @@ import { router, Head, Link } from '@inertiajs/vue3'
 import AdminLayout from '@/Layouts/AdminLayout.vue'
 import DeceasedMember from '@/Components/dashboard/admin/archive/DeceasedMember.vue'
 import Official from '@/Components/dashboard/admin/archive/Official.vue'
+import Contributions from '@/Components/dashboard/admin/charts/Contributions.vue'
 
 const props = defineProps({
   members: {
@@ -296,6 +297,7 @@ const performUndoMember = (id) => {
       </div>
 
       <Official :officials="getOfficials" />
+      <Contributions />
     </div>
   </AdminLayout>
 </template>
@@ -324,7 +326,9 @@ const performUndoMember = (id) => {
 .table-responsive {
   overflow-x: auto;
 }
-
+table th {
+  background: #D4F3F9 !important;
+}
 @media (max-width: 768px) {
   .table th,
   .table td {

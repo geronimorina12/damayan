@@ -10,6 +10,7 @@ const fetchContributions = async () => {
   try {
     const response = await axios.get(route("contributions.list"));
     contributions.value = response.data;
+    console.log("contributions: ", contributions.value)
   } catch (error) {
     console.error("Error fetching contributions:", error);
   }
@@ -105,6 +106,7 @@ onMounted(fetchContributions);
   overflow: hidden;
   transition: all 0.3s ease;
   border: 1px solid rgba(0, 0, 0, 0.05);
+  margin-bottom: 7rem;
 }
 
 .card-header {

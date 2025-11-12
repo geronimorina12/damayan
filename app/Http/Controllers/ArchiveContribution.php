@@ -28,9 +28,9 @@ class ArchiveContribution extends Controller
             'message' => 'Archived contribution added successfully!'
         ], 201);
     }
-     public function getContributions($id)
+     public function getContributions()
     {
-        $contributions = ArchiveContributions::where('member_id', $id)->first();
+        $contributions = ArchiveContributions::all();
         if($contributions){
             return response()->json($contributions);
         }

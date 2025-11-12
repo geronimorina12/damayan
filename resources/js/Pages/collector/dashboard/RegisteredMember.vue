@@ -162,7 +162,6 @@ const centerActivePagination = () => {
         <table class="table table-bordered align-middle text-center">
           <thead class="table-light">
             <tr>
-              <th>ID</th>
               <th><i class="bi bi-person"></i> NAME</th>
               <th>AGE</th>
               <th>CONTACT NO.</th>
@@ -185,7 +184,6 @@ const centerActivePagination = () => {
               <td colspan="6" class="text-center text-danger">{{ searchError }}</td>
 </tr>
             <tr v-for="(member, index) in filteredMembers" :key="index">
-              <td>{{ member.id }}</td>
               <td>{{ member?.first_name }} {{ member?.middle_name }} {{ member?.last_name }}</td>
               <td>{{ member.age }}</td>
               <td>{{ member.contact_number }}</td>

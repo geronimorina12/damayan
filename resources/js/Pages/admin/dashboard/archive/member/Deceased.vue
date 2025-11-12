@@ -51,7 +51,7 @@ const undo = (id) => {
             <th>ID</th>
             <th><i class="bi bi-person"></i> NAME</th>
             <th>DECEASED DATE</th>
-            <th>Actions</th>
+            <!-- <th>Actions</th> -->
           </tr>
         </thead>
         <tbody>
@@ -59,7 +59,7 @@ const undo = (id) => {
             <td>{{ index + 1 }}</td>
             <td>{{ member?.deceased_name }}</td>
             <td>{{ formatDate(member?.date_of_death) }}</td>
-            <td>
+            <!-- <td>
               <button class="btn btn-sm btn-outline-dark me-1" @click="deletePermanently(member.member_id)" title="delete permanently">
                 <i class="bi bi-trash"></i> 
               </button>
@@ -67,7 +67,7 @@ const undo = (id) => {
               <button class="btn btn-sm btn-outline-dark" @click="undo(member.member_id)" title="undo delete">
                 <i class="bi bi-arrow-counterclockwise"></i>
               </button> 
-              </td>
+              </td> -->
           </tr>
         </tbody>
       </table>
@@ -87,5 +87,7 @@ const undo = (id) => {
 </template>
 
 <style>
-
+table th {
+  background: #D4F3F9 !important;
+}
 </style>
