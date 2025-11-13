@@ -1,7 +1,7 @@
 <script setup>
 import { Head, router, useForm } from '@inertiajs/vue3';
 import CollectorLayout from '@/Layouts/CollectorLayout.vue';
-import { defineProps, watch, ref, computed } from 'vue';
+import { defineProps, ref, watch, computed, nextTick } from 'vue';
 import PurokComponentForCollector from '@/Components/dashboard/contribution/PurokComponentForCollector.vue';
 import ToggleContribution from '@/Components/dashboard/contribution/ToggleContribution.vue';
 import ViewAsCollector from '@/Components/dashboard/report/ViewAsCollector.vue';
@@ -12,15 +12,10 @@ const props = defineProps({
   collectors: Array,
   paidMembersId: Array,
   currentCollector: Object,
-  currentDeceasedMembers: {
-    type: Array,
-    default: () => []
-  },
-  currentDeceasedMember: {
-    type: Object,
-    default: () => ({})
-  }
+  currentDeceasedMembers: { type: Array, default: () => [] },
+  currentDeceasedMember: { type: Object, default: () => ({}) },
 });
+
 let getMember = ref([]);
 let getSelectedPurok = ref('');
 let getCollectors = ref([]);
@@ -32,50 +27,29 @@ let getCurrentCollector = ref({});
 const getCurrentDeceasedMembers = ref([]);
 const getCurrentDeceasedMember = ref({});
 
-watch(() => props.member, (newData) => (getMember.value = newData), { immediate: true });
-watch(() => props.selectedPurok, (newData) => (getSelectedPurok.value = newData), { immediate: true });
-watch(() => props.collectors, (newData) => (getCollectors.value = newData), { immediate: true });
-watch(() => props.paidMembersId, (newData) => (getPaidMembersId.value = newData), { immediate: true });
-watch(() => props.currentCollector, (newData) => {
-  getCurrentCollector.value = newData;
-}, { immediate: true });
-
-watch(
-  () => props.currentDeceasedMembers,
-  (newData) => {
-    getCurrentDeceasedMembers.value = newData ? Object.values(newData) : [];
-  },
-  { immediate: true }
-);
-watch(
-  () => props.currentDeceasedMember,
-  (newData) => {
-    getCurrentDeceasedMember.value = newData;
-    console.log("current deceased: ", getCurrentDeceasedMember.value)
-  },
-  { immediate: true }
-);
+watch(() => props.member, (newData) => getMember.value = newData, { immediate: true });
+watch(() => props.selectedPurok, (newData) => getSelectedPurok.value = newData, { immediate: true });
+watch(() => props.collectors, (newData) => getCollectors.value = newData, { immediate: true });
+watch(() => props.paidMembersId, (newData) => getPaidMembersId.value = newData, { immediate: true });
+watch(() => props.currentCollector, (newData) => getCurrentCollector.value = newData, { immediate: true });
+watch(() => props.currentDeceasedMembers, (newData) => getCurrentDeceasedMembers.value = newData ? Object.values(newData) : [], { immediate: true });
+watch(() => props.currentDeceasedMember, (newData) => getCurrentDeceasedMember.value = newData, { immediate: true });
 
 const searchQuery = ref('');
 
 const filteredMembers = computed(() => {
-  if (!searchQuery.value.trim()) {
-    return getMember.value;
-  }
-
+  if (!searchQuery.value.trim()) return getMember.value;
   const keyword = searchQuery.value.toLowerCase();
-  return getMember.value.filter(mem => {
-    return (
-      (mem.first_name && mem.first_name.toLowerCase().includes(keyword)) ||
-      (mem.last_name && mem.last_name.toLowerCase().includes(keyword)) ||
-      (mem.middle_name && mem.middle_name.toLowerCase().includes(keyword)) ||
-      (mem.contact_number && mem.contact_number.toLowerCase().includes(keyword)) ||
-      (mem.purok && mem.purok.toLowerCase().includes(keyword))
-    );
-  });
+  return getMember.value.filter(mem => (
+    (mem.first_name && mem.first_name.toLowerCase().includes(keyword)) ||
+    (mem.last_name && mem.last_name.toLowerCase().includes(keyword)) ||
+    (mem.middle_name && mem.middle_name.toLowerCase().includes(keyword)) ||
+    (mem.contact_number && mem.contact_number.toLowerCase().includes(keyword)) ||
+    (mem.purok && mem.purok.toLowerCase().includes(keyword))
+  ));
 });
 
-// 🧾 Contribution form
+// Contribution form
 const form = useForm({
   member_id: null,
   amount: 100,
@@ -85,13 +59,10 @@ const form = useForm({
   status: 'paid',
 });
 
-// Normalize Purok ("Purok 1" → "purok1")
-const normalizePurok = (purok) => {
-  if (!purok) return '';
-  return purok.toLowerCase().replace(/\s+/g, '');
-};
+// Normalize Purok
+const normalizePurok = (purok) => purok?.toLowerCase().replace(/\s+/g, '') || '';
 
-// Assign member before opening modal
+// Assign member and send SMS
 const preparePayment = (memberId, memberPurok, contact_number) => {
   selectedMemberId.value = memberId;
   selectedMemberPurok.value = memberPurok;
@@ -114,28 +85,39 @@ const preparePayment = (memberId, memberPurok, contact_number) => {
   );
 };
 
-// Confirm when Done clicked
+// Confirm payment and update UI
 const confirmPayment = () => {
   form.member_id = selectedMemberId.value;
   form.purok = normalizePurok(selectedMemberPurok.value);
   form.collector = selectedCollector.value;
 
- form.post(route('contributions.store'), {
-  onSuccess: () => {
-    const member = getMember.value.find((m) => m.id === selectedMemberId.value);
-    if (member) member.paid = true;
+  form.post(route('contributions.store'), {
+    onSuccess: () => {
+      // Update member object reactively
+      const memberIndex = getMember.value.findIndex(m => m.id === selectedMemberId.value);
+      if (memberIndex !== -1) {
+        getMember.value[memberIndex] = {
+          ...getMember.value[memberIndex],
+          paid: true,
+        };
+      }
 
-    if (!getPaidMembersId.value.includes(selectedMemberId.value)) {
-      getPaidMembersId.value.push(selectedMemberId.value);
-    }
-  },
-});
+      // Add to paid members array
+      nextTick(() => {
+        if (!getPaidMembersId.value.includes(selectedMemberId.value)) {
+          getPaidMembersId.value.push(selectedMemberId.value);
+        }
+      });
+    },
+  });
 };
 
 // Mark as unpaid
 const unPaidFunc = (memberId) => {
-  const member = getMember.value.find((m) => m.id === memberId);
-  if (member) member.paid = false;
+  const memberIndex = getMember.value.findIndex(m => m.id === memberId);
+  if (memberIndex !== -1) {
+    getMember.value[memberIndex] = { ...getMember.value[memberIndex], paid: false };
+  }
 
   router.delete(route('collectorContribution.deleteContribution', memberId), {
     onSuccess: () => {
@@ -143,17 +125,12 @@ const unPaidFunc = (memberId) => {
     },
   });
 };
+
 const showReportModal = ref(false);
-
-const openReportModal = () => {
-  showReportModal.value = true;
-};
-
-const closeReportModal = () => {
-  showReportModal.value = false;
-};
-
+const openReportModal = () => showReportModal.value = true;
+const closeReportModal = () => showReportModal.value = false;
 </script>
+
 
 <template>
   <Head title="Member contribution" />

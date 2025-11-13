@@ -203,15 +203,15 @@ watch(
                     </td>
                     <td class="text-center">
                       <div class="form-check form-switch d-flex align-items-center justify-content-center gap-2">
-                        <input
+                        <!-- <input
                           class="form-check-input"
                           type="checkbox"
                           role="switch"
                           :checked="official.status || official.role === 'collector'"
                           @change="toggleStatus(official)"
                           :disabled="official.role === 'collector'"
-                        />
-                        <span :class="official.status ? 'text-success' : 'text-muted'">
+                        /> -->
+                        <span :class="official.status ? 'text-success' : 'text-danger'" class="fw-bold">
                           {{ official.status || official.role === 'collector' ? 'Active' : 'Inactive' }}
                         </span>
                       </div>
@@ -223,13 +223,13 @@ watch(
                         data-bs-toggle="modal"
                         data-bs-target="#editOfficial"
                       >
-                        <i class="bi bi-pencil-square"></i>
+                        <i class="bi bi-pencil text-dark"></i>
                       </button>
                       <button
                         class="btn btn-outline-danger btn-sm"
                         @click="deleteOfficial(official.id)"
                       >
-                        <i class="bi bi-trash"></i>
+                        <i class="bi bi-trash text-dark"></i>
                       </button>
                     </td>
                   </tr>
