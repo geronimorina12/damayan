@@ -133,7 +133,7 @@ private function cleanupDeceasedContributions(): void
         Log::info("Cleaning records for deceased with ID: {$deceased->id}");
 
         // 1️ Delete all contributions for this deceased member
-        $deletedContributions = ContributionModel::where('deceased_id', $deceased->member_id)->delete();
+        $deletedContributions = ContributionModel::where('member_id', $deceased->member_id)->delete();
         Log::info("Deleted {$deletedContributions} contributions for deceased member_id: {$deceased->member_id}");
 
         // 2️ Delete the deceased record itself

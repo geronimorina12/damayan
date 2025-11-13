@@ -174,7 +174,6 @@ const closeReportModal = () => showReportModal.value = false;
             <table class="table table-bordered table-hover align-middle text-center mb-0">
               <thead class="table-light">
                 <tr>
-                  <th>ID</th>
                   <th>NAME</th>
                   <th>CONTACT NO.</th>
                   <th>PUROK</th>
@@ -183,7 +182,6 @@ const closeReportModal = () => showReportModal.value = false;
               </thead>
               <tbody>
                 <tr v-for="(mem, index) in filteredMembers" :key="index">
-                  <td>{{ mem?.id }}</td>
                   <td class="text-start">
                     {{ mem?.first_name }} {{ mem?.middle_name }} {{ mem?.last_name }}
                   </td>

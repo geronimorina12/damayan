@@ -61,15 +61,13 @@ const formatDate = (dateString) => {
                     <table class="modern-table">
                       <thead>
                         <tr>
-                          <th>ID</th>
                           <th>Name</th>
                           <th>Position</th>
                           <th>Term</th>
                         </tr>
                       </thead>
                       <tbody>
-                        <tr v-for="(official, index) in getOfficials" :key="official.id">
-                          <td class="id-cell">{{ index +1  }}</td>
+                        <tr v-for="(official) in getOfficials" :key="official.id">
                           <td class="name-cell">{{ official.name }}</td>
                           <td class="position-cell">{{ official.position }}</td>
                           <td class="term-cell">{{ formatDate(official.term_start) }} - {{ formatDate(official.term_end) }}</td>
