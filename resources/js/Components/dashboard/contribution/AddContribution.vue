@@ -13,10 +13,21 @@ const getDeceasedMembersData = ref([]);
 const showAlert = ref(false);
 const alertMessage = ref("");
 
+// Helper function to get current date-time in `datetime-local` format
+const getNowForInput = () => {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const day = String(now.getDate()).padStart(2, "0");
+  const hours = String(now.getHours()).padStart(2, "0");
+  const minutes = String(now.getMinutes()).padStart(2, "0");
+  return `${year}-${month}-${day}T${hours}:${minutes}`;
+};
+
 const form = useForm({
     member_id: "",
     amount: 100,
-    payment_date: "",
+    payment_date: getNowForInput(),
     collector: "",
     status: "paid",
     purok: "",
@@ -49,8 +60,8 @@ const fetchMembersData = async () => {
 
         // Only users with role = collector
         getCollectors.value = (users || []).filter((u) => u.role === "collector");
-
-        console.log("Collectors:", getCollectors.value);
+        
+        console.log("Collectorss:", getCollectors.value);
     } catch (error) {
         console.error(error);
     }
@@ -58,26 +69,20 @@ const fetchMembersData = async () => {
 
 onMounted(fetchMembersData);
 
-// Watch for purok selection change
 watch(
-    () => form.purok,
-    (newPurok) => {
-        if (!newPurok) return;
+  () => form.purok,
+  (newPurok) => {
+    if (!newPurok) return;
 
-        // Extract the number part (e.g., "purok1" -> "1")
-        const purokNumber = newPurok.replace("purok", "");
+    // Extract number from "purok1", "purok2", etc.
+    const purokNumber = parseInt(newPurok.replace("purok", ""), 10);
 
-        // Find collector with the same purok number
-        const collector = getCollectors.value.find(
-            (c) => String(c.purok) === String(purokNumber)
-        );
+    const collector = getCollectors.value.find(
+      (c) => Number(c.purok) === purokNumber
+    );
 
-        if (collector) {
-            form.collector = collector.name;
-        } else {
-            form.collector = "";
-        }
-    }
+    form.collector = collector ? collector.name : "";
+  }
 );
 
 // Submit form

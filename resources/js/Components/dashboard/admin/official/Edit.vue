@@ -1,6 +1,7 @@
 <script setup>
 import { useForm } from '@inertiajs/vue3'
 import { defineProps, ref, watch } from 'vue'
+import * as bootstrap from 'bootstrap';
 
 const props = defineProps({
   official: {
@@ -9,7 +10,7 @@ const props = defineProps({
   },
 })
 
-//  Reactive alerts
+// Reactive alerts
 const successMessage = ref('')
 const errorMessage = ref('')
 const hasError = ref(false)
@@ -26,7 +27,7 @@ const form = useForm({
   status: 1,
 })
 
-//  When modal opens or prop changes, update form fields
+// Watch for prop changes and populate form
 watch(
   () => props.official,
   (newOfficial) => {
@@ -39,7 +40,7 @@ watch(
       form.position = newOfficial.position || ''
       form.term_start = newOfficial.term_start || ''
       form.term_end = newOfficial.term_end || ''
-      form.status = newOfficial.status || 0
+      form.status = newOfficial.status ?? 0
     }
   },
   { immediate: true }
@@ -54,17 +55,18 @@ function splitName(fullName = '') {
   return [first, middle, last]
 }
 
-//  Submit form handler
+// Submit form
 function submit() {
   const middle = form.middle_initial ? ` ${form.middle_initial}.` : ''
   const name = `${form.first_name}${middle} ${form.last_name}`.trim()
+
   successMessage.value = ''
   errorMessage.value = ''
   hasError.value = false
 
   form.put(route('officials.editData', { id: props.official.id }), {
     data: {
-      name : name,
+      name: name,
       position: form.position,
       term_start: form.term_start,
       term_end: form.term_end,
@@ -73,28 +75,45 @@ function submit() {
     },
     onSuccess: () => {
       successMessage.value = 'Official updated successfully!'
+
+      // Close modal after a short delay (optional)
       setTimeout(() => {
         closeModal()
-      }, 1000)
+      }, 500)
     },
     onError: (errors) => {
       hasError.value = true
-      // Combine all error messages into one string
       errorMessage.value = Object.values(errors).flat().join(' ')
       console.error(errors)
     },
   })
 }
 
-//  Close Bootstrap modal
 function closeModal() {
   const modalEl = document.getElementById('editOfficial')
-  if (modalEl) {
-    const modal = bootstrap.Modal.getInstance(modalEl)
-    modal?.hide()
+  if (!modalEl) return
+
+  // Get Bootstrap modal instance
+  let modalInstance = bootstrap.Modal.getInstance(modalEl)
+  if (!modalInstance) {
+    modalInstance = new bootstrap.Modal(modalEl)
   }
+
+  // Hide the modal
+  modalInstance.hide()
+
+  // Also remove the backdrop manually
+  const backdrops = document.getElementsByClassName('modal-backdrop')
+  while (backdrops[0]) {
+    backdrops[0].parentNode.removeChild(backdrops[0])
+  }
+
+  // Remove "modal-open" class from body
+  document.body.classList.remove('modal-open')
 }
+
 </script>
+
 
 <template>
   <Head title="Edit Official" />
@@ -103,7 +122,7 @@ function closeModal() {
     <div class="container border-0 pt-2">
       <div class="card-body px-3">
 
-        <!-- ✅ Success Alert -->
+        <!--  Success Alert -->
         <div
           v-if="successMessage"
           class="alert alert-success alert-dismissible fade show"
@@ -225,17 +244,21 @@ function closeModal() {
             />
           </div>
 
-          <!-- Status Switch -->
-          <div class="form-check form-switch mb-4">
-            <input
-              class="form-check-input"
-              type="checkbox"
-              id="status"
-              v-model="form.status"
-              true-value="1"
-              false-value="0"
-            />
-            <label class="form-check-label" for="status">Active Status</label>
+          <div class="container px-0 px-0 d-flex flex-row justify-content-start align-items-center gap-2 mb-2">
+             <div class="status-cell">
+                  <div class="status-toggle">
+                    <label class="toggle-switch">
+                      <input
+                        type="checkbox"
+                        :checked="form.status"
+                        v-model="form.status"
+                      >
+                      <span class="toggle-slider"></span>
+                    </label>
+                  </div>
+                </div>
+
+                <div>Status</div>
           </div>
 
           <!-- Submit Button -->
@@ -261,3 +284,99 @@ function closeModal() {
     </div>
   </div>
 </template>
+
+<style scoped>
+
+.status-cell {
+  text-align: center;
+}
+
+.status-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 24px;
+}
+
+.toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #e5e7eb;
+  transition: .3s;
+  border-radius: 24px;
+}
+
+.toggle-slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: .3s;
+  border-radius: 50%;
+}
+
+input:checked + .toggle-slider {
+  background-color: #10b981;
+}
+
+input:checked + .toggle-slider:before {
+  transform: translateX(20px);
+}
+
+.status-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.status-label.active {
+  color: #10b981;
+}
+
+.status-label.inactive {
+  color: #ef4444;
+}
+
+.actions-cell {
+  text-align: center;
+}
+
+.action-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.btn-action {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+</style>

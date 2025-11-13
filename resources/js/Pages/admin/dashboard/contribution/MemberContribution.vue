@@ -153,7 +153,6 @@ const filteredMembers = computed(() => {
             <table class="table table-bordered table-hover align-middle text-center">
               <thead class="">
                 <tr>
-                  <th>ID</th>
                   <th>NAME</th>
                   <th>AMOUNT</th>
                   <th>DATE</th>
@@ -164,7 +163,6 @@ const filteredMembers = computed(() => {
               </thead>
               <tbody class="scrollable-tbody">
                 <tr v-for="(mem, index) in filteredMembers" :key="index">
-                  <td>{{ mem?.id }}</td>
                   <td class="text-start">
                     {{ mem?.first_name }} {{ mem?.middle_name }} {{ mem?.last_name }}
                   </td>

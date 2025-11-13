@@ -1,6 +1,6 @@
 <script setup>
+import { ref, watch, computed } from 'vue'
 import { router, Head, Link } from '@inertiajs/vue3'
-import { defineProps, ref, watch, computed } from 'vue'
 import AdminLayout from '@/Layouts/AdminLayout.vue'
 import Add from '@/Components/dashboard/admin/official/Add.vue'
 import Edit from '@/Components/dashboard/admin/official/Edit.vue'
@@ -15,13 +15,66 @@ let searchQuery = ref('')
 let statusFilter = ref('all')
 const successMessage = ref('')
 
-watch(
-  () => props.officials,
-  (newData) => {
-    getOfficials.value = newData
-  },
-  { immediate: true }
-)
+// --- Modal State & Functions ---
+const showModal = ref(false)
+const modalTitle = ref('')
+const modalMessage = ref('')
+const modalType = ref('') // 'confirm' or 'alert'
+const modalAction = ref(null)
+const modalData = ref(null)
+
+// Show confirmation modal
+const showConfirmation = (title, message, action, data = null) => {
+  modalTitle.value = title
+  modalMessage.value = message
+  modalType.value = 'confirm'
+  modalAction.value = action
+  modalData.value = data
+  showModal.value = true
+}
+
+// Show alert modal
+const showAlert = (title, message) => {
+  modalTitle.value = title
+  modalMessage.value = message
+  modalType.value = 'alert'
+  showModal.value = true
+}
+
+// Execute modal action
+const executeModalAction = () => {
+  if (modalAction.value && modalData.value) {
+    modalAction.value(modalData.value)
+  } else if (modalAction.value) {
+    modalAction.value()
+  }
+  showModal.value = false
+}
+
+// Close modal
+const closeModal = () => {
+  showModal.value = false
+  modalAction.value = null
+  modalData.value = null
+}
+
+// Replace deleteOfficial to use modal
+const deleteOfficial = (id) => {
+  showConfirmation(
+    'Delete Official',
+    'Are you sure you want to delete this official? This action cannot be undone.',
+    performDeleteOfficial,
+    id
+  )
+}
+
+// Actual deletion logic
+const performDeleteOfficial = (id) => {
+  router.delete(route('officials.delete', { id: id }), {
+    onSuccess: () => showAlert('Success', 'Official deleted successfully.'),
+    onError: () => showAlert('Error', 'Failed to delete the official.')
+  })
+}
 
 const toggleStatus = (official) => {
   router.patch(route('officials.status.toggle', { id: official.id }), {
@@ -33,21 +86,13 @@ const editOfficial = (official) => {
   selectedOfficial.value = official
 }
 
-const deleteOfficial = (id) => {
-  if (confirm('Are you sure you want to delete this official?')) {
-    router.delete(route('officials.delete', { id: id }))
-  }
-}
-
 const addOfficial = () => {
   router.get(route('officials.addOfficialRoute'))
 }
 
 const formatDate = (dateString) => {
   const date = new Date(dateString)
-  if (isNaN(date.getTime())) {
-    return '~'
-  }
+  if (isNaN(date.getTime())) return '~'
   const options = { year: 'numeric' }
   return date.toLocaleDateString(undefined, options)
 }
@@ -69,141 +114,147 @@ const filteredOfficials = computed(() => {
     return matchesSearch && matchesStatus
   })
 })
+
 const capitalizeFirst = (str) => {
   if (!str) return ''
   return str.charAt(0).toUpperCase() + str.slice(1)
 }
+
+// Watch for props changes
+watch(
+  () => props.officials,
+  (newData) => {
+    getOfficials.value = newData
+  },
+  { immediate: true }
+)
 </script>
 
 <template>
   <Head title="View officials" />
-  <div>
-    <AdminLayout>
-      <div class="modern-container">
-        <div class="scroll-content">
-          <div class="header-section mb-3 d-flex align-items-center justify-content-between">
-            <h5 class="fw-light mb-0">Protec Damayan Officials</h5>
+  <AdminLayout>
+    <div class="modern-container">
+      <div class="scroll-content">
+        <div class="header-section mb-3 d-flex align-items-center justify-content-between">
+          <h5 class="fw-light mb-0">Protec Damayan Officials</h5>
+        </div>
+
+        <!-- Search & Filter Section -->
+        <div class="d-flex flex-wrap align-items-center mb-3 gap-2">
+          <div class="input-group" style="max-width: 300px;">
+            <span class="input-group-text bg-white">
+              <i class="bi bi-search"></i>
+            </span>
+            <input
+              type="text"
+              class="form-control"
+              placeholder="Search by name or position..."
+              v-model="searchQuery"
+            />
           </div>
 
-          <!-- Search & Filter Section -->
-          <div class="d-flex flex-wrap align-items-center mb-3 gap-2">
-            <div class="input-group" style="max-width: 300px;">
-              <span class="input-group-text bg-white">
-                <i class="bi bi-search"></i>
-              </span>
-              <input
-                type="text"
-                class="form-control"
-                placeholder="Search by name or position..."
-                v-model="searchQuery"
-              />
-            </div>
+          <div class="input-group" style="max-width: 200px;">
+            <span class="input-group-text bg-white">
+              <i class="bi bi-funnel"></i>
+            </span>
+            <select class="form-select" v-model="statusFilter">
+              <option value="all">All Status</option>
+              <option value="active">Active</option>
+              <option value="inactive">Inactive</option>
+            </select>
+          </div>
+        </div>
 
-            <div class="input-group" style="max-width: 200px;">
-              <span class="input-group-text bg-white">
-                <i class="bi bi-funnel"></i>
-              </span>
-              <select class="form-select" v-model="statusFilter">
-                <option value="all">All Status</option>
-                <option value="active">Active</option>
-                <option value="inactive">Inactive</option>
-              </select>
+        <div
+          v-if="successMessage"
+          class="alert alert-success alert-dismissible fade show position-fixed top-0 end-0 mt-3 me-3 shadow-lg"
+          role="alert"
+          style="z-index: 9999; min-width: 280px;"
+        >
+          <i class="bi bi-check-circle-fill me-2"></i> {{ successMessage }}
+          <button
+            type="button"
+            class="btn-close"
+            @click="successMessage = ''"
+          ></button>
+        </div>
+
+        <!-- Officials Table -->
+        <div class="content-wrapper">
+          <div class="table-container" v-if="filteredOfficials.length > 0">
+            <div class="table-responsive">
+              <table class="modern-table">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Position</th>
+                    <th>Term</th>
+                    <th class="text-center">Status</th>
+                    <th class="text-center">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="official in filteredOfficials" :key="official.id">
+                    <td>{{ official.name }}</td>
+                    <td>{{ capitalizeFirst(official.position) || 'Collector' }}</td>
+                    <td>
+                      {{ formatDate(official.term_start || official.created_at) }} -
+                      {{ formatDate(official.term_end || new Date(new Date(official.created_at).setFullYear(new Date(official.created_at).getFullYear() + 2))) }}
+                    </td>
+                    <td class="text-center">
+                      <div class="form-check form-switch d-flex align-items-center justify-content-center gap-2">
+                        <input
+                          class="form-check-input"
+                          type="checkbox"
+                          role="switch"
+                          :checked="official.status || official.role === 'collector'"
+                          @change="toggleStatus(official)"
+                          :disabled="official.role === 'collector'"
+                        />
+                        <span :class="official.status ? 'text-success' : 'text-muted'">
+                          {{ official.status || official.role === 'collector' ? 'Active' : 'Inactive' }}
+                        </span>
+                      </div>
+                    </td>
+                    <td class="text-center">
+                      <button
+                        class="btn btn-outline-primary btn-sm me-2"
+                        @click="editOfficial(official)"
+                        data-bs-toggle="modal"
+                        data-bs-target="#editOfficial"
+                      >
+                        <i class="bi bi-pencil-square"></i>
+                      </button>
+                      <button
+                        class="btn btn-outline-danger btn-sm"
+                        @click="deleteOfficial(official.id)"
+                      >
+                        <i class="bi bi-trash"></i>
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
           </div>
 
-           <div
-            v-if="successMessage"
-            class="alert alert-success alert-dismissible fade show position-fixed top-0 end-0 mt-3 me-3 shadow-lg"
-            role="alert"
-            style="z-index: 9999; min-width: 280px;"
-          >
-            <i class="bi bi-check-circle-fill me-2"></i> {{ successMessage }}
-            <button
-              type="button"
-              class="btn-close"
-              data-bs-dismiss="alert"
-              aria-label="Close"
-              @click="successMessage = ''"
-            ></button>
+          <div class="empty-state text-center py-5" v-else>
+            <i class="bi bi-people fs-1 text-secondary mb-2"></i>
+            <h5>No Officials Found</h5>
+            <p class="text-muted">Try adjusting your search or filters.</p>
           </div>
 
-          <div class="content-wrapper">
-            <div class="table-container" v-if="filteredOfficials.length > 0">
-              <div class="table-responsive">
-                <table class="modern-table">
-                  <thead>
-                    <tr>
-                      <th>Name</th>
-                      <th>Position</th>
-                      <th>Term</th>
-                      <th class="text-center">Status</th>
-                      <th class="text-center">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr v-for="official in filteredOfficials" :key="official.id">
-                      <td>{{ official.name }}</td>
-                      <td>{{ capitalizeFirst(official.position) || 'Collector' }}</td>
-                      <td>
-                        {{ formatDate(official.term_start || official.created_at) }} -
-                        {{ formatDate(official.term_end || new Date(new Date(official.created_at).setFullYear(new Date(official.created_at).getFullYear() + 2))) }}
-                      </td>
-                      <td class="text-center">
-                        <div class="form-check form-switch d-flex align-items-center justify-content-center gap-2"
-                        >
-                          <input
-                            class="form-check-input"
-                            type="checkbox"
-                            role="switch"
-                            :checked="official.status || official.role === 'collector'"
-                            @change="toggleStatus(official)"
-                            :disabled="official.role === 'collector'"
-                          />
-                          <span :class="official.status ? 'text-success' : 'text-muted'">
-                            {{ official.status || official.role === 'collector' ? 'Active' : 'Inactive' }}
-                          </span>
-                        </div>
-                      </td>
-                      <td class="text-center">
-                        <button
-                          class="btn btn-outline-primary btn-sm me-2"
-                          @click="editOfficial(official)"
-                          data-bs-toggle="modal"
-                          data-bs-target="#editOfficial"
-                        >
-                          <i class="bi bi-pencil-square"></i>
-                        </button>
-                        <button
-                          class="btn btn-outline-danger btn-sm"
-                          @click="deleteOfficial(official.id)"
-                        >
-                          <i class="bi bi-trash"></i>
-                        </button>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
-            <div class="empty-state text-center py-5" v-else>
-              <i class="bi bi-people fs-1 text-secondary mb-2"></i>
-              <h5>No Officials Found</h5>
-              <p class="text-muted">Try adjusting your search or filters.</p>
-            </div>
-
-            <div class="footer-actions d-flex justify-content-between mt-4">
-              <Link :href="route('role.index')" class="btn btn-secondary">
-                <i class="bi bi-shield-lock me-1"></i> User Roles
-              </Link>
-              <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addOfficial">
-                <i class="bi bi-plus-lg me-1"></i> Add New Official
-              </button>
-            </div>
+          <div class="footer-actions d-flex justify-content-between mt-4">
+            <Link :href="route('role.index')" class="btn btn-secondary">
+              <i class="bi bi-shield-lock me-1"></i> User Roles
+            </Link>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addOfficial">
+              <i class="bi bi-plus-lg me-1"></i> Add New Official
+            </button>
           </div>
         </div>
       </div>
-    </AdminLayout>
+    </div>
 
     <!-- Add New Official Modal -->
     <div class="modal fade" id="addOfficial" tabindex="-1" aria-labelledby="addOfficialLabel" aria-hidden="true">
@@ -234,8 +285,51 @@ const capitalizeFirst = (str) => {
         </div>
       </div>
     </div>
-  </div>
+
+    <!-- Confirmation / Alert Modal -->
+    <div v-if="showModal" class="modal fade show d-block" tabindex="-1" role="dialog" style="background-color: rgba(0,0,0,0.5)">
+      <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">{{ modalTitle }}</h5>
+            <button type="button" class="btn-close" @click="closeModal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <p>{{ modalMessage }}</p>
+          </div>
+          <div class="modal-footer">
+            <button 
+              v-if="modalType === 'confirm'" 
+              type="button" 
+              class="btn btn-secondary" 
+              @click="closeModal"
+            >
+              Cancel
+            </button>
+            <button 
+              v-if="modalType === 'confirm'" 
+              type="button" 
+              class="btn btn-primary" 
+              @click="executeModalAction"
+            >
+              Confirm
+            </button>
+            <button 
+              v-if="modalType === 'alert'" 
+              type="button" 
+              class="btn btn-primary" 
+              @click="closeModal"
+            >
+              OK
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </AdminLayout>
 </template>
+
 
 <style scoped>
 .input-group-text i {
