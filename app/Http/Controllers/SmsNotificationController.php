@@ -229,10 +229,9 @@ class SmsNotificationController extends Controller
             ]);
             $deceased->delete();
 
-        // foreach ($members as $member) {
-        //     $this->sendAndLog($message, $member->contact_number, $notification->id);
-        // }
-            $this->sendAndLog($message, '09811986323', 1);
+        foreach ($members as $member) {
+            $this->sendAndLog($message, $member->contact_number, $notification->id);
+        }
 
         return redirect()->back()->with('success', 'Reminders saved and SMS sent to all members.');
     }

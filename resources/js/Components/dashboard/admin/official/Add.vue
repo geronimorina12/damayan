@@ -1,7 +1,7 @@
 <script setup>
-import { useForm } from '@inertiajs/vue3'
-import { Head } from '@inertiajs/vue3'
+import { useForm, Head } from '@inertiajs/vue3'
 import { ref, watch, computed, defineModel } from 'vue'
+import * as bootstrap from 'bootstrap'
 
 const isCollector = ref(false)
 const successMessage = ref('')
@@ -10,6 +10,7 @@ let errorMessage = ref('')
 let hasPresident = ref(false)
 let close = defineModel('closeModal')
 const collectors = ref(0);
+const parentMessage = defineModel('parentMessage')
 
 const form = useForm({
   first_name: '',
@@ -78,7 +79,7 @@ watch(isCollector, (newVal) => {
   }
 })
 
-// ✅ Computed property for password match validation
+//  Computed property for password match validation
 const passwordsMatch = computed(() => form.password === form.re_password)
 
 // Submit form
@@ -118,6 +119,7 @@ function submit() {
         form.reset()
         isCollector.value = false
         setTimeout(() => (successMessage.value = ''), 4000)
+        parentMessage.value = 'Collector added successfully!'
       },
       onError: (errors) => console.log(errors),
     })
@@ -129,6 +131,7 @@ function submit() {
         closeModal()
         form.reset()
         setTimeout(() => (successMessage.value = ''), 4000)
+        parentMessage.value = 'Official added successfully!'
       },
       onError: (err) => console.log('An error occurred:', err),
     })
@@ -137,12 +140,21 @@ function submit() {
 
 // Close modal helper
 function closeModal() {
-  const modalEl = document.getElementById('addOfficialModal')
+  const modalEl = document.getElementById('addOfficial')
   if (modalEl) {
     const modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl)
     modal.hide()
+
+    // Remove lingering backdrop and body lock after animation
+    setTimeout(() => {
+      const backdrop = document.querySelector('.modal-backdrop')
+      if (backdrop) backdrop.remove()
+      document.body.classList.remove('modal-open')
+      document.body.style.removeProperty('padding-right')
+    }, 300)
   }
 }
+
 </script>
 
 <template>

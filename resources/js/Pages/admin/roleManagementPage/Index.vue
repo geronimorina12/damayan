@@ -1,185 +1,257 @@
 <script setup>
 import { Head, Link, router } from "@inertiajs/vue3";
 import AdminLayout from "@/Layouts/AdminLayout.vue";
-import { defineProps, ref, watch } from "vue";
+import { defineProps, ref, watch, computed } from "vue";
 import RoleAndPermissionTable from "@/Components/dashboard/role/RoleAndPermissionTable.vue";
+
 const props = defineProps({
-    users: {
-        type: Array,
-        default: () => [],
-    },
-    admins: {
-        type: Array,
-        default: () => [],
-    },
+  users: {
+    type: Array,
+    default: () => [],
+  },
+  admins: {
+    type: Array,
+    default: () => [],
+  },
 });
+
 let getUsers = ref([]);
 let getAdmins = ref([]);
 let userIdClicked = ref(null);
 let userRole = ref("");
-const searching = ref(false)
-const searchError = ref('')
-const searchQuery = ref('')
 
+// Search states
+const searchQuery = ref("");
+const searching = ref(false);
+const searchError = ref("");
+
+// Initialize data
 watch(
-    () => props.admins,
-    (newAdmins) => {
-        getAdmins.value = newAdmins;
-    },
-    { immediate: true }
-);
-watch(
-    () => props.users,
-    (newUsers) => {
-        getUsers.value = newUsers;
-        getUsers.value.push(...getAdmins.value);
-    },
-    { immediate: true }
+  () => props.admins,
+  (newAdmins) => {
+    getAdmins.value = newAdmins;
+  },
+  { immediate: true }
 );
 
+watch(
+  () => props.users,
+  (newUsers) => {
+    getUsers.value = [...newUsers, ...getAdmins.value];
+  },
+  { immediate: true }
+);
+
+// Computed for filtered users
+const filteredUsers = computed(() => {
+  const query = searchQuery.value.trim().toLowerCase();
+  if (!query) return getUsers.value;
+
+  return getUsers.value.filter((user) => {
+    const name = user.name?.toLowerCase() || "";
+    const email = user.email?.toLowerCase() || "";
+    const role = user.role?.toLowerCase() || "";
+    const position = user.position?.toLowerCase() || "";
+    return (
+      name.includes(query) ||
+      email.includes(query) ||
+      role.includes(query) ||
+      position.includes(query)
+    );
+  });
+});
+
+// Watch search input to simulate loading spinner
+let typingTimeout;
+watch(searchQuery, () => {
+  searching.value = true;
+  clearTimeout(typingTimeout);
+  typingTimeout = setTimeout(() => {
+    searching.value = false;
+  }, 400);
+});
+
+// User Actions
 const action1Func = (userId, role) => {
-    userIdClicked.value = userId;
-    userRole.value = role;
+  userIdClicked.value = userId;
+  userRole.value = role;
 };
+
 const editFunc = () => {
-    if(userRole.value === 'admin' || userRole.value === 'collector'){
-      router.get(route('role.edit', {id: userIdClicked.value}));
-    }else{
-      router.get(route('role.official.edit', {official: userIdClicked.value}));
-    }
+  if (userRole.value === "admin" || userRole.value === "collector") {
+    router.get(route("role.edit", { id: userIdClicked.value }));
+  } else {
+    router.get(route("role.official.edit", { official: userIdClicked.value }));
+  }
 };
+
 const deleteFunc = () => {
-    if(confirm("Are you sure you want to delete this user?")) {
-        router.delete(route('role.deleteUser', {user: userIdClicked.value}), {
-            onSuccess: () => {
-                alert("User deleted successfully.");
-            },
-            onError: (e) => {
-                console.error("Failed to delete user.", e);
-            }
-        });
-    }
+  if (confirm("Are you sure you want to delete this user?")) {
+    router.delete(route("role.deleteUser", { user: userIdClicked.value }), {
+      onSuccess: () => {
+        alert("User deleted successfully.");
+      },
+      onError: (e) => {
+        console.error("Failed to delete user.", e);
+      },
+    });
+  }
 };
+
+// Role access mapping
 const getUserAcess = (role, position) => {
-    if(role === 'collector' || position === 'collector') return 'Status updates'
-    if(role === 'admin' || position === 'president') return 'Full modules'
-    if(role === 'secretary' || position === 'secretary') return 'Records and Reports'
-    if(role === 'vise_president' || position === 'vise_president') return 'Review and Approval'
-    else return "N/A"
-
-}
+  if (role === "collector" || position === "collector") return "Status updates";
+  if (role === "admin" || position === "president") return "Full modules";
+  if (role === "secretary" || position === "secretary") return "Records and Reports";
+  if (role === "vise_president" || position === "vise_president") return "Review and Approval";
+  return "N/A";
+};
 </script>
+
 <template>
-    <div>
-        <Head title="Role Management" />
-        <AdminLayout>
+  <div>
+    <Head title="Role Management" />
+    <AdminLayout>
+      <div class="container mt-4 role-container">
+        <h5 class="fw-light">User and Role Management</h5>
 
-            <div class="container mt-4 role-container">
-                <h5 class="fw-light">User and Role Management</h5>
+        <!-- User Management Table -->
+        <div class="card mt-3">
+          <div class="card-body">
+            <div class="container-fluid d-flex align-items-center justify-content-between px-0">
+              <div>
+                <h6 class="fw-semibold">User Management</h6>
+              </div>
 
-                <!-- User Management Table -->
-                <div class="card mt-3">
-                    <div class="card-body">
-                        <div class="container-fluid d-flex align-items-center justify-content-between px-0">
-                          <div>
-                          <h6 class="fw-semibold">User Management</h6>
-                        </div>
-
-                         <div class="search-box mb-3 position-relative">
-                            <input 
-                              type="text" 
-                              class="form-control search-input"
-                              placeholder="Search..." 
-                              v-model="searchQuery"
-                            />
-                            <div v-if="searching" class="spinner-border text-primary spinner-sm position-absolute end-0 top-50 translate-middle-y me-3" role="status">
-                              <span class="visually-hidden">Loading...</span>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div class="table-responsive">
-                            <table class="table table-bordered align-middle">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th>ID</th>
-                                        <th>NAME</th>
-                                        <th>EMAIL</th>
-                                        <th>Role</th>
-                                        <th>Access</th>
-                                        <th></th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr
-                                        v-for="(user, index) in getUsers"
-                                        :key="index"
-                                    >
-                                        <td>{{ user.id }}</td>
-                                        <td>{{ user.name }}</td>
-                                        <td>{{ user.email || 'N/A' }}</td>
-                                        <td>{{ user?.role || user?.position }}</td>
-                                        <td>{{ getUserAcess(user.role, user.position) }}</td>
-                                        <td>
-                                            <button
-                                                class="btn btn-sm btn-light"
-                                            >
-                                                <i
-                                                    class="bi bi-three-dots-vertical action1"
-                                                    data-bs-toggle="modal"
-                                                    data-bs-target="#action1Modal"
-                                                    @click="action1Func(user.id, user.role || user.position)"
-                                                ></i>
-                                            </button>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
+              <div class="search-box mb-3 position-relative">
+                <input
+                  type="text"
+                  class="form-control search-input"
+                  placeholder="Search..."
+                  v-model="searchQuery"
+                />
+                <div
+                  v-if="searching"
+                  class="spinner-border text-primary spinner-sm position-absolute end-0 top-50 translate-middle-y me-3"
+                  role="status"
+                >
+                  <span class="visually-hidden">Loading...</span>
                 </div>
-                    <RoleAndPermissionTable :users="getUsers"/>
-                <div class="bottom-role-container container"></div>
+              </div>
             </div>
-        </AdminLayout>
 
-      <!-- Modern Action Modal -->
-<div class="modal fade" id="action1Modal" tabindex="-1" aria-labelledby="actionModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content modern-modal">
-      <div class="modal-header modern-header">
-        <div class="header-content">
-          <i class="modal-icon fas fa-exclamation-circle"></i>
-          <h2 class="modal-title text-dark" id="actionModalLabel">Confirm Action</h2>
+            <div class="table-responsive">
+              <table class="table table-bordered align-middle">
+                <thead class="table-light">
+                  <tr>
+                    <th>ID</th>
+                    <th>NAME</th>
+                    <th>EMAIL</th>
+                    <th>Role</th>
+                    <th>Access</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-if="filteredUsers.length === 0">
+                    <td colspan="6" class="text-center text-muted py-3">
+                      No users found.
+                    </td>
+                  </tr>
+                  <tr v-for="(user, index) in filteredUsers" :key="index">
+                    <td>{{ user.id }}</td>
+                    <td>{{ user.name }}</td>
+                    <td>{{ user.email || "N/A" }}</td>
+                    <td>{{ user?.role || user?.position }}</td>
+                    <td>{{ getUserAcess(user.role, user.position) }}</td>
+                    <td>
+                      <button class="btn btn-sm btn-light">
+                        <i
+                          class="bi bi-three-dots-vertical action1"
+                          data-bs-toggle="modal"
+                          data-bs-target="#action1Modal"
+                          @click="action1Func(user.id, user.role || user.position)"
+                        ></i>
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
-        <button type="button" class="btn-close modern-close" data-bs-dismiss="modal" aria-label="Close">
-         <i class="bi bi-x-lg text-dark"></i>
-        </button>
+
+        <RoleAndPermissionTable :users="filteredUsers" />
+        <div class="bottom-role-container container"></div>
       </div>
-      <div class="modal-body modern-body">
-        <p>Please select an action to perform. <span class="text-danger">This action cannot be undone.</span></p>
-      </div>
-      <div class="modal-footer modern-footer">
-        <div class="action-buttons">
-          <button type="button" class="btn btn-edit text-dark" data-bs-dismiss="modal" @click="editFunc()">
-            <i class="fas fa-edit"></i>
-            <span>Edit</span>
-          </button>
-          <button type="button" class="btn btn-delete text-dark" data-bs-dismiss="modal" @click="deleteFunc()">
-            <i class="fas fa-trash-alt"></i>
-            <span>Delete</span>
-          </button>
-          <button type="button" class="btn btn-cancel text-dark" data-bs-dismiss="modal">
-            <i class="fas fa-times"></i>
-            <span>Cancel</span>
-          </button>
+    </AdminLayout>
+
+    <!-- Modern Action Modal -->
+    <div
+      class="modal fade"
+      id="action1Modal"
+      tabindex="-1"
+      aria-labelledby="actionModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content modern-modal">
+          <div class="modal-header modern-header">
+            <div class="header-content">
+              <i class="modal-icon fas fa-exclamation-circle"></i>
+              <h2 class="modal-title text-dark" id="actionModalLabel">Confirm Action</h2>
+            </div>
+            <button
+              type="button"
+              class="btn-close modern-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            >
+              <i class="bi bi-x-lg text-dark"></i>
+            </button>
+          </div>
+          <div class="modal-body modern-body">
+            <p>
+              Please select an action to perform.
+              <span class="text-danger">This action cannot be undone.</span>
+            </p>
+          </div>
+          <div class="modal-footer modern-footer">
+            <div class="action-buttons">
+              <button
+                type="button"
+                class="btn btn-edit text-dark"
+                data-bs-dismiss="modal"
+                @click="editFunc()"
+              >
+                <i class="fas fa-edit"></i>
+                <span>Edit</span>
+              </button>
+              <button
+                type="button"
+                class="btn btn-delete text-dark"
+                data-bs-dismiss="modal"
+                @click="deleteFunc()"
+              >
+                <i class="fas fa-trash-alt"></i>
+                <span>Delete</span>
+              </button>
+              <button
+                type="button"
+                class="btn btn-cancel text-dark"
+                data-bs-dismiss="modal"
+              >
+                <i class="fas fa-times"></i>
+                <span>Cancel</span>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   </div>
-</div>
-    </div>
 </template>
+
 <style scoped>
 .role-container {
     width: 100%;

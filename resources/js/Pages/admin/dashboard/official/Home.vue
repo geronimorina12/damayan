@@ -13,6 +13,7 @@ let getOfficials = ref([])
 let selectedOfficial = ref({})
 let searchQuery = ref('')
 let statusFilter = ref('all')
+const successMessage = ref('')
 
 watch(
   () => props.officials,
@@ -108,6 +109,22 @@ const capitalizeFirst = (str) => {
                 <option value="inactive">Inactive</option>
               </select>
             </div>
+          </div>
+
+           <div
+            v-if="successMessage"
+            class="alert alert-success alert-dismissible fade show position-fixed top-0 end-0 mt-3 me-3 shadow-lg"
+            role="alert"
+            style="z-index: 9999; min-width: 280px;"
+          >
+            <i class="bi bi-check-circle-fill me-2"></i> {{ successMessage }}
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="alert"
+              aria-label="Close"
+              @click="successMessage = ''"
+            ></button>
           </div>
 
           <div class="content-wrapper">
