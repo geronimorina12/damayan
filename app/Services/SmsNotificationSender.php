@@ -17,8 +17,10 @@ class SmsNotificationSender
         $apiKey = env('SEMAPHORE_API_KEY');
         $sender = env('SEMAPHORE_SENDER_NAME', 'SEMAPHORE');
 
+        Log::info("Loaded API KEY: " . $apiKey);
+
         foreach ($numbers as $number) {
-            $response = Http::post('https://semaphore.co/api/v4/messages', [
+            $response = Http::post('https://api.semaphore.co/api/v4/messages', [
                 'apikey' => $apiKey,
                 'number' => $number,
                 'message' => $message,

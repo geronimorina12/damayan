@@ -264,24 +264,39 @@ class SmsNotificationController extends Controller
         return redirect()->back()->with('success', 'Fund updates saved and SMS sent to all members.');
     }
 
-    /**
-     * Helper for sending and logging
-     */
-    private function sendAndLog(string $message, string $number, int $notificationId): void
-    {
-            Log::info("FAKE SMS (TEST MODE) to {$number} | Notification ID: {$notificationId} | Message: {$message}");
-         try {
-             $success = SmsNotificationSender::send($message, [$number]);
+            /**
+             * Helper for sending and logging
+             */
+            /**
+         * Sends an SMS message and logs the result.
+         *
+         * @param string $message The SMS message content.
+         * @param string $number The recipient phone number.
+         * @param int $notificationId The related notification record ID.
+         */
+        private function sendAndLog(string $message, string $number, int $notificationId): void
+        {
+            // Log the outgoing message (TEST MODE)
+            Log::info("FAKE SMS (TEST MODE): Sending to {$number} | Notification ID: {$notificationId} | Message: {$message}");
 
-             if ($success) {
-                 Log::info("SMS sent successfully to {$number} | Notification ID: {$notificationId}");
-             } else {
-                 Log::error("SMS failed to send to {$number} | Notification ID: {$notificationId}");
-             }
-         } catch (\Exception $e) {
-             Log::error("Exception when sending SMS to {$number}: " . $e->getMessage());
-         }
-    }
+            try {
+                // Attempt to send SMS using a service class (Semaphore, Twilio, etc.)
+                $success = SmsNotificationSender::send($message, [$number]);
+
+                // Evaluate the send result
+                if ($success) {
+                    Log::info("SMS successfully sent to {$number} | Notification ID: {$notificationId}");
+                } else {
+                    Log::error("SMS failed to send to {$number} | Notification ID: {$notificationId}");
+                }
+
+            } catch (\Throwable $e) {
+                // Log unexpected errors (network issues, API errors, etc.)
+                Log::error(
+                    "Error sending SMS to {$number} | Notification ID: {$notificationId} | Exception: {$e->getMessage()}"
+                );
+            }
+        }
 
     public function selectDeceased()
     {
