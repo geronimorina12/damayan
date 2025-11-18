@@ -100,7 +100,7 @@ const overlayStyles = computed(() => {
 
         <Link :href="route('members.registered')" class="nav-link text-dark d-flex align-items-center"
           @click="closeSidebar"
-          :class="{ active: currentRoute.includes('/registered-member') }"
+          :class="{ active: currentRoute.includes('/registered-member') , active: currentRoute.includes('/send-to-all-selected/v2') }"
         >
           <i class="bi bi-people me-2"></i> Members
         </Link>

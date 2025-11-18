@@ -63,7 +63,7 @@ const validateLastNight = (dateString) => {
   today.setHours(0, 0, 0, 0);
   
   if (selectedDate <= today) {
-    lastNightError.value = "The last night date cannot be set to today or a past date.";
+    lastNightError.value = "The last night date cannot be set today or a past date.";
   } else {
     lastNightError.value = "";
   }
