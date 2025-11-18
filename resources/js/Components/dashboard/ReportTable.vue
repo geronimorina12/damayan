@@ -10,7 +10,7 @@ const props = defineProps({
 })
 
 const getMembers = ref([])
-const getPurok = ref("all")
+const getPurok = computed(() => props.activePurok)
 const localStatus = ref(props.activeStatus)
 const searchQuery = ref('')
 const searching = ref(false)
@@ -65,15 +65,10 @@ watch(
   { immediate: true, deep: true }
 )
 
-watch(
-  () => props.activePurok,
-  (newPurok) => {
-    getPurok.value = newPurok
-  },
-  { immediate: true }
-)
-
 const toggleStatus = (status) => {
+  console.log("Status:", status)
+  console.log("Purok:", getPurok.value)  // <-- always correct
+
   localStatus.value = status
 
   if (getPurok.value === 'all') {
@@ -87,6 +82,7 @@ const toggleStatus = (status) => {
     { preserveState: true, replace: true }
   )
 }
+
 </script>
 
 <template>

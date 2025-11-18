@@ -31,28 +31,35 @@ class ReportForCollector extends Controller
             'members' => $members,
         ]);
     }
+public function toggleStatus($status, $purok) 
+{
+    // Filter contributions by MEMBER purok
+    $contributions = ContributionModel::whereHas('memberContribution', function ($q) use ($purok) {
+            if ($purok !== 'all') {
+                $q->where('purok', $purok);
+            }
+        })
+        ->with(['memberContribution' => function ($query) {
+            $query->select('id', 'first_name', 'middle_name', 'last_name', 'purok', 'contact_number');
+        }])
+        ->latest('created_at')
+        ->get();
 
-    public function toggleStatus($status, $purok) 
-    {
-        // Removed status filter, only filter by purok
-        $contributions = ContributionModel::where('purok', $purok)
-            ->with(['memberContribution' => function ($query) {
-                $query->select('id', 'first_name','middle_name', 'last_name', 'purok', 'contact_number');
-            }])
-            ->latest('created_at')
-            ->get();
+    // Count all members
+    $membersCount = memberModel::count();
 
-        $membersCount = memberModel::count();
-        $contributionsIds = ContributionModel::pluck('member_id')->toArray(); 
+    // All paid members IDs
+    $contributionsIds = ContributionModel::pluck('member_id')->toArray(); 
 
-        return Inertia::render('collector/report/Index', [
-            'contributions' => $contributions,
-            'activePurok' => $purok,
-            'membersCount' => $membersCount,
-            'activeStatus' => 'all', // since we ignore status
-            'contributionsIds' => $contributionsIds,
-        ]);
-    }
+    return Inertia::render('collector/report/Index', [
+        'contributions' => $contributions,
+        'activePurok' => $purok,
+        'membersCount' => $membersCount,
+        'activeStatus' => $status,  // now return status properly
+        'contributionsIds' => $contributionsIds,
+    ]);
+}
+
      public function togglePaid($status = 'paid', $purok) 
     {
         // Removed status filter, only filter by purok
