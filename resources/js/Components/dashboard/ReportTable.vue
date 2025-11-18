@@ -128,7 +128,6 @@ const toggleStatus = (status) => {
       <table class="table" v-if="filteredMembers.length > 0">
         <thead>
           <tr>
-            <th class="bg-light">ID</th>
             <th class="bg-light">NAME</th>
             <th class="bg-light">CONTACT</th>
             <th class="bg-light">PUROK</th>
@@ -138,7 +137,6 @@ const toggleStatus = (status) => {
 
         <tbody>
           <tr v-for="member in filteredMembers" :key="member.id">
-            <td class="bg-light">{{ member.id }}</td>
             <td class="bg-light">
               {{ member.first_name }} {{ member.middle_name }} {{ member.last_name }}
             </td>

@@ -5,13 +5,22 @@ import { Head } from '@inertiajs/vue3';
 import SubHeaderForCollectorReport from '@/Components/dashboard/SubHeaderForCollectorReport.vue';
 import ReportTable from '@/Components/dashboard/ReportTable.vue';
 import PurokComponentForCollectorReport from '@/Components/dashboard/contribution/PurokComponentForCollectorReport.vue';
+import Toggle from '@/Components/dashboard/report/Toggle.vue';
 
 const props = defineProps({
     contributions: { type: Array, default: () => [] },
     activePurok: { type: String, default: () => 'all' },
     activeStatus: { type: String, default: () => 'paid' },
     contributionsIds: { type: Array, default: () => [] },
-    members: { type: Array, default: () => [] }
+    members: { type: Array, default: () => [] }, 
+    currentDeceasedMembers: {
+        type: Array,
+        default: () => []
+    },
+    currentDeceasedMember: {
+        type: Object,
+        default: () => ({})
+    }
 });
 
 let getContributions = ref([]);
@@ -20,6 +29,8 @@ let getAmmount = ref(0);
 let getActiveStatus = ref('paid');
 let getContributionsIds = ref([]);
 const getMembers = ref([]);
+const getCurrentDeceasedMembers = ref([]);
+const getCurrentDeceasedMember = ref({});
 
 // WATCHERS
 watch(() => props.contributions, (newContributions) => {
@@ -45,6 +56,23 @@ watch(() => props.members, (newMembers) => {
     getMembers.value = newMembers;
 }, { immediate: true });
 
+watch(
+  () => props.currentDeceasedMembers,
+  (newData) => {
+    getCurrentDeceasedMembers.value = newData ? Object.values(newData) : [];
+  },
+  { immediate: true }
+);
+
+watch(
+  () => props.currentDeceasedMember,
+  (newData) => {
+    getCurrentDeceasedMember.value = newData;
+  },
+  { immediate: true }
+);
+
+
 //  Use contributionsIds.includes(member.id) for counts
 const getPaidMembers = computed(() => {
     return getMembers.value.filter(m => getContributionsIds.value.includes(m.id)).length;
@@ -65,6 +93,14 @@ const getMembersCount = computed(() => getMembers.value.length);
                 <h5 class="mb-0">Report</h5>
                 <p class="d-none d-lg-block">Contribution Report</p>
             </div>
+
+            <div class="mt-3" v-if="getCurrentDeceasedMember">
+            <Toggle 
+              :allDeceased="getCurrentDeceasedMembers" 
+              :data="getCurrentDeceasedMember"
+              :purok="getActivePurok"
+            />
+          </div>
 
             <div class="purok-container container-fluid d-flex justify-content-end align-items-center">
                 <PurokComponentForCollectorReport
