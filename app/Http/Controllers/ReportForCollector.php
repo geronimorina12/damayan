@@ -53,6 +53,27 @@ class ReportForCollector extends Controller
             'contributionsIds' => $contributionsIds,
         ]);
     }
+     public function togglePaid($status = 'paid', $purok) 
+    {
+        // Removed status filter, only filter by purok
+        $contributions = ContributionModel::where('purok', $purok)
+            ->with(['memberContribution' => function ($query) {
+                $query->select('id', 'first_name','middle_name', 'last_name', 'purok', 'contact_number');
+            }])
+            ->latest('created_at')
+            ->get();
+
+        $membersCount = memberModel::count();
+        $contributionsIds = ContributionModel::pluck('member_id')->toArray(); 
+
+        return Inertia::render('collector/report/Index', [
+            'contributions' => $contributions,
+            'activePurok' => $purok,
+            'membersCount' => $membersCount,
+            'activeStatus' => 'paid', 
+            'contributionsIds' => $contributionsIds,
+        ]);
+    }
 
    public function togglePurok($status, $purok)
 {

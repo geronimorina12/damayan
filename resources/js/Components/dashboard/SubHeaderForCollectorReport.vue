@@ -71,7 +71,7 @@ watch(() => props.unpaidMembers, (newUnpaid) => {
             <td class="bg-light">{{ getAmount }}</td>
             <td class="bg-light">{{ getActivePurok[5] || 'All'}}</td>
             <td class="bg-light">{{ getPaidMembers }}</td>
-            <td class="bg-light">{{ getUnpaidMembers }}</td>
+            <td class="bg-light">{{ getMembersCount - getPaidMembers }}</td>
           </tr>
         </tbody>
       </table>

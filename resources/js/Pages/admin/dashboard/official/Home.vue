@@ -119,7 +119,6 @@ const capitalizeFirst = (str) => {
   if (!str) return ''
   return str.charAt(0).toUpperCase() + str.slice(1)
 }
-
 // Watch for props changes
 watch(
   () => props.officials,
@@ -202,16 +201,8 @@ watch(
                       {{ formatDate(official.term_end || new Date(new Date(official.created_at).setFullYear(new Date(official.created_at).getFullYear() + 2))) }}
                     </td>
                     <td class="text-center">
-                      <div class="form-check form-switch d-flex align-items-center justify-content-center gap-2">
-                        <!-- <input
-                          class="form-check-input"
-                          type="checkbox"
-                          role="switch"
-                          :checked="official.status || official.role === 'collector'"
-                          @change="toggleStatus(official)"
-                          :disabled="official.role === 'collector'"
-                        /> -->
-                        <span :class="official.status ? 'text-success' : 'text-danger'" class="fw-bold">
+                      <div class="text-start">
+                        <span :class="official.status || official.role === 'collector' ? 'text-success' : 'text-danger inactive-status'" class="fw-bold status-label">
                           {{ official.status || official.role === 'collector' ? 'Active' : 'Inactive' }}
                         </span>
                       </div>
@@ -626,7 +617,14 @@ input:checked + .toggle-slider:before {
 .modern-modal .modal-body {
   padding: 2rem;
 }
-
+/* .status-label{
+  transform: translateX(-50%);
+  text-align: left;
+}
+.inactive-status{
+  transform: translateX(-30%);
+  text-align: left;
+} */
 @media (max-width: 768px) {
   .modern-container {
     padding: 1rem;
