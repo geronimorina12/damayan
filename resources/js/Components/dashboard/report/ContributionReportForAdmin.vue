@@ -12,25 +12,50 @@ const purok2Count = ref([]);
 const purok3Count = ref([]);
 const purok4Count = ref([]);
 const members = ref([]);
+
+
+const getPurokNumber = (value) => {
+  if (!value) return 999;
+
+  // Convert to string, remove spaces, lowercase
+  let cleaned = String(value).toLowerCase().replace(/\s+/g, "");
+
+  // If it's already a number-like value ("1", 1, "01")
+  if (/^\d+$/.test(cleaned)) {
+    return Number(cleaned);
+  }
+
+  // Match forms like "purok1", "purok-1", "purok01"
+  const match = cleaned.match(/purok[-_]?(\d+)/);
+  if (match) return Number(match[1]);
+
+  return 999; // unknown → put at bottom
+};
+
+
+const sortByPurok = (arr) => {
+  if (!Array.isArray(arr)) return [];
+
+  return [...arr].sort((a, b) => Number(a.purok) - Number(b.purok));
+};
+
 watch(
-    () => props.contributions,
-    (data) => {
-        getContributions.value = data;
-        purok1Count.value = getContributions.value.filter(
-            (item) => item.purok == "purok1"
-        );
-        purok2Count.value = getContributions.value.filter(
-            (item) => item.purok == "purok2"
-        );
-        purok3Count.value = getContributions.value.filter(
-            (item) => item.purok == "purok3"
-        );
-        purok4Count.value = getContributions.value.filter(
-            (item) => item.purok == "purok4"
-        );
-    },
-    { immediate: true }
+  () => props.contributions,
+  (data) => {
+    // sorted contributions
+    getContributions.value = sortByPurok(data || []);
+
+    // counts per purok
+    purok1Count.value = getContributions.value.filter(item => Number(item.purok) === 1);
+    purok2Count.value = getContributions.value.filter(item => Number(item.purok) === 2);
+    purok3Count.value = getContributions.value.filter(item => Number(item.purok) === 3);
+    purok4Count.value = getContributions.value.filter(item => Number(item.purok) === 4);
+
+    console.log("SORTED:", getContributions.value);
+  },
+  { immediate: true }
 );
+
 const getAllMembers = async () => {
   try {
     const response = await axios.get("/members");
@@ -88,7 +113,7 @@ onMounted(() => {
                             </tr>
                         </thead>
                         <tbody>
-                            <tr v-for="(item, index) in contributions" :key="index">
+                            <tr v-for="(item, index) in getContributions" :key="index">
                                 <td data-label="Collector">
                                     <i class="bi bi-person me-2"></i>{{ item.collector }}
                                 </td>

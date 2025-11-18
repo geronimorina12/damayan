@@ -29,18 +29,18 @@ const formatDate = (dateString) => {
                 <table class="responsive-table">
                     <thead class="table-light">
                         <tr>
-                            <th data-label="Amount">AMOUNT</th>
-                            <th data-label="Members">MEMBERS</th>
                             <th data-label="Collector">COLLECTOR</th>
                             <th data-label="Purok">PUROK</th>
+                            <th data-label="Members">MEMBERS</th>
+                            <th data-label="Amount">AMOUNT</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr v-for="(item, index) in recent" :key="index">
-                            <td data-label="Amount">{{ item.total_amount }}</td>
-                            <td data-label="Members">{{ item.members }}</td>
                             <td data-label="Collector">{{ item.collector }}</td>
                             <td data-label="Purok">{{ item.purok }}</td>
+                            <td data-label="Members">{{ item.members }}</td>
+                            <td data-label="Amount">{{ item.total_amount }}</td>
                         </tr>
                     </tbody>
                 </table>

@@ -34,6 +34,7 @@ const togglePurok = (purok) =>{
         onError: (err) => console.log("An error occured: " , err)
     })
 }
+const formatPurok = (purok) => purok.toLowerCase().replace(/\s+/g, '');
 </script>
 
 <template>

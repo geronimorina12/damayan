@@ -87,8 +87,8 @@ const formatDate = (dateString) => {
             >
               <td class="index-cell">{{ index + 1 }}</td>
               <td class="name-cell">{{ person.deceased_name }}</td>
-              <td class="date-cell">{{ formatDate(person.date_of_death) }}</td>
-              <td class="address-cell">{{ person.last_night || 'N/A' }}</td>
+              <td class="date-cell">{{ formatDate(person.date_of_death || 'N/A') }}</td>
+              <td class="address-cell">{{ formatDate(person.last_night || 'N/A') }}</td>
             </tr>
           </tbody>
         </table>

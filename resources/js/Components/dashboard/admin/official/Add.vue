@@ -50,6 +50,7 @@ async function countCollectors() {
     })
     const data = await response.json()
     collectors.value = data.collectors
+    console.log('Collectors count:', collectors.value)
   } catch (error) {
     console.error('Error fetching collectos status:', error)
   }
@@ -199,7 +200,7 @@ function closeModal() {
               <option value="secretary">Secretary</option>
               <option value="treasurer">Treasurer</option>
               <option value="auditor">Auditor</option>
-              <option value="purok_leader" v-if="!collectors > 4">Purok Leader</option>
+              <option value="purok_leader" v-if="collectors < 4">Purok Leader</option>
             </select>
           </div>
 
@@ -209,10 +210,9 @@ function closeModal() {
                     <label class="toggle-switch">
                       <input
                         type="checkbox"
-                        :checked="isCollectorClicked === isCollector"
                         v-model="isCollector"
-                        :disabled="collectors > 4"
-                      >
+                        :disabled="collectors >= 4"
+                      />
                       <span class="toggle-slider"></span>
                     </label>
                     <span class="status-label" :class="isCollector === 'active' ? 'active' : 'inactive'">
@@ -220,7 +220,9 @@ function closeModal() {
                   </div>
                     <div>
                        <label class="form-check-label" for="collector">Register as Collector
-                        <p class="text-danger">Purok leader/ Collector limit has been reached.</p>
+                        <p class="text-danger" v-if="collectors >= 4">
+                          Purok leader / Collector limit has been reached.
+                        </p>
                        </label>
                     </div>
           </div>
