@@ -72,7 +72,7 @@ const prevName = () => {
 
   // pass the member_id to your route as requested
   router.get(
-  route("filterContribution.toggle", { 
+  route("collector.toggleDeceased", { 
     id: prevMember.member_id,
     purok: props.purok
   }),
@@ -95,7 +95,7 @@ const nextName = () => {
 
   selectedDeceased.value = nextMember;
     router.get(
-  route("filterContribution.toggle", { 
+  route("collector.toggleDeceased", { 
     id: nextMember.member_id,
     purok: props.purok
   }),

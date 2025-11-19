@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\ContributionModel;
 use App\Models\DeathReportModel;
 use App\Models\memberModel;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
@@ -66,6 +67,46 @@ public function toggleStatus($status, $purok)
         'activeStatus' => $status,  // now return status properly
         'contributionsIds' => $contributionsIds,
     ]);
+}
+
+public function toggleDeceased($id, $purok)
+{
+   $mem = memberModel::with(['contributions' => function ($query) use ($id) {
+        $query->where('deceased_id', $id);
+    }])
+    ->orderBy('first_name', 'asc')
+    ->paginate(10);
+    $selectedPurok = $purok;
+
+    $collectors = User::select('id', 'name', 'purok')
+        ->where('role', 'collector')
+        ->get();
+
+         $currentDeceasedMembers = DeathReportModel::where('iscurrent', true)
+     ->get();
+     $currentDeceasedMember = DeathReportModel::where('member_id', $id)
+     ->latest('created_at')
+     ->first();
+
+     $contributions = ContributionModel::   with(['memberContribution' => function ($query) {
+                $query->select('id', 'first_name','middle_name', 'last_name', 'purok', 'contact_number');
+            }])
+            ->latest('created_at')
+            ->get();
+
+        // Bilang san intero na members
+         $members = memberModel::all();
+
+        $contributionsIds = ContributionModel::pluck('member_id')->toArray(); 
+
+        return Inertia::render('collector/report/Index', [
+            'contributions' => $contributions,
+            'member' => $mem->items(),
+            'activePurok' => $selectedPurok,
+            'activeStatus' => 'all',  
+            'currentDeceasedMembers' => $currentDeceasedMembers,
+            'currentDeceasedMember' => $currentDeceasedMember,
+        ]);
 }
 
      public function togglePaid($status = 'paid', $purok) 
