@@ -32,22 +32,65 @@ class SmsNotificationController extends Controller
         ]);
     }
 
-    public function smsPage()
-    {
-        $deathReport = SmsNotificationSaved::where('type', 'deathReport')->latest()->first();
-        $scheduleContribution = SmsNotificationSaved::where('type', 'scheduleContribution')->latest()->first();
-        $reminders = SmsNotificationSaved::where('type', 'reminders')->latest()->first();
-        $currentFund = AssistanceDistribution::sum('total_amount');
+   public function smsPage()
+{
+    $deathReport = SmsNotificationSaved::where('type', 'deathReport')->latest()->first();
+    $scheduleContribution = SmsNotificationSaved::where('type', 'scheduleContribution')->latest()->first();
+    $reminders = SmsNotificationSaved::where('type', 'reminders')->latest()->first();
 
-        $fundUpdates = "Total money disbursed so far is " . $currentFund . ". Thank you for your continuous support.";
-        return Inertia::render('admin/SmsPage', [
-            'deathReport' => $deathReport,
-            'scheduleContribution' => $scheduleContribution,
-            'reminders' => "Hello! You still have an unpaid Damayan contribution. Please settle as soon as possible. If already paid, please ignore this message. Thank you",
-            'fundUpdates' => $fundUpdates,
-            'members' => memberModel::select('id', 'first_name', 'last_name')->get()->toArray(),
-        ]);
+    $currentFund = AssistanceDistribution::sum('total_amount');
+
+    // Latest assistance distribution (may be null)
+    $distributions = AssistanceDistribution::latest()->first();
+
+    $deceasedName = null;
+
+    // ---------------------------------------------
+    // 1. If we HAVE a distribution → get that member
+    // ---------------------------------------------
+    if ($distributions) {
+        $deceased = DeathReportModel::where('member_id', $distributions->report_id)
+            ->with(['member:id,first_name,last_name'])
+            ->first();
+
+        if ($deceased && $deceased->member) {
+            $deceasedName = $deceased->member->first_name . " " . $deceased->member->last_name;
+        }
     }
+
+    // --------------------------------------------------------
+    // 2. If NO distribution → use the FIRST DeathReport record
+    // --------------------------------------------------------
+if (!$deceasedName) {
+    $firstDeath = DeathReportModel::with(['member:id,first_name,last_name'])
+        ->orderBy('created_at', 'asc')
+        ->first();
+
+    Log::info("First Death Report fetched: " . ($firstDeath ? $firstDeath : 'None'));
+
+    if ($firstDeath) {
+        if ($firstDeath->member) {
+            $deceasedName = $firstDeath->member->first_name . " " . $firstDeath->member->last_name;
+        } else {
+            // fallback to the deceased_name in the death report
+            $deceasedName = $firstDeath->deceased_name;
+        }
+    }
+}
+
+
+    // Final SMS text
+    $fundUpdates = "Total money disbursed so far for {$deceasedName} is {$currentFund}. Thank you for your continuous support.";
+
+    return Inertia::render('admin/SmsPage', [
+        'deathReport' => $deathReport,
+        'scheduleContribution' => $scheduleContribution,
+        'reminders' => "Hello! You still have an unpaid Damayan contribution. Please settle as soon as possible. If already paid, please ignore this message. Thank you",
+        'fundUpdates' => $fundUpdates,
+        'members' => memberModel::select('id', 'first_name', 'last_name')->get()->toArray(),
+    ]);
+}
+
         public function sendToAllSelected($type, $message, $deceased, $last)
         {
             $members = memberModel::select('id', 'first_name', 'last_name', 'age')->get();

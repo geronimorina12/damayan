@@ -62,11 +62,24 @@ public function toggleContributionPurok($purok, $deceasedId)
             $formatPurok = '';
     }
 
+         
+     if($deceasedId !== 0){
+        $currentDeceasedMember = DeathReportModel::where('member_id', $deceasedId)
+     ->latest('created_at')
+     ->first();
+     }else{
+        $currentDeceasedMember = null;
+     }
     $mem = memberModel::where('purok', $formatPurok)
-    ->with('contributions')->paginate(10);
+        ->with(['contributions' => function($query) use ($deceasedId, $currentDeceasedMember) {
+            $query->where('deceased_id', $deceasedId ?: $currentDeceasedMember->member_id ?? 0);
+        }])
+        ->paginate(10);
 
     if (count($mem->items()) === 0 && $purok === 'all') {
-          $mem = memberModel::with('contributions')->paginate(10);
+          $mem = memberModel::with(['contributions' => function($query) use ($deceasedId) {
+            $query->where('deceased_id', $deceasedId);
+        }])->paginate(10);
     }
 
     $collectors = User::select('id', 'name', 'purok')
@@ -75,14 +88,6 @@ public function toggleContributionPurok($purok, $deceasedId)
 
     $currentDeceasedMembers = DeathReportModel::where('iscurrent', true)
      ->get();
-     
-     if($deceasedId !== 0){
-        $currentDeceasedMember = DeathReportModel::where('member_id', $deceasedId)
-     ->latest('created_at')
-     ->first();
-     }else{
-        $currentDeceasedMember = null;
-     }
 
     return Inertia::render('admin/dashboard/contribution/MemberContribution', [
         'member'        => $mem,
@@ -145,7 +150,7 @@ public function toggleContributionPurok($purok, $deceasedId)
         'status' => 'required',
         'deceased_id' => 'nullable|exists:death_reports,member_id',
     ]);
-
+    Log::info("Purok: " . $request->purok ?: "null");
     $member = memberModel::find($request->member_id);
     $message = "Dear {$member->first_name} {$member->last_name}, your contribution of {$request->amount} has been recorded on {$request->payment_date}. Thank you for your support!";   
     $this->sendAndLog($message, $member->contact_number, $notification->id ?? 0);
@@ -174,7 +179,15 @@ public function toggleContributionPurok($purok, $deceasedId)
 }
   public function toggle($id, $purok)
 {
-   $mem = memberModel::with(['contributions' => function ($query) use ($id) {
+    // Log::info("Purok: " . $purok ?: "null");
+    $cleaned = trim($purok);
+    
+    // Add space between "purok" and the number using regex
+    $formatted = preg_replace('/(purok)(\d+)/i', '$1 $2', $cleaned);
+    
+    // Capitalize the first letter of each word
+    $formatted = ucwords(strtolower($formatted));
+   $mem = memberModel::where('purok', $formatted)->with(['contributions' => function ($query) use ($id) {
         $query->where('deceased_id', $id);
     }])
     ->orderBy('first_name', 'asc')

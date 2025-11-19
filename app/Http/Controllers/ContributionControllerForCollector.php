@@ -8,6 +8,7 @@ use App\Models\memberModel;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
 class ContributionControllerForCollector extends Controller
@@ -61,9 +62,13 @@ class ContributionControllerForCollector extends Controller
         default:
             $formatPurok = '';
     }
+Log::info("Deceased ID33: " . $deceasedId ?: "null");
+Log::info("purok ID33: " . $formatPurok ?: "null");
 
     $mem = memberModel::where('purok', $formatPurok)
-    ->with('contributions')->get();
+    ->with(['contributions' => function($query) use ($deceasedId) {
+            $query->where('deceased_id', $deceasedId);
+        }])->get();
 
     if ($mem->isEmpty() && $purok === 'all') {
         $mem = memberModel::with('contributions')->get();
@@ -83,7 +88,7 @@ class ContributionControllerForCollector extends Controller
      ->latest('created_at')
      ->first();
 
-        $paidMembersId = ContributionModel::pluck('member_id')->toArray();
+        $paidMembersId = ContributionModel::where('deceased_id', $deceasedId)->pluck('member_id')->toArray();
         return Inertia::render('collector/contribution/MemberContribution', [
             'member' => $mem,
             'selectedPurok' => $purok,

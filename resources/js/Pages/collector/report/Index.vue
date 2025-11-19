@@ -106,6 +106,7 @@ const getMembersCount = computed(() => getMembers.value.length);
                 <PurokComponentForCollectorReport
                     :activePurok="getActivePurok"
                     :activeStatus="getActiveStatus"
+                    :deceasedId="getCurrentDeceasedMember.member_id"
                 />
             </div>
 

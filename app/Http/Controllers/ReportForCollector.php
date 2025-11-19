@@ -68,47 +68,63 @@ public function toggleStatus($status, $purok)
         'contributionsIds' => $contributionsIds,
     ]);
 }
-
 public function toggleDeceased($id, $purok)
 {
-   $mem = memberModel::with(['contributions' => function ($query) use ($id) {
+    Log::info("Toggling deceased for ID: $id and Purok: $purok");
+
+    $mem = memberModel::with(['contributions' => function ($query) use ($id) {
         $query->where('deceased_id', $id);
     }])
     ->orderBy('first_name', 'asc')
-    ->paginate(10);
+    ->get();
+    
     $selectedPurok = $purok;
 
     $collectors = User::select('id', 'name', 'purok')
         ->where('role', 'collector')
         ->get();
 
-         $currentDeceasedMembers = DeathReportModel::where('iscurrent', true)
-     ->get();
-     $currentDeceasedMember = DeathReportModel::where('member_id', $id)
-     ->latest('created_at')
-     ->first();
+    $currentDeceasedMembers = DeathReportModel::where('iscurrent', true)->get();
+    
+    // Fix: Handle null case
+    $currentDeceasedMember = DeathReportModel::where('member_id', $id)
+        ->latest('created_at')
+        ->first();
 
-     $contributions = ContributionModel::   with(['memberContribution' => function ($query) {
-                $query->select('id', 'first_name','middle_name', 'last_name', 'purok', 'contact_number');
-            }])
-            ->latest('created_at')
-            ->get();
+        //  $contributions = ContributionModel::where('purok', $purok)
+        // ->where('deceased_id', $deceasedId)
+        // ->with(['memberContribution' => function ($query) {
+        //     $query->select('id', 'first_name','middle_name', 'last_name', 'purok', 'contact_number');
+        // }])
+        // ->latest('created_at')
+        // ->get();
 
-        // Bilang san intero na members
-         $members = memberModel::all();
+        
+    $contributions = ContributionModel::
+    where('deceased_id', $id)
+    ->whereHas('memberContribution', function ($q) use ($purok) {
+        if ($purok !== 'all') {
+            $q->where('purok', $purok);
+        }
+    })
+    ->with(['memberContribution' => function ($query) {
+        $query->select('id', 'first_name', 'middle_name', 'last_name', 'purok', 'contact_number');
+    }])
+    ->latest('created_at')
+    ->get();
 
-        $contributionsIds = ContributionModel::pluck('member_id')->toArray(); 
+    $members = memberModel::all();
+    $contributionsIds = ContributionModel::pluck('member_id')->toArray(); 
 
-        return Inertia::render('collector/report/Index', [
-            'contributions' => $contributions,
-            'member' => $mem->items(),
-            'activePurok' => $selectedPurok,
-            'activeStatus' => 'all',  
-            'currentDeceasedMembers' => $currentDeceasedMembers,
-            'currentDeceasedMember' => $currentDeceasedMember,
-        ]);
+    return Inertia::render('collector/report/Index', [
+        'contributions' => $contributions,
+        'members' => $mem,
+        'activePurok' => $selectedPurok,
+        'activeStatus' => 'all',  
+        'currentDeceasedMembers' => $currentDeceasedMembers,
+        'currentDeceasedMember' => $currentDeceasedMember ?: null, 
+    ]);
 }
-
      public function togglePaid($status = 'paid', $purok) 
     {
         // Removed status filter, only filter by purok
@@ -130,13 +146,18 @@ public function toggleDeceased($id, $purok)
             'contributionsIds' => $contributionsIds,
         ]);
     }
-public function togglePurok($status, $purok)
+public function togglePurok($status, $purok, $deceasedId)
 {
+    $dead = DeathReportModel::where('member_id' , $deceasedId);
+    if (!$dead) {
+        dd("Deceased member not found." . $deceasedId);
+    }
     // Extract numeric purok value (handles "Purok 1", "purok1", etc)
     $number = preg_replace('/[^0-9]/', '', $purok);
 
     // Get contributions only for that purok
     $contributions = ContributionModel::where('purok', $purok)
+        ->where('deceased_id', $deceasedId)
         ->with(['memberContribution' => function ($query) {
             $query->select('id', 'first_name','middle_name', 'last_name', 'purok', 'contact_number');
         }])
@@ -151,16 +172,26 @@ public function togglePurok($status, $purok)
 
     // Paid IDs only for that purok (important)
     $contributionsIds = ContributionModel::where('purok', $purok)
+    ->where('deceased_id', $deceasedId)
         ->pluck('member_id')
         ->toArray();
 
+$currentDeceasedMembers = DeathReportModel::where('iscurrent', true)->get();
+    
+    // Fix: Handle null case
+    $currentDeceasedMember = DeathReportModel::where('member_id', $deceasedId)
+
+        ->latest('created_at')
+        ->first();
     return Inertia::render('collector/report/Index', [
         'contributions'   => $contributions,
         'activePurok'     => $purok,
         'membersCount'    => $members->count(),
         'activeStatus'    => 'all',
         'contributionsIds'=> $contributionsIds,
-        'members'         => $members
+        'members'         => $members,
+        'currentDeceasedMembers' => $currentDeceasedMembers,
+        'currentDeceasedMember' => $currentDeceasedMember,
     ]);
 }
 

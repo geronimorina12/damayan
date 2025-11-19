@@ -84,6 +84,7 @@ const prevName = () => {
 
 // navigate to next distinct member
 const nextName = () => {
+
   const idx = currentIndex.value;
   if (idx === -1) return;
 
@@ -94,6 +95,8 @@ const nextName = () => {
   if (!nextMember) return;
 
   selectedDeceased.value = nextMember;
+    console.log("deceased_id: ", nextMember.member_id)
+  console.log("deceased_id: ", props.purok)
     router.get(
   route("collector.toggleDeceased", { 
     id: nextMember.member_id,

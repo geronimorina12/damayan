@@ -28,6 +28,7 @@ const puroks = ['Purok 1', 'Purok 2', 'Purok 3', 'Purok 4']
 const formatPurok = (purok) => purok.toLowerCase().replace(/\s+/g, '');
 
 const togglePurok = (purok) => {
+    console.log("deceasedId:", props.deceasedId);
     const cleanedPurok = formatPurok(purok);
 
     router.get(

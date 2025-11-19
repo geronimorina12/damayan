@@ -10,12 +10,17 @@ const props = defineProps({
     activeStatus: {
         type: String,
         default: () => 'paid'
+    },
+    
+    deceasedId: {
+        type: Number,
+        default: () => 0
     }
 })
 
 let getActiveStatus = ref('');
 let getActivePurok = ref('all');
-
+let getDeceasedId = ref(0);
 watch(() => props.activePurok, (newData) => {
     getActivePurok.value = newData;
 }, { immediate: true })
@@ -24,6 +29,11 @@ watch(() => props.activeStatus, (newStatus) => {
     getActiveStatus.value = newStatus;
 }, { immediate: true })
 
+watch(() => props.deceasedId, (newDeceasedId) => {
+    getDeceasedId.value = newDeceasedId;
+}, { immediate: true })
+
+
 // Raw purok values (used in route)
 const puroks = ['purok1', 'purok2', 'purok3', 'purok4'];
 
@@ -31,7 +41,8 @@ const puroks = ['purok1', 'purok2', 'purok3', 'purok4'];
 const togglePurok = (purok) => {
     router.get(route('collector.togglePurok', { 
         status: getActiveStatus.value, 
-        purok: purok
+        purok: purok,
+            deceasedId: getDeceasedId.value 
     }), {
         onSuccess: () => console.log("changing purok"),
         onError: (err) => console.log("An error occured: ", err)

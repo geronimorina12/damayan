@@ -140,7 +140,7 @@ Route::prefix('collector')->name('collector.')->middleware('auth')->group(functi
     Route::get('/view-members-as-collector', [MemberControllerForCollector::class, 'index'])->name('viewMembersAsCollector');
     Route::get('/view-report-as-collector', [ReportForCollector::class, 'index'])->name('viewReportAsCollector');
     Route::get('/toggle-status-as-collector/{status}/{purok}', [ReportForCollector::class, 'toggleStatus'])->name('toggleStatus');
-    Route::get('/toggle-purok-as-collector/{status}/{purok}', [ReportForCollector::class, 'togglePurok'])->name('togglePurok');
+    Route::get('/toggle-purok-as-collector/{status}/{purok}/{deceasedId}', [ReportForCollector::class, 'togglePurok'])->name('togglePurok');
     Route::get('/toggle-deceased-as-collector/{id}/{purok}', [ReportForCollector::class, 'toggleDeceased'])->name('toggleDeceased');
     Route::get('/contributions/{id}/{purok}', [ReportForCollector::class, 'getContributions'])->name('contributions');
     Route::get('/notification/has', [CollectorController::class, 'hasNotification'])->name('hasNotification');
