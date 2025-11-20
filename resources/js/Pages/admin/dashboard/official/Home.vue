@@ -253,7 +253,7 @@ watch(
             <i class="bi bi-people fs-1 text-secondary mb-2"></i>
             <h5>No Officials Found</h5>
             <p class="text-muted" v-if="searchQuery || statusFilter !== 'all'">
-              Try adjusting your search "{{ searchQuery }}" or filters.
+              Try adjusting your search {{ searchQuery }} or filters.
             </p>
             <p class="text-muted" v-else>
               No officials available. Add a new official to get started.

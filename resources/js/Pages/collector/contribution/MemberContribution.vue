@@ -30,7 +30,12 @@ const getCurrentDeceasedMember = ref({});
 watch(() => props.member, (newData) => getMember.value = newData, { immediate: true });
 watch(() => props.selectedPurok, (newData) => getSelectedPurok.value = newData, { immediate: true });
 watch(() => props.collectors, (newData) => getCollectors.value = newData, { immediate: true });
-watch(() => props.paidMembersId, (newData) => getPaidMembersId.value = newData, { immediate: true });
+watch(() => props.paidMembersId, (newData) => 
+{
+  getPaidMembersId.value = newData
+  console.log('Paid Members ID updated:', newData)
+}
+, { immediate: true });
 watch(() => props.currentCollector, (newData) => getCurrentCollector.value = newData, { immediate: true });
 watch(() => props.currentDeceasedMembers, (newData) => getCurrentDeceasedMembers.value = newData ? Object.values(newData) : [], { immediate: true });
 watch(() => props.currentDeceasedMember, (newData) => getCurrentDeceasedMember.value = newData, { immediate: true });
