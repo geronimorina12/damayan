@@ -3,7 +3,10 @@ import { Link } from '@inertiajs/vue3';
 import AddNewMember from './members/AddNewMember.vue';
 import NewlyCreated from './members/NewlyCreated.vue';
 import { ref, watch } from 'vue';
-const closeAddMemberModal = ref(false);
+import { useModalStore } from '@/piniaStore/modalStore';
+
+const modalStore = useModalStore();
+
 // JS logic for opening and closing modals
 const openModal = (id) => {
   document.getElementById(id).classList.add('show');
@@ -13,17 +16,20 @@ const closeModal = (id) => {
   document.getElementById(id).classList.remove('show');
 };
 
+// When Add Member modal closes -> show success popup
+watch(() => modalStore.closeAddMemberModal, (newVal) => {
+  if (newVal) {
+    closeModal('addNewMemberModal');
+    //showSuccessPopup();
+    modalStore.resetModal();
+  }
+});
+
 // Close modal when clicking outside
 window.addEventListener('click', (e) => {
   document.querySelectorAll('.custom-modal').forEach((modal) => {
     if (e.target === modal) modal.classList.remove('show');
   });
-});
-watch(closeAddMemberModal, (newVal) => {
-  if (newVal) {
-    closeModal('addNewMemberModal');
-    closeAddMemberModal.value = false; // reset it back
-  }
 });
 </script>
 
@@ -65,24 +71,20 @@ watch(closeAddMemberModal, (newVal) => {
           <button class="close-btn" @click="closeModal('addNewMemberModal')">&times;</button>
         </div>
         <div class="modal-body">
-          <AddNewMember v-model:closeAddMemberModal="closeAddMemberModal"/>
-          
+          <AddNewMember/>
         </div>
       </div>
     </div>
 
     <!-- Newly Created Member Modal -->
     <div id="newCreatedMemberModal" class="custom-modal" style="padding-top: 0;">
-
-      <div class="modal-content " style="min-width: 60%; height: auto;">
+      <div class="modal-content" style="min-width: 60%; height: auto;">
         <div class="modal-header alig-items-center">
-
-                <div class="">
-                    <h4 class="mb-3 text-dark fw-bold d-flex align-items-center">
-                      Newly Registered Member
-                </h4>
-            </div>
-
+          <div class="">
+            <h4 class="mb-3 text-dark fw-bold d-flex align-items-center">
+              Newly Registered Member
+            </h4>
+          </div>
           <button class="close-btn2 fs-2" @click="closeModal('newCreatedMemberModal')">&times;</button>
         </div>
         <div class="modal-body">
@@ -90,6 +92,15 @@ watch(closeAddMemberModal, (newVal) => {
         </div>
       </div>
     </div>
+
+    <!-- SUCCESS POPUP -->
+    <div v-if="modalStore.closeAddMemberModal" class="modal-overlay">
+      <div class="modal-box">
+        <p>Successfully created</p>
+        <button class="close-btn" @click="modalStore.resetModal()">OK</button>
+      </div>
+    </div>
+
   </div>
 </template>
 
@@ -180,7 +191,6 @@ watch(closeAddMemberModal, (newVal) => {
 }
 .modal-body {
   padding: 1rem 1.2rem;
-  min-height: 100px; /* gives space without content */
 }
 .close-btn {
   background: none;
@@ -193,9 +203,10 @@ watch(closeAddMemberModal, (newVal) => {
 .close-btn:hover {
   color: #000;
 }
-.close-btn2{
+.close-btn2 {
   transform: translateY(-20%);
 }
+
 @keyframes fadeIn {
   from { opacity: 0; transform: scale(0.95); }
   to { opacity: 1; transform: scale(1); }

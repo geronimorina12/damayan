@@ -1,5 +1,5 @@
 <script setup>
-import { ref, defineProps, watch, onMounted, onUnmounted, nextTick } from 'vue'
+import { ref, defineProps, watch, onMounted, onUnmounted, nextTick, computed } from 'vue'
 import { router, Head, Link } from '@inertiajs/vue3'
 import axios from 'axios'
 import AdminLayout from '@/Layouts/AdminLayout.vue'
@@ -33,6 +33,7 @@ const editMemberValue = ref({})
 const searching = ref(false)
 const searchError = ref('')
 const lastClickedDeceasedId = ref(null)
+const show = ref(false)
 
 //  Initialize members from props
 watch(
@@ -101,8 +102,8 @@ async function performSearch(query) {
     console.log('🧾 Normalized members array to display:', membersPayload)
     getMembers.value = membersPayload
   } catch (error) {
-    console.error('❌ Search error:', error)
-    searchError.value = 'Error fetching search results.'
+     //console.error('❌ Search error:', error)
+     //searchError.value = 'Error fetching search results.'
   } finally {
     searching.value = false
   }
@@ -203,6 +204,8 @@ const closeDeceasedModal = () => {
     if (checkbox) checkbox.checked = false
     lastClickedDeceasedId.value = null
   }
+
+ 
 }
 
 // Edit modal
@@ -210,6 +213,60 @@ const EditMemberFunc = (member) => {
   showActionsPopup.value = false
   editMemberValue.value = { ...member }
 }
+const overlay = document.getElementById('memberModalOverlay');
+    const modal = document.getElementById('memberModal');
+    const createBtn = document.getElementById('createBtn');
+    const closeBtn = document.getElementById('closeBtn');
+
+    let autoCloseTimer = null;
+
+    function showModal({autoClose = true, autoCloseMs = 2500} = {}) {
+      overlay.classList.add('show');
+      modal.classList.add('show');
+      overlay.setAttribute('aria-hidden', 'false');
+
+      // Focus management: move focus into the dialog so screen readers announce it
+      // and keyboard users can close it quickly.
+      closeBtn.focus();
+
+      // Auto-close after a short delay (optional)
+      if (autoClose) {
+        clearTimeout(autoCloseTimer);
+        autoCloseTimer = setTimeout(hideModal, autoCloseMs);
+      }
+    }
+
+    function hideModal() {
+      modal.classList.remove('show');
+      overlay.classList.remove('show');
+      overlay.setAttribute('aria-hidden', 'true');
+
+      // Return focus to the action that opened the dialog
+      createBtn.focus();
+      clearTimeout(autoCloseTimer);
+    }
+// Parent can toggle this using v-model:showModal
+
+
+const closeModal = () => {
+  show.value = false
+}
+const displayPaginationLinks = computed(() => {
+  // If table has 1–5 members, only show 1 button
+  if (getMembers.value.length <= 5) {
+    return [
+      {
+        label: "1",
+        url: props.members.links[0]?.url || null,
+        active: true
+      }
+    ]
+  }
+
+  // Otherwise show real pagination links
+  return props.members.links
+})
+
 </script>
 
 <template>
@@ -327,13 +384,14 @@ const EditMemberFunc = (member) => {
         <div class="pagination-wrapper mt-3 mb-5">
           <div class="pagination-controls">
             <button
-              v-for="(link, index) in props.members.links"
+              v-for="(link, index) in displayPaginationLinks"
               :key="index"
               class="btn pagination-btn"
               :class="link.active ? 'btn-primary' : 'btn-outline-primary'"
               @click="goToPage(link.url)"
               v-html="link.label"
             />
+
           </div>
         </div>
       </div>
@@ -375,6 +433,10 @@ const EditMemberFunc = (member) => {
         </div>
       </div>
     </div>
+
+  
+
+
   </AdminLayout>
 </template>
 

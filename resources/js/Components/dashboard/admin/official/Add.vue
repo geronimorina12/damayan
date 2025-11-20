@@ -2,6 +2,7 @@
 import { useForm, Head } from '@inertiajs/vue3'
 import { ref, watch, computed, defineModel } from 'vue'
 import * as bootstrap from 'bootstrap'
+import Override from './Override.vue'
 
 const isCollector = ref(false)
 const successMessage = ref('')
@@ -11,7 +12,8 @@ let hasPresident = ref(false)
 let close = defineModel('closeModal')
 const collectors = ref(0);
 const parentMessage = defineModel('parentMessage')
-
+const officials = ref({});
+const showAsk = ref(false);
 const form = useForm({
   first_name: '',
   middle_initial: '',
@@ -26,6 +28,7 @@ const form = useForm({
   status: 1,
   role: 'collector',
   purok: '',
+  is_override: false,
 })
 
 // Check if president already exists
@@ -55,8 +58,22 @@ async function countCollectors() {
     console.error('Error fetching collectos status:', error)
   }
 }
+async function countOfficials() {
+  try {
+    const response = await fetch('/officials/count', {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
+    })
+    const data = await response.json()
+    officials.value = data.data
+    console.log('officials count:', officials.value)
+  } catch (error) {
+    console.error('Error fetching collectos status:', error)
+  }
+}
 checkHasPresident()
 countCollectors()
+countOfficials()
 // Toggle collector based on position
 watch(
   () => form.position,
@@ -155,6 +172,48 @@ function closeModal() {
     }, 300)
   }
 }
+const overrideNow = ref(false);
+
+const submitOverride = () => {
+  // your logic here
+  overrideNow.value = false;
+};
+
+const cancelAction = () => {
+  showAsk.value = false;
+};
+const approveAction = () => {
+  form.is_override = true;
+  showAsk.value = false;
+};
+watch(
+  () => form.position,
+  (newPosition) => {
+    if (!newPosition) return;
+
+    // Build the key in officials object
+    const key = newPosition + '_count';
+
+    // Check if that position already has someone
+    if (officials.value[key] && officials.value[key] > 0) {
+      showAsk.value = true;
+    } else {
+      showAsk.value = false; // optional reset
+      submit();
+    }
+  }
+);
+// Computed limits for term_start and term_end
+const today = new Date().toISOString().split('T')[0]; // yyyy-mm-dd format
+
+const maxTermStart = computed(() => {
+  const d = new Date();
+  d.setDate(d.getDate() - 1); // yesterday
+  return d.toISOString().split('T')[0];
+});
+
+const minTermEnd = computed(() => today); // today
+
 
 </script>
 
@@ -203,6 +262,32 @@ function closeModal() {
               <option value="purok_leader" v-if="collectors < 4">Purok Leader</option>
             </select>
           </div>
+
+          
+          <div class="bg-white ask-card mb-5 rounded-xl p-6 w-100 mx-auto max-w-sm animate-fade-in" v-if="showAsk">
+      <h2 class="text-xl font-semibold text-gray-800 mb-4">
+        Do you want to override this current 
+        <span v-if="form.position == 'vice_president'">vice president</span>
+        <span v-else>{{ form.position || 'official' }}</span>
+        ?
+      </h2>
+
+      <div class="flex justify-end gap-3 mt-6">
+        <button
+          @click="cancelAction"
+          class="px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-100 transition"
+        >
+          Cancel
+        </button>
+
+        <button
+          @click="approveAction"
+          class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition"
+        >
+          Yes
+        </button>
+      </div>
+    </div>
 
           <!-- Collector Toggle -->
           <div class="mb-4 d-flex align-items-center justify-content-start">
@@ -263,17 +348,32 @@ function closeModal() {
               <input v-model="form.email" type="email" id="email" class="form-control" placeholder="juan45@gmail.com" />
             </div>
 
-            <div class="d-flex justify-content-between gap-2">
-              <div class="w-50">
-                <label for="term_start" class="form-label fw-semibold">Term Start</label>
-                <input v-model="form.term_start" type="date" id="term_start" class="form-control" required />
-              </div>
-
-              <div class="w-50">
-                <label for="term_end" class="form-label fw-semibold">Term End</label>
-                <input v-model="form.term_end" type="date" id="term_end" class="form-control" required />
-              </div>
+            <div class="w-100 d-flex flex-row align-items-center justify-content-between">
+                   <div class="w-50 ">
+              <label for="term_start" class="form-label fw-semibold">Term Start</label>
+              <input 
+                v-model="form.term_start" 
+                type="date" 
+                id="term_start" 
+                class="form-control" 
+                :max="maxTermStart" 
+                required 
+              />
             </div>
+
+<div class="w-50">
+  <label for="term_end" class="form-label fw-semibold">Term End</label>
+  <input 
+    v-model="form.term_end" 
+    type="date" 
+    id="term_end" 
+    class="form-control" 
+    :min="minTermEnd" 
+    required 
+  />
+</div>
+            </div>
+
           </div>
 
           <!-- Active Status -->
@@ -317,7 +417,9 @@ function closeModal() {
   width: 44px;
   height: 24px;
 }
-
+.ask-card {
+  border: 1px solid red;
+}
 .toggle-switch input {
   opacity: 0;
   width: 0;

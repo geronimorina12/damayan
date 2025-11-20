@@ -1,7 +1,8 @@
 <script setup>
 import { Head, Link, useForm } from "@inertiajs/vue3";
 import { ref, defineProps, computed, watch, defineModel } from "vue";
-
+import { useModalStore } from "@/piniaStore/modalStore";
+const modalStore = useModalStore();
 // Temporary beneficiary form data
 const beneficiarytemp = ref({
   name: "",
@@ -9,13 +10,13 @@ const beneficiarytemp = ref({
   age: "",
   birth_date: "",
 });
-const closeModal = defineModel('closeAddMemberModal')
+
 const beneficiary = ref([]);
 const showAddBeneficiaryForm = ref(false);
 const successMessage = ref("");
 const birthDateError = ref("");
 const memberBirthDateError = ref("");
-
+let showSuccessModal = ref(false);
 // Computed property for current year
 const currentYear = computed(() => new Date().getFullYear());
 
@@ -31,7 +32,7 @@ const calculateAge = (birthDate) => {
   if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
     age--;
   }
-
+  console.log("Calculated age: ", age.toString());
   return age.toString();
 };
 
@@ -43,16 +44,23 @@ const validateBirthDate = (dateString, errorRef) => {
   }
 
   const selectedDate = new Date(dateString);
-  const selectedYear = selectedDate.getFullYear();
+  const today = new Date();
 
-  if (selectedYear >= currentYear.value) {
-    errorRef.value = "Birth year cannot be the current year or in the future.";
+  // Normalize time for accurate comparison
+  selectedDate.setHours(0, 0, 0, 0);
+  today.setHours(0, 0, 0, 0);
+
+  // If date is in the future → error
+  if (selectedDate > today) {
+    errorRef.value = "Birth date cannot be in the future.";
     return false;
   }
 
+  // Past or today → valid
   errorRef.value = "";
   return true;
 };
+
 
 // Member form
 const form = useForm({
@@ -74,8 +82,9 @@ const form = useForm({
 watch(
   () => form.date_of_birth,
   (newDate) => {
-    validateBirthDate(newDate, memberBirthDateError);
-    if (newDate && !memberBirthDateError.value) {
+    const isValid = validateBirthDate(newDate, memberBirthDateError);
+
+    if (newDate && isValid) {
       form.age = calculateAge(newDate);
     } else {
       form.age = "";
@@ -83,18 +92,21 @@ watch(
   }
 );
 
+
 // --- Watch for beneficiary birth_date changes (reactive validation + age calc)
 watch(
   () => beneficiarytemp.value.birth_date,
   (newDate) => {
-    validateBirthDate(newDate, birthDateError);
-    if (newDate && !birthDateError.value) {
+    const isValid = validateBirthDate(newDate, birthDateError);
+
+    if (newDate && isValid) {
       beneficiarytemp.value.age = calculateAge(newDate);
     } else {
       beneficiarytemp.value.age = "";
     }
   }
 );
+
 
 //  Submit form with validation
 const submit = () => {
@@ -104,9 +116,9 @@ const submit = () => {
     form.setError("contact_number", "Contact number must start with 0 and be exactly 11 digits.");
     return;
   }
-
+modalStore.triggerCloseMemberModal();
   if (!validateBirthDate(form.date_of_birth, memberBirthDateError)) return;
-
+  modalStore.triggerCloseMemberModal();
   form.beneficiaries = beneficiary.value;
   // form.purok = "Purok " + form.purok;
   form.post(route("addMemberPost"), {
@@ -141,6 +153,21 @@ const formatDate = (dateString) => {
   const options = { year: "numeric", month: "long", day: "numeric" };
   return new Date(dateString).toLocaleDateString(undefined, options);
 };
+
+const maxBirthDate = computed(() => {
+  const today = new Date();
+  const year = today.getFullYear() - 16;
+  const month = String(today.getMonth() + 1).padStart(2, "0");
+  const day = String(today.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+});
+
+
+// Open modal when member is successfully created
+// Parent can toggle this using v-model:showModal
+const show = defineModel('show')
+const closeModal = ref(false)
+modalStore.triggerCloseMemberModal();
 </script>
 
 <template>
@@ -165,9 +192,11 @@ const formatDate = (dateString) => {
             <label class="form-label">Birth date</label>
             <input
               type="date"
+              id="birthDate"
               class="form-control"
               :class="{ 'is-invalid': memberBirthDateError }"
               v-model="form.date_of_birth"
+              :max="maxBirthDate"
             />
             <div v-if="memberBirthDateError" class="invalid-feedback d-block">
               {{ memberBirthDateError }}
@@ -237,7 +266,7 @@ const formatDate = (dateString) => {
 
           <div class="col-12">
             <label class="form-label">Address</label>
-            <input type="text" class="form-control" placeholder="Bonga, Bulan, Sorsogon" v-model="form.address" required />
+            <input type="text" class="form-control" placeholder="Bonga, Bulan, Sorsogon" v-model="form.address" required disabled />
           </div>
         </div>
 
@@ -296,12 +325,23 @@ const formatDate = (dateString) => {
         <h5 class="mb-3">Add Beneficiary</h5>
         <form @submit.prevent="addBeneficiaryFunc" class="row g-2">
           <div class="col-md-6">
+            <label>Name</label>
             <input type="text" placeholder="Name" class="form-control" v-model="beneficiarytemp.name" required />
           </div>
           <div class="col-md-6">
-            <input type="text" placeholder="Relation" class="form-control" v-model="beneficiarytemp.relation" required />
+            <label>Relation</label>
+            <select name="selectRelation" id="selectRelation" class="form-control" v-model="beneficiarytemp.relation" required>
+              <option value="" disabled>Select relation</option>
+              <option value="mother">Mother</option>
+              <option value="father">Father</option>
+              <option value="son">Son</option>
+              <option value="daughter">Daughter</option>
+              <option value="adopted">Adopted</option>
+
+            </select>
           </div>
           <div class="col-md-6">
+            <label>Age</label>
             <input 
               type="number" 
               placeholder="Age" 
@@ -340,6 +380,13 @@ const formatDate = (dateString) => {
         </form>
       </div>
     </div>
+
+     <div v-if="show" class="modal-overlay" @click="closeModal">
+    <div class="modal-box" @click.stop>
+      <p>Member created</p>
+      <button class="close-btn" @click="closeModal">OK</button>
+    </div>
+  </div>
   </div>
 </template>
 
@@ -358,6 +405,51 @@ const formatDate = (dateString) => {
 .form-control,
 .form-select {
   font-size: 0.95rem;
+}
+.success-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 99999;
+}
+
+.success-modal {
+  background: #fff;
+  padding: 25px 40px;
+  border-radius: 12px;
+  text-align: center;
+  animation: fadeIn 0.2s ease-out;
+  box-shadow: 0 5px 25px rgba(0,0,0,0.2);
+}
+
+.success-text {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 15px;
+}
+
+.success-btn {
+  background: #198754; /* Bootstrap green */
+  color: white;
+  border: none;
+  padding: 8px 18px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.success-btn:hover {
+  background: #157347;
+}
+
+@keyframes fadeIn {
+  from {opacity: 0; transform: scale(0.9);}
+  to   {opacity: 1; transform: scale(1);}
 }
 
 @media (max-width: 576px) {

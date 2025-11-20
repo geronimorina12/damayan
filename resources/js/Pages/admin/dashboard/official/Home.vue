@@ -12,7 +12,7 @@ const props = defineProps({
 let getOfficials = ref([])
 let selectedOfficial = ref({})
 let searchQuery = ref('')
-let statusFilter = ref('all')
+let statusFilter = ref('active')
 const successMessage = ref('')
 
 // --- Modal State & Functions ---
@@ -107,7 +107,7 @@ const filteredOfficials = computed(() => {
     const matchesStatus =
       statusFilter.value === 'all'
         ? true
-        : statusFilter.value === 'active'
+        : statusFilter.value === 'active' || official.role === 'collector'
         ? official.status
         : !official.status
 
@@ -157,8 +157,7 @@ watch(
               <i class="bi bi-funnel"></i>
             </span>
             <select class="form-select" v-model="statusFilter">
-              <option value="all">All Status</option>
-              <option value="active">Active</option>
+              <option value="active" selected>Active</option>
               <option value="inactive">Inactive</option>
             </select>
           </div>
@@ -195,14 +194,17 @@ watch(
                 <tbody>
                   <tr v-for="official in filteredOfficials" :key="official.id">
                     <td>{{ official.name }}</td>
-                    <td>{{ capitalizeFirst(official.position) || 'Collector' }}</td>
+                    <td>
+                      <span>{{ official.position === 'vice_president' ? 'Vice President' : capitalizeFirst(official.position) || 'Collector' }}</span>
+                      
+                    </td>
                     <td>
                       {{ formatDate(official.term_start || official.created_at) }} -
                       {{ formatDate(official.term_end || new Date(new Date(official.created_at).setFullYear(new Date(official.created_at).getFullYear() + 2))) }}
                     </td>
                     <td class="text-center">
                       <div class="text-start">
-                        <span :class="official.status || official.role === 'collector' ? 'text-success' : 'text-danger inactive-status'" class="fw-bold status-label">
+                        <span :class="official.status || official.role === 'collector' ? 'text-success' : 'text-danger inactive-status'" class="fw-bold status-label ps-3">
                           {{ official.status || official.role === 'collector' ? 'Active' : 'Inactive' }}
                         </span>
                       </div>

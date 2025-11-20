@@ -204,5 +204,7 @@ Route::prefix('filterContribution')->name('filterContribution.')->middleware('au
     Route::get('/contribution/toggle/{id}/{purok}', [ContributionController::class, 'toggle'])->name('toggle');
 });
 Route::get('/collectors/count', [CollectorController::class, 'collectorCount'])->name('collector.count');
+Route::get('/officials/count', [OfficialController::class, 'officialCount'])->name('official.count');
+
 
 require __DIR__.'/auth.php';

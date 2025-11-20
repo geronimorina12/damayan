@@ -46,9 +46,14 @@ class OfficialController extends Controller
             'position' => 'required|string|max:255',
             'term_start' => 'required|date',
             'term_end' => 'required|date',
-            'status' => 'required|boolean'
+            'status' => 'required|boolean',
+            'is_override' => 'sometimes|boolean',
         ]);
 
+        if($request->is_override){
+            // Delete existing official with the same position
+            OfficialModel::where('position', $request->position)->delete();
+        }
         OfficialModel::create($request->all());
         return redirect()->back()->with(['success' => 'data created.']);
     }
@@ -109,6 +114,23 @@ class OfficialController extends Controller
         Log::info(['official: ' => $official]);
         $official->update([
             'status' => !$official->status
+        ]);
+    }
+
+    public function officialCount(){
+        $secretaryCount = OfficialModel::where('position', 'secretary')->count();
+        $treasurerCount = OfficialModel::where('position', 'treasurer')->count();
+        $visePresidentCount = OfficialModel::where('position', 'vice_president')->count();
+        $auditorCount = OfficialModel::where('position', 'auditor')->count();
+
+        $data = [
+            'secretary_count' => $secretaryCount,
+            'treasurer_count' => $treasurerCount,
+            'vice_president_count' => $visePresidentCount,
+            'auditor_count' => $auditorCount,
+        ];
+        return response()->json([
+            'data' => $data
         ]);
     }
 }

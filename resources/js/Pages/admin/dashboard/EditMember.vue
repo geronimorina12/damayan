@@ -95,7 +95,7 @@ const formatDate = (dateString) => {
 <template>
     <Head title="Edit member info" />
     <AdminLayout>
-        <div>
+        <div class="edit-container">
             <div class="container text-center">
                 <h4 class="text-dark fw-lighter mt-3">Edit Member Info</h4>
             </div>
@@ -401,4 +401,5 @@ const formatDate = (dateString) => {
 .main-container {
     height: 100%;
 }
+
 </style>
