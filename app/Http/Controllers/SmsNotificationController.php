@@ -161,60 +161,72 @@ if (!$deceasedName) {
      * Schedule Contribution
      */
         public function sendScheduleContribution(Request $request)
-        {
-            try {
-                $request->validate([
-                    'id' => 'required',
-                    'message' => 'required|string',
-                    'contact_number' => 'required|string',
-                    'collector' => 'nullable|string',
-                    'purok' => 'required|string',
-                    'deceasedId' => 'nullable'
-                ]);
+{
+    try {
+        $request->validate([
+            'id' => 'required',
+            'message' => 'required|string',
+            'contact_number' => 'required|string',
+            'collector' => 'nullable|string',
+            'purok' => 'required|string',
+            'deceasedId' => 'nullable'
+        ]);
 
-                $members = memberModel::whereNotNull('contact_number')->get();
-                if ($members->isEmpty()) {
-                    return redirect()->back()->with('error', 'No members with contact numbers.');
-                }
-
-                $message = $request->input('message');
-
-                $notification = SmsNotificationSaved::create([
-                    'message' => $message,
-                    'type' => 'scheduleContribution',
-                ]);
-
-                //  Convert "Purok 1" → "purok1"
-                $normalizedPurok = $this->normalizePurok($request->purok);
-
-                ContributionModel::create([
-                    'member_id' => $request->id,
-                    'amount' => 100,
-                    'payment_date' => now(),
-                    'updated_by' => Auth::id(),
-                    'collector' => $request->collector ?: "",
-                    'purok' => $normalizedPurok,
-                    'status' => "paid",
-                    'deceased_id' => $request->deceasedId,
-                ]);
-                ArchiveContributions::create([
-                    'member_id' => $request->id,
-                    'amount' => 100,
-                    'payment_date' => now(),
-                    'updated_by' => Auth::id(),
-                    'collector' => $request->collector ?: "",
-                    'purok' => $normalizedPurok,
-                    'status' => "paid",
-                    'deceased_id' => $request->deceasedId,
-                ]);
-                $this->sendAndLog($request->message, $request->contact_number, $notification->id);
-
-                return redirect()->back()->with('success', 'Schedule contribution notifications sent.');
-            } catch (\Exception $e) {
-                Log::error('Error in sendScheduleContribution: ' . $e->getMessage());
-                return redirect()->back()->with('error', 'An error occurred while sending schedule contribution: ' . $e->getMessage());
-            }
+        $members = memberModel::whereNotNull('contact_number')->get();
+        if ($members->isEmpty()) {
+            return redirect()->back()->with('error', 'No members with contact numbers.');
         }
+
+        $message = $request->input('message');
+
+        $notification = SmsNotificationSaved::create([
+            'message' => $message,
+            'type' => 'scheduleContribution',
+        ]);
+
+        // Convert to normalized form
+        $normalizedPurok = $this->normalizePurok($request->purok);
+
+        // 🔍 CHECK IF CONTRIBUTION ALREADY EXISTS
+        $exists = ContributionModel::where('member_id', $request->id)
+            ->where('deceased_id', $request->deceasedId)
+            ->exists();
+
+        if (!$exists) {
+            // ✔ Create new contribution only if not existing
+            ContributionModel::create([
+                'member_id' => $request->id,
+                'amount' => 100,
+                'payment_date' => now(),
+                'updated_by' => Auth::id(),
+                'collector' => $request->collector ?: "",
+                'purok' => $normalizedPurok,
+                'status' => "paid",
+                'deceased_id' => $request->deceasedId,
+            ]);
+
+            ArchiveContributions::create([
+                'member_id' => $request->id,
+                'amount' => 100,
+                'payment_date' => now(),
+                'updated_by' => Auth::id(),
+                'collector' => $request->collector ?: "",
+                'purok' => $normalizedPurok,
+                'status' => "paid",
+                'deceased_id' => $request->deceasedId,
+            ]);
+        }
+
+        // Send SMS after processing
+        $this->sendAndLog($request->message, $request->contact_number, $notification->id);
+
+        return redirect()->back()->with('success', 'Schedule contribution notifications sent.');
+    } catch (\Exception $e) {
+        Log::error('Error in sendScheduleContribution: ' . $e->getMessage());
+        return redirect()->back()->with('error', 'An error occurred while sending schedule contribution: ' . $e->getMessage());
+    }
+}
+
 
         /**
          *  Helper function to normalize Purok format

@@ -32,7 +32,7 @@ class ContributionControllerForCollector extends Controller
      ->first();
 
      Log::info(['paidMembersId' => $paidMembersId ?: "null"]);
-        return Inertia::render('collector/contribution/MemberContribution', [
+        return Inertia::render('collector/contribution/MemberContribution2', [
             'member' => $mem,
             'selectedPurok' => 'all',
             'collectors' => $collectors,
@@ -91,7 +91,7 @@ Log::info("purok ID33: " . $formatPurok ?: "null");
 
         $paidMembersId = ContributionModel::where('deceased_id', $deceasedId)->pluck('member_id')->toArray();
         Log::info(['paidMembersId' => $paidMembersId ?: "null"]);
-        return Inertia::render('collector/contribution/MemberContribution', [
+        return Inertia::render('collector/contribution/MemberContribution2', [
             'member' => $mem,
             'selectedPurok' => $purok,
             'paidMembersId' => $paidMembersId,
