@@ -33,7 +33,7 @@ watch(() => props.collectors, (newData) => getCollectors.value = newData, { imme
 watch(() => props.paidMembersId, (newData) => 
 {
   getPaidMembersId.value = newData
-  console.log('Paid Members ID updated:', newData)
+  console.log('Paid Members ID updated:', newData || 'No data');
 }
 , { immediate: true });
 watch(() => props.currentCollector, (newData) => getCurrentCollector.value = newData, { immediate: true });

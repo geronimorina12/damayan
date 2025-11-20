@@ -31,7 +31,7 @@ class ContributionControllerForCollector extends Controller
      ->latest('created_at')
      ->first();
 
-     Log::info(['paidMembersId' => $paidMembersId]);
+     Log::info(['paidMembersId' => $paidMembersId ?: "null"]);
         return Inertia::render('collector/contribution/MemberContribution', [
             'member' => $mem,
             'selectedPurok' => 'all',
