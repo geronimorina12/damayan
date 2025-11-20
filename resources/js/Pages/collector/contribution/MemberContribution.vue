@@ -61,26 +61,35 @@ const form = useForm({
 
 // Normalize Purok
 const normalizePurok = (purok) => purok?.toLowerCase().replace(/\s+/g, '') || '';
-
-// Assign member and send SMS
 const preparePayment = (memberId, memberPurok, contact_number) => {
+  if (!memberId || !memberPurok) {
+    console.warn("Missing member data for preparePayment()");
+    return;
+  }
+
+  // Update current selections
   selectedMemberId.value = memberId;
   selectedMemberPurok.value = memberPurok;
-  selectedCollector.value = ''; // reset
+  selectedCollector.value = '';
 
+  // Send SMS notification
   router.post(
     route('smsNotification.sendScheduleContribution'),
     {
       id: memberId,
       message: 'Successfully paid.',
-      contact_number: contact_number,
-      collector: getCurrentCollector.value.name,
+      contact_number,
+      collector: getCurrentCollector.value?.name || '',
       purok: memberPurok,
-      deceasedId: getCurrentDeceasedMember.value.member_id || null,
+      deceasedId: getCurrentDeceasedMember.value?.member_id ?? null,
     },
     {
-      onSuccess: () => alert('Schedule Contribution sent successfully!'),
-      onError: () => alert('Error sending Schedule Contribution'),
+      onSuccess: () => {
+        alert('Schedule Contribution sent successfully!');
+      },
+      onError: () => {
+        alert('Error sending Schedule Contribution');
+      }
     }
   );
 };
@@ -114,17 +123,31 @@ const confirmPayment = () => {
 
 // Mark as unpaid
 const unPaidFunc = (memberId) => {
-  const memberIndex = getMember.value.findIndex(m => m.id === memberId);
-  if (memberIndex !== -1) {
-    getMember.value[memberIndex] = { ...getMember.value[memberIndex], paid: false };
+  if (!memberId) {
+    console.warn("No memberId passed in unPaidFunc()");
+    return;
   }
 
   router.delete(route('collectorContribution.deleteContribution', memberId), {
     onSuccess: () => {
+      // Update member status
+      const idx = getMember.value.findIndex(m => m.id === memberId);
+      if (idx !== -1) {
+        getMember.value[idx] = {
+          ...getMember.value[idx],
+          paid: false
+        };
+      }
+
+      // Remove from paid list
       getPaidMembersId.value = getPaidMembersId.value.filter(id => id !== memberId);
     },
+    onError: () => {
+      alert("Failed to unmark payment. Try again.");
+    }
   });
 };
+
 
 const showReportModal = ref(false);
 const openReportModal = () => showReportModal.value = true;
