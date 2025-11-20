@@ -116,10 +116,11 @@ const confirmPayment = () => {
         };
       }
 
-      // Add to paid members array
+      // Add to paid members array - FIXED: Ensure consistent ID type
       nextTick(() => {
-        if (!getPaidMembersId.value.includes(selectedMemberId.value)) {
-          getPaidMembersId.value.push(selectedMemberId.value);
+        const memberId = Number(selectedMemberId.value); // Convert to number for consistency
+        if (!getPaidMembersId.value.includes(memberId)) {
+          getPaidMembersId.value.push(memberId);
         }
       });
       
@@ -149,8 +150,9 @@ const unPaidFunc = (memberId) => {
         };
       }
 
-      // Remove from paid list
-      getPaidMembersId.value = getPaidMembersId.value.filter(id => id !== memberId);
+      // Remove from paid list - FIXED: Ensure consistent ID type
+      const idToRemove = Number(memberId); // Convert to number for consistency
+      getPaidMembersId.value = getPaidMembersId.value.filter(id => id !== idToRemove);
     },
     onError: () => {
       alert("Failed to unmark payment. Try again.");
@@ -163,8 +165,13 @@ const showReportModal = ref(false);
 const openReportModal = () => showReportModal.value = true;
 const closeReportModal = () => showReportModal.value = false;
 
-// Determines if member is paid
-const isPaid = (id) => getPaidMembersId.value.includes(id);
+// Determines if member is paid - FIXED: Handle both string and number IDs
+const isPaid = (id) => {
+  // Convert both to string for consistent comparison, or use loose equality
+  return getPaidMembersId.value.some(paidId => 
+    paidId == id || String(paidId) === String(id)
+  );
+};
 
 // Unified toggle function
 const togglePayment = (mem) => {
@@ -278,7 +285,7 @@ const togglePayment = (mem) => {
                 
                 <div class="mobile-actions">
                   <button
-                    v-if="!(getPaidMembersId || []).includes(mem?.id)"
+                    v-if="!isPaid(mem.id)"
                     class="btn btn-danger btn-sm mobile-pay-btn"
                     @click="preparePayment(mem.id, mem.purok, mem.contact_number)"
                     title="Mark member as paid"
