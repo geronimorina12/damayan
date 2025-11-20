@@ -149,5 +149,49 @@ class MembersController extends Controller
 
     return response()->json(['members' => $members]);
 }
+    /**
+     * Search members by first_name and last_name
+     */
+    public function searchMemberContribution(Request $request)
+    {
+        $request->validate([
+            'keyword' => 'nullable|string|max:255',
+            'purok' => 'nullable|string|max:255',
+            'per_page' => 'nullable|integer|min:1|max:100',
+        ]);
+
+        $keyword = $request->get('keyword', '');
+        $selectedPurok = $request->get('purok', '');
+        $perPage = $request->get('per_page', 15);
+
+        // Base query
+        $query = memberModel::with(['contributions' => function($query) {
+            $query->latest()->take(1);
+        }])
+        ->whereHas('contributions');
+
+        // Search by first_name and last_name
+        if (!empty($keyword)) {
+            $query->where(function($q) use ($keyword) {
+                $q->where('first_name', 'like', "%{$keyword}%")
+                  ->orWhere('last_name', 'like', "%{$keyword}%")
+                  ->orWhere('middle_name', 'like', "%{$keyword}%");
+            });
+        }
+
+        // Filter by purok if selected
+        if (!empty($selectedPurok)) {
+            $query->where('purok', $selectedPurok);
+        }
+
+        // Get paginated results
+        $members = $query->paginate($perPage);
+
+        return response()->json([
+            'member' => $members,
+            'search_keyword' => $keyword,
+        ]);
+    }
+
 
 }

@@ -67,6 +67,8 @@ Route::get('/view-member-info/{id}', [MembersController::class, 'viewMemberInfo'
 Route::get('/edit-member-route/{id}', [MembersController::class, 'editMember'])->name('editMember');
 Route::put('/members/{id}', [MembersController::class, 'update'])->name('members.update');
 Route::put('/members/{id}/toggle-status', [MembersController::class, 'toggleStatus'])->name('toggleMemberStatus');
+Route::get('/member-contributions/search', [MembersController::class, 'searchMemberContribution'])->name('member-contributions.search');
+
 //contribution
 Route::prefix('contribution')->name('contributions.')->middleware('auth')->group(function () {
     Route::get('/view-contributions', [ContributionController::class, 'index'])->name('index');

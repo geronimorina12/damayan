@@ -99,17 +99,30 @@ const formatDate = (dateString) => {
 
 // --- Filter + Search Logic ---
 const filteredOfficials = computed(() => {
-  return getOfficials.value.filter((official) => {
-    const matchesSearch =
-      official.name.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-      official.position.toLowerCase().includes(searchQuery.value.toLowerCase())
+  if (!getOfficials.value || getOfficials.value.length === 0) {
+    return []
+  }
 
-    const matchesStatus =
-      statusFilter.value === 'all'
-        ? true
-        : statusFilter.value === 'active' || official.role === 'collector'
-        ? official.status
-        : !official.status
+  return getOfficials.value.filter((official) => {
+    // Search logic - make it more robust
+    const searchTerm = searchQuery.value.toLowerCase().trim()
+    const matchesSearch = searchTerm === '' || 
+      (official.name && official.name.toLowerCase().includes(searchTerm)) ||
+      (official.position && official.position.toLowerCase().includes(searchTerm)) ||
+      (official.role && official.role.toLowerCase().includes(searchTerm))
+
+    // Status filter logic
+    let matchesStatus = false
+    
+    if (statusFilter.value === 'all') {
+      matchesStatus = true
+    } else if (statusFilter.value === 'active') {
+      // Show active officials OR collectors (regardless of status)
+      matchesStatus = official.status || official.role === 'collector'
+    } else if (statusFilter.value === 'inactive') {
+      // Show inactive officials that are NOT collectors
+      matchesStatus = !official.status && official.role !== 'collector'
+    }
 
     return matchesSearch && matchesStatus
   })
@@ -119,11 +132,12 @@ const capitalizeFirst = (str) => {
   if (!str) return ''
   return str.charAt(0).toUpperCase() + str.slice(1)
 }
+
 // Watch for props changes
 watch(
   () => props.officials,
   (newData) => {
-    getOfficials.value = newData
+    getOfficials.value = newData || []
   },
   { immediate: true }
 )
@@ -196,7 +210,6 @@ watch(
                     <td>{{ official.name }}</td>
                     <td>
                       <span>{{ official.position === 'vice_president' ? 'Vice President' : capitalizeFirst(official.position) || 'Collector' }}</span>
-                      
                     </td>
                     <td>
                       {{ formatDate(official.term_start || official.created_at) }} -
@@ -204,7 +217,12 @@ watch(
                     </td>
                     <td class="text-center">
                       <div class="text-start">
-                        <span :class="official.status || official.role === 'collector' ? 'text-success' : 'text-danger inactive-status'" class="fw-bold status-label ps-3">
+                        <span 
+                          :class="[
+                            official.status || official.role === 'collector' ? 'text-success' : 'text-danger', 
+                            'fw-bold status-label ps-3'
+                          ]"
+                        >
                           {{ official.status || official.role === 'collector' ? 'Active' : 'Inactive' }}
                         </span>
                       </div>
@@ -234,7 +252,12 @@ watch(
           <div class="empty-state text-center py-5" v-else>
             <i class="bi bi-people fs-1 text-secondary mb-2"></i>
             <h5>No Officials Found</h5>
-            <p class="text-muted">Try adjusting your search or filters.</p>
+            <p class="text-muted" v-if="searchQuery || statusFilter !== 'all'">
+              Try adjusting your search "{{ searchQuery }}" or filters.
+            </p>
+            <p class="text-muted" v-else>
+              No officials available. Add a new official to get started.
+            </p>
           </div>
 
           <div class="footer-actions d-flex justify-content-between mt-4">
@@ -322,7 +345,6 @@ watch(
 
   </AdminLayout>
 </template>
-
 
 <style scoped>
 .input-group-text i {
