@@ -90,6 +90,7 @@ Log::info("purok ID33: " . $formatPurok ?: "null");
      ->first();
 
         $paidMembersId = ContributionModel::where('deceased_id', $deceasedId)->pluck('member_id')->toArray();
+        Log::info(['paidMembersId' => $paidMembersId ?: "null"]);
         return Inertia::render('collector/contribution/MemberContribution', [
             'member' => $mem,
             'selectedPurok' => $purok,
