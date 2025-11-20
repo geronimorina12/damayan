@@ -150,11 +150,13 @@ public function toggleContributionPurok($purok, $deceasedId)
         'status' => 'required',
         'deceased_id' => 'nullable|exists:death_reports,member_id',
     ]);
+
     Log::info("Purok: " . $request->purok ?: "null");
+    
     $member = memberModel::find($request->member_id);
-    $message = "Dear {$member->first_name} {$member->last_name}, your contribution of {$request->amount} has been recorded on {$request->payment_date}. Thank you for your support!";   
-    $this->sendAndLog($message, $member->contact_number, $notification->id ?? 0);
-    ContributionModel::create([
+    
+    // Create contribution first
+    $contribution = ContributionModel::create([
         'member_id' => $request->member_id,
         'amount' => $request->amount,
         'payment_date' => $request->payment_date,
@@ -165,7 +167,8 @@ public function toggleContributionPurok($purok, $deceasedId)
         'deceased_id' => $request->deceased_id,
     ]);
 
-     ArchiveContributions::create([
+    // Create archive
+    ArchiveContributions::create([
         'member_id' => $request->member_id,
         'amount' => $request->amount,
         'payment_date' => $request->payment_date,
@@ -175,8 +178,41 @@ public function toggleContributionPurok($purok, $deceasedId)
         'status' => $request->status,
         'deceased_id' => $request->deceased_id,
     ]);
+
+    // Send SMS notification after successful payment
+    $message = "Dear {$member->first_name} {$member->last_name}, your contribution of {$request->amount} has been recorded on {$request->payment_date}. Thank you for your support!";
+    
+    // Use the contribution ID or create a notification record if needed
+    $notificationId = $contribution->id; // Using contribution ID as reference
+    
+    $this->sendAndLog($message, $member->contact_number, $notificationId);
+
     return redirect()->back()->with('success', 'Contribution created successfully.');
 }
+
+private function sendAndLog(string $message, string $number, int $notificationId): void
+{
+    try {
+        Log::info("Attempting to send SMS to {$number} | Reference ID: {$notificationId} | Message: {$message}");
+        
+        // Check if we're in testing mode or should send real SMS
+        if (app()->environment('local', 'testing')) {
+            Log::info("FAKE SMS (TEST MODE) to {$number} | Reference ID: {$notificationId} | Message: {$message}");
+        } else {
+            // Real SMS sending for production
+            $success = SmsNotificationSender::send($message, [$number]);
+
+            if ($success) {
+                Log::info("SMS sent successfully to {$number} | Reference ID: {$notificationId}");
+            } else {
+                Log::error("SMS failed to send to {$number} | Reference ID: {$notificationId}");
+            }
+        }
+    } catch (\Exception $e) {
+        Log::error("Exception when sending SMS to {$number}: " . $e->getMessage());
+    }
+}
+
   public function toggle($id, $purok)
 {
     // Log::info("Purok: " . $purok ?: "null");
@@ -262,21 +298,5 @@ public function sendReminderBeforeLastNight()
         }
     }
 }
-
-private function sendAndLog(string $message, string $number, int $notificationId): void
-    {
-            Log::info("FAKE SMS (TEST MODE) to {$number} | Notification ID: {$notificationId} | Message: {$message}");
-         try {
-             $success = SmsNotificationSender::send($message, [$number]);
-
-             if ($success) {
-                 Log::info("SMS sent successfully to {$number} | Notification ID: {$notificationId}");
-             } else {
-                 Log::error("SMS failed to send to {$number} | Notification ID: {$notificationId}");
-             }
-         } catch (\Exception $e) {
-             Log::error("Exception when sending SMS to {$number}: " . $e->getMessage());
-         }
-    }
 
 }

@@ -117,9 +117,14 @@ const confirmPayment = () => {
           getPaidMembersId.value.push(selectedMemberId.value);
         }
       });
+      
+      // Reset selections
+      selectedMemberId.value = null;
+      selectedCollector.value = '';
     },
   });
 };
+
 
 // Mark as unpaid
 const unPaidFunc = (memberId) => {
