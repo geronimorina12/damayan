@@ -149,32 +149,26 @@ class DashboardController extends Controller
         'deceasedMember' => $deceasedMember,
     ]);
 }
+public function search(Request $request)
+{
+    $query = $request->query('query');
 
-    public function search(Request $request)
-    {
-        $query = $request->query('query');
-
-    $member = memberModel::whereRaw("CONCAT(first_name, ' ', middle_name, ' ', last_name) LIKE ?", ["%{$query}%"])
+    $members = memberModel::whereRaw("CONCAT(first_name, ' ', middle_name, ' ', last_name) LIKE ?", ["%{$query}%"])
         ->orWhere('contact_number', 'like', "%{$query}%")
         ->orWhere('purok', 'like', "%{$query}%")
         ->orderBy('first_name', 'asc')
-        ->first();
+        ->get(); // ⬅ RETURN ALL MEMBERS
 
-    if (!$member) {
-        return response()->json(['message' => 'No member found'], 404);
+    if ($members->isEmpty()) {
+        return response()->json([
+            'members' => [],
+            'message' => 'No members found'
+        ], 200);
     }
-
-    $perPage = 10;
-
-    $position = memberModel::where('first_name', '<', $member->first_name)
-        ->count();
-
-    $page = intval(floor($position / $perPage)) + 1;
 
     return response()->json([
-        'member' => $member,
-        'page' => $page
+        'members' => $members,
     ]);
-    }
+}
 
 }

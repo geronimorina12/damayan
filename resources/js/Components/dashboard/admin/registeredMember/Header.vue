@@ -6,6 +6,8 @@ import { ref, watch } from 'vue';
 import { useModalStore } from '@/piniaStore/modalStore';
 
 const modalStore = useModalStore();
+const showSuccess = ref(false);
+const countdown = ref(3);
 
 // JS logic for opening and closing modals
 const openModal = (id) => {
@@ -30,6 +32,20 @@ window.addEventListener('click', (e) => {
   document.querySelectorAll('.custom-modal').forEach((modal) => {
     if (e.target === modal) modal.classList.remove('show');
   });
+});
+watch(showSuccess, (value) => {
+  if (value) {
+    countdown.value = 3; // reset counter
+
+    const interval = setInterval(() => {
+      countdown.value--;
+
+      if (countdown.value <= 0) {
+        showSuccess.value = false;
+        clearInterval(interval);
+      }
+    }, 1000);
+  }
 });
 </script>
 
@@ -71,7 +87,7 @@ window.addEventListener('click', (e) => {
           <button class="close-btn" @click="closeModal('addNewMemberModal')">&times;</button>
         </div>
         <div class="modal-body">
-          <AddNewMember/>
+          <AddNewMember v-model:show="showSuccess"/>
         </div>
       </div>
     </div>
@@ -93,13 +109,21 @@ window.addEventListener('click', (e) => {
       </div>
     </div>
 
-    <!-- SUCCESS POPUP -->
-    <div v-if="modalStore.closeAddMemberModal" class="modal-overlay">
-      <div class="modal-box">
-        <p>Successfully created</p>
-        <button class="close-btn" @click="modalStore.resetModal()">OK</button>
-      </div>
+    <div v-if="showSuccess" class="modal-overlay">
+    <div class="modal-box">
+      <p>Member created successfully!</p>
+      <p style="font-size: 0.9rem; color: #555;">
+        Closing in {{ countdown }}s...
+      </p>
+
+      <button class="close-btn" @click="showSuccess = false">
+        OK ({{ countdown }})
+      </button>
     </div>
+  </div>
+
+
+
 
   </div>
 </template>
@@ -205,6 +229,59 @@ window.addEventListener('click', (e) => {
 }
 .close-btn2 {
   transform: translateY(-20%);
+}
+/* Dark background overlay */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.65); /* darker bg */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+/* Small success modal box */
+.modal-box {
+  background: #fff;
+  width: 320px;            /* small modal */
+  padding: 25px 20px;
+  border-radius: 12px;
+  text-align: center;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+  animation: popupScale 0.25s ease-out;
+}
+
+/* Success text style */
+.modal-box p {
+  font-size: 1.1rem;
+  margin-bottom: 15px;
+  font-weight: 500;
+}
+
+/* OK button */
+.modal-box .close-btn {
+  padding: 8px 18px;
+  border: none;
+  background-color: #4CAF50; /* green */
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  transition: 0.2s;
+}
+
+.modal-box .close-btn:hover {
+  background-color: #43a047;
+}
+
+/* Popup animation */
+@keyframes popupScale {
+  0%   { transform: scale(0.8); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
 }
 
 @keyframes fadeIn {

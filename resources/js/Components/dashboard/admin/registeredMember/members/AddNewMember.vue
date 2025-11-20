@@ -124,6 +124,7 @@ modalStore.triggerCloseMemberModal();
   form.post(route("addMemberPost"), {
     onSuccess: () => {
       successMessage.value = "Member added successfully!";
+      show.value = true;
       closeModal.value = true;
       setTimeout(() => (successMessage.value = ""), 4000);
     },

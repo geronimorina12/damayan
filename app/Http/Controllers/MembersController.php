@@ -90,6 +90,7 @@ class MembersController extends Controller
         
         return redirect()->back()->with([
             'message' => 'Member status updated successfully.',
+            'id' => $id,
         ]);
     }
 

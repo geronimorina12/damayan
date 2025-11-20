@@ -152,6 +152,21 @@ const unPaidFunc = (memberId) => {
 const showReportModal = ref(false);
 const openReportModal = () => showReportModal.value = true;
 const closeReportModal = () => showReportModal.value = false;
+
+// Determines if member is paid
+const isPaid = (id) => getPaidMembersId.value.includes(id);
+
+// Unified toggle function
+const togglePayment = (mem) => {
+  if (isPaid(mem.id)) {
+    // If currently paid → Unpay
+    unPaidFunc(mem.id);
+  } else {
+    // If currently unpaid → Prepare to pay
+    preparePayment(mem.id, mem.purok, mem.contact_number);
+  }
+};
+
 </script>
 
 
@@ -210,25 +225,21 @@ const closeReportModal = () => showReportModal.value = false;
                   </td>
                   <td>{{ mem?.contact_number || 'undefined' }}</td>
                   <td>{{ mem?.purok || 'N/A' }}</td>
-                  <td>
-                    <button
-                      v-if="!(getPaidMembersId || []).includes(mem?.id)"
-                      class="btn btn-danger"
-                      @click="preparePayment(mem.id, mem.purok, mem.contact_number)"
-                      title="Mark member as paid"
-                      :class="{ disabled: mem.purok.slice(-1) !== getCurrentCollector?.purok }"
-                    >
-                      Paid
-                    </button>
-                    <button
-                      v-else
-                      class="btn btn-success"
-                      @click="unPaidFunc(mem.id)"
-                      title="Mark member as unpaid"
-                    >
-                      <i class="bi bi-check-lg"></i>
-                    </button>
-                  </td>
+                 <td>
+                <button
+                  class="status-btn"
+                  :class="{
+                    'status-paid': isPaid(mem.id),
+                    'status-unpaid': !isPaid(mem.id),
+                    'disabled': mem.purok.slice(-1) !== getCurrentCollector?.purok
+                  }"
+                  @click="togglePayment(mem)"
+                >
+                  <span v-if="isPaid(mem.id)">✔ Paid</span>
+                  <span v-else>Mark as Paid</span>
+                </button>
+              </td>
+
                 </tr>
               </tbody>
             </table>
@@ -495,6 +506,41 @@ const closeReportModal = () => showReportModal.value = false;
   display: flex;
   justify-content: flex-end;
   padding: 0 8px;
+}
+.status-btn {
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-weight: 600;
+  transition: 0.25s ease;
+  border: none;
+}
+
+.status-unpaid {
+  background: #dc3545;
+  color: white;
+}
+
+.status-unpaid:hover {
+  background: #b02a37;
+}
+
+.status-paid {
+  background: #198754;
+  color: white;
+}
+
+.status-paid:hover {
+  background: #157347;
+}
+
+.status-btn.disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.mobile-btn {
+  width: 100%;
+  margin-top: 6px;
 }
 
 /* Responsive Breakpoints */

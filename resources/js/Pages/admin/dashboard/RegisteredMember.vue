@@ -34,6 +34,10 @@ const searching = ref(false)
 const searchError = ref('')
 const lastClickedDeceasedId = ref(null)
 const show = ref(false)
+const updatingMemberIds = ref([])
+const showStatusLoadingModal = ref(false)
+const statusLoadingName = ref('')
+let toggledStatus = ref([])
 
 //  Initialize members from props
 watch(
@@ -53,7 +57,7 @@ watch(
   { immediate: true }
 )
 
-// 🧠 Debounced real-time search + logging
+//  Debounced real-time search + logging
 let searchTimer = null
 const DEBOUNCE_MS = 400
 
@@ -120,21 +124,45 @@ const trashMember = (id) => {
     })
   }
 }
-
-// 🔄 Toggle active/inactive status
-const toggleMemberStatus = (member) => {
+const toggleMemberStatus = async (member) => {
   const newStatus = member.status === 'active' ? 'inactive' : 'active'
-  router.put(
-    route('toggleMemberStatus', { id: member.id }),
-    { status: newStatus },
-    {
+  
+  statusLoadingName.value = `${member.first_name} ${member.middle_name} ${member.last_name}`
+  showStatusLoadingModal.value = true
+
+  try {
+    // Use Inertia router instead of axios
+    router.put(route('toggleMemberStatus', { id: member.id }), {
+      status: newStatus
+    }, {
+      preserveState: true,
+      preserveScroll: true,
       onSuccess: () => {
-        member.status = newStatus
+        // Update local state after successful request
+        const updatedMembers = getMembers.value.map(m => 
+          m.id === member.id ? { ...m, status: newStatus } : m
+        )
+        getMembers.value = updatedMembers
+        
         statusChangeAlert.value = newStatus === 'active'
-        passNameToAlert.value = `${member.first_name} ${member.middle_name} ${member.last_name}`
+        passNameToAlert.value = statusLoadingName.value
+      },
+      onError: (errors) => {
+        console.error('Failed to toggle status:', errors)
+      },
+      onFinish: () => {
+        setTimeout(() => {
+          showStatusLoadingModal.value = false
+        }, 1500)
       }
-    }
-  )
+    })
+
+  } catch (error) {
+    console.error('Failed to toggle status:', error)
+    setTimeout(() => {
+      showStatusLoadingModal.value = false
+    }, 1500)
+  }
 }
 
 // ⚙️ Popup logic
@@ -326,21 +354,22 @@ const displayPaginationLinks = computed(() => {
                 <td>{{ member.contact_number }}</td>
                 <td>{{ member.purok }}</td>
 
-                <td class="status-cell">
-                  <div class="status-toggle">
-                    <label class="toggle-switch">
-                      <input
-                        type="checkbox"
-                        :checked="member.status === 'active'"
-                        @change="toggleMemberStatus(member)"
-                      >
-                      <span class="toggle-slider"></span>
-                    </label>
-                    <span class="status-label" :class="member.status === 'active' ? 'active' : 'inactive'">
-                      {{ member.status === 'active' ? 'Active' : 'Inactive' }}
-                    </span>
-                  </div>
-                </td>
+               <td class="status-cell">
+              <div class="status-toggle">
+                <label class="toggle-switch">
+                  <input
+                    type="checkbox"
+                    :checked="member.status === 'active'"
+                    @change="toggleMemberStatus(member)"
+                  >
+                  <span class="toggle-slider"></span>
+                </label>
+                <span class="status-label" :class="member.status === 'active' ? 'active' : 'inactive'">
+                  {{ member.status === 'active' ? 'Active' : 'Inactive' }}
+                </span>
+              </div>
+            </td>
+
 
                 <td class="status-cell">
                   <div class="status-toggle">
@@ -435,6 +464,12 @@ const displayPaginationLinks = computed(() => {
     </div>
 
   
+    <div v-if="showStatusLoadingModal" class="custom-loading-modal">
+      <div class="loading-content">
+        <div class="spinner-border text-primary" role="status"></div>
+        <p class="mt-2">Updating status for {{ statusLoadingName }}...</p>
+      </div>
+    </div>
 
 
   </AdminLayout>
@@ -732,6 +767,26 @@ table td{
 }
 .modern-modal .modal-body {
   padding: 3rem !important;
+}
+.custom-loading-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1050;
+}
+
+.loading-content {
+  background: #fff;
+  padding: 20px 30px;
+  border-radius: 12px;
+  text-align: center;
+  box-shadow: 0 0 10px rgba(0,0,0,0.3);
 }
 
 @media (max-width: 768px) {
