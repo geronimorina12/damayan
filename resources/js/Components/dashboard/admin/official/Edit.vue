@@ -9,7 +9,6 @@ const props = defineProps({
     default: () => ({}),
   },
 })
-
 // Reactive alerts
 const successMessage = ref('')
 const errorMessage = ref('')
@@ -21,7 +20,7 @@ const form = useForm({
   middle_initial: '',
   last_name: '',
   email: '',
-  position: '',
+  position: 'collector',
   term_start: '',
   term_end: '',
   status: 1,
@@ -37,11 +36,12 @@ watch(
       form.middle_initial = middle
       form.last_name = lastName
       form.email = newOfficial.email || ''
-      form.position = newOfficial.position || ''
+      form.position = newOfficial.position || 'collector'
       form.term_start = newOfficial.term_start || ''
       form.term_end = newOfficial.term_end || ''
       form.status = newOfficial.status ?? 0
     }
+    console.log('Editing Official:', form)
   },
   { immediate: true }
 )
@@ -64,6 +64,33 @@ function submit() {
   errorMessage.value = ''
   hasError.value = false
 
+  if(form.position == 'collector'){
+
+  form.put(route('officials.collector.editData', { id: props.official.id }), {
+    data: {
+      name: name,
+      position: form.position,
+      term_start: form.term_start,
+      term_end: form.term_end,
+      status: form.status,
+      email: form.email,
+    },
+    onSuccess: () => {
+      successMessage.value = 'Official updated successfully!'
+
+      // Close modal after a short delay (optional)
+      setTimeout(() => {
+        closeModal()
+      }, 500)
+    },
+    onError: (errors) => {
+      hasError.value = true
+      errorMessage.value = Object.values(errors).flat().join(' ')
+      console.error(errors)
+    },
+  })
+  }else{
+    
   form.put(route('officials.editData', { id: props.official.id }), {
     data: {
       name: name,
@@ -87,6 +114,7 @@ function submit() {
       console.error(errors)
     },
   })
+  }
 }
 
 function closeModal() {
@@ -193,20 +221,13 @@ function closeModal() {
           <!-- Position -->
           <div class="mb-3">
             <label for="position" class="form-label fw-semibold">Position</label>
-            <select
+            <input
               id="position"
               class="form-control"
               v-model="form.position"
               required
-            >
-              <option disabled value="">Select a position</option>
-              <option value="president">President</option>
-              <option value="vice_president">Vice President</option>
-              <option value="secretary">Secretary</option>
-              <option value="treasurer">Treasurer</option>
-              <option value="auditor">Auditor</option>
-              <option value="purok_leader">Purok Leader</option>
-            </select>
+              disabled
+            />
           </div>
 
           <!-- Email -->

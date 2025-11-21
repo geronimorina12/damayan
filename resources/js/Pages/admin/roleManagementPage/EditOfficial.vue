@@ -91,6 +91,7 @@ const submit = () => {
               v-model="form.position"
               class="form-select"
               :class="{ 'is-invalid': form.errors.position }"
+              disabled
             >
               <option value="" disabled>Select Position</option>
               <option value="admin">Admin</option>

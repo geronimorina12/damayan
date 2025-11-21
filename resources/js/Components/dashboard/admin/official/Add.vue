@@ -265,7 +265,7 @@ const minTermEnd = computed(() => today); // today
 
           
           <div class="bg-white ask-card mb-5 rounded-xl p-6 w-100 mx-auto max-w-sm animate-fade-in" v-if="showAsk">
-      <h2 class="text-xl font-semibold text-gray-800 mb-4">
+      <h2 class="ask-text mb-4">
         Do you want to override this current 
         <span v-if="form.position == 'vice_president'">vice president</span>
         <span v-else>{{ form.position || 'official' }}</span>
@@ -481,7 +481,10 @@ input:checked + .toggle-slider:before {
 .collector-label.active {
   color: #10b981;
 }
-
+.ask-text {
+  font-size: 1rem;
+  color: #111827;
+}
 .collector-label.inactive {
   color: #ef4444;
 }

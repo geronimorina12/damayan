@@ -225,7 +225,7 @@ const formatDate = (dateString) => {
           </Link>
 
           <button class="btn-modern" @click="sendReminders">
-            <i class="bi bi-send-fill me-2"></i>Send
+            <i class="bi bi-send-fill me-2"></i>Send to all
           </button>
         </div>
       </transition>

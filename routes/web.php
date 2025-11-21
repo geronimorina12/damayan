@@ -96,9 +96,12 @@ Route::prefix('reports')->name('reports.')->middleware('auth')->group(function (
 // Official
 Route::prefix('officials')->name('officials.')->middleware('auth')->group(function (){
     Route::get('/view-officials', [OfficialController::class, 'index'])->name('index');
+    Route::get('/view-official', [OfficialController::class, 'viewOfficial'])->name('viewOfficial');
+    Route::get('/view-collector', [OfficialController::class, 'viewCollector'])->name('viewCollector');
     Route::get('/edit-officials-route/{id}', [OfficialController::class, 'edit'])->name('edit');
     Route::get('/president/has', [OfficialController::class, 'hasPresident'])->name('hasPresident');
     Route::put('/edit-officials-put/{id}', [OfficialController::class, 'editData'])->name('editData');
+    Route::put('/edit-collector-put/{id}', [OfficialController::class, 'editCollector'])->name('collector.editData');
     Route::post('/add-official', [OfficialController::class, 'create'])->name('add');
     Route::get('/add-official-route', [OfficialController::class, 'addOfficialRoute'])->name('addOfficialRoute');
     Route::delete('/delete-official/{id}', [OfficialController::class, 'delete'])->name('delete');
@@ -131,6 +134,8 @@ Route::prefix('role')->name('role.')->middleware('auth')->group(function () {
     Route::get('/view-roles', [RoleController::class, 'index'])->name('index');
     Route::get('/users/{user}/edit', [RoleController::class, 'edit'])->name('edit');
     Route::get('/officials/{official}/edit', [RoleController::class, 'editOfficial'])->name('official.edit');
+    Route::get('/users/{user}/view', [RoleController::class, 'viewUser'])->name('viewUser');
+    Route::get('/officials/{official}/view', [RoleController::class, 'viewOfficial'])->name('official.view');
     Route::put('/users/{user}', [RoleController::class, 'update'])->name('update');
     Route::put('/officials/{official}', [RoleController::class, 'updateOfficial'])->name('official.update');
     Route::get('/add-user-route', [RoleController::class, 'add'])->name('add');

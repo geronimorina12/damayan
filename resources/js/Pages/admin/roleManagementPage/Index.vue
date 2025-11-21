@@ -79,9 +79,9 @@ const action1Func = (userId, role) => {
 
 const editFunc = () => {
   if (userRole.value === "admin" || userRole.value === "collector") {
-    router.get(route("role.edit", { id: userIdClicked.value }));
+    router.get(route("role.viewUser", { user: userIdClicked.value }));
   } else {
-    router.get(route("role.official.edit", { official: userIdClicked.value }));
+    router.get(route("role.official.view", { official: userIdClicked.value }));
   }
 };
 
@@ -105,6 +105,10 @@ const getUserAcess = (role, position) => {
   if (role === "secretary" || position === "secretary") return "Records and Reports";
   if (role === "vise_president" || position === "vise_president") return "Review and Approval";
   return "N/A";
+};
+const formatDate = (dateString) => {
+    const options = { year: "numeric", month: "long", day: "numeric" };
+    return new Date(dateString).toLocaleDateString(undefined, options);
 };
 </script>
 
@@ -144,7 +148,6 @@ const getUserAcess = (role, position) => {
               <table class="table table-bordered align-middle">
                 <thead class="table-light">
                   <tr>
-                    <th>ID</th>
                     <th>NAME</th>
                     <th>EMAIL</th>
                     <th>Role</th>
@@ -159,7 +162,6 @@ const getUserAcess = (role, position) => {
                     </td>
                   </tr>
                   <tr v-for="(user, index) in filteredUsers" :key="index">
-                    <td>{{ user.id }}</td>
                     <td>{{ user.name }}</td>
                     <td>{{ user.email || "N/A" }}</td>
                     <td>{{ user?.role || user?.position }}</td>
@@ -225,7 +227,7 @@ const getUserAcess = (role, position) => {
                 @click="editFunc()"
               >
                 <i class="fas fa-edit"></i>
-                <span>Edit</span>
+                <span>View</span>
               </button>
               <button
                 type="button"

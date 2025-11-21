@@ -66,6 +66,15 @@ class OfficialController extends Controller
             'official' => $official
         ]);
      }
+     public function viewOfficial($id){
+        $official = OfficialModel::findOrfail($id);
+        if(!$official){
+            abort(404, 'official not found');
+        }
+        return Inertia::render('admin/dashboard/official/ViewOfficial', [
+            'official' => $official
+        ]);
+     }
     public function editData(Request $request, $id)
 {
     $official = OfficialModel::findOrFail($id);
@@ -93,10 +102,45 @@ class OfficialController extends Controller
 
     return redirect()->back()->with('success', 'Official updated successfully.');
 }
+
+public function editCollector(Request $request, $id)
+{
+    $official = User::findOrFail($id);
+
+    if (!$official) {
+        abort(404, 'Official not found');
+    }
+
+    //  Combine first, middle, and last name into one
+    $request->merge([
+        'name' => trim($request->first_name . ' ' . $request->middle_name . ' ' . $request->last_name)
+    ]);
+
+    //  Validate combined data
+    $validated = $request->validate([
+        'name' => 'required|string|max:255',
+        'position' => 'required|string|max:255',
+        'term_start' => 'required|date',
+        'term_end' => 'required|date',
+        'status' => 'required|boolean',
+        'email' => 'nullable|email',
+    ]);
+
+    $official->update([
+        'name' => $validated['name'],
+        'email' => $validated['email'],
+        'created_at' => $validated['term_start'],
+    ]);
+
+    return redirect()->back()->with('success', 'Official updated successfully.');
+}
+
     public function delete($id){
-        $official = OfficialModel::findOrFail($id);
+        $official = OfficialModel::find($id);
         if(!$official){
-            abort(404, "official not found");
+            $collector = User::findOrFail($id);
+            $collector->delete();
+            return redirect()->back()->with(['success' => 'collector deleted!'], 201);
         }
         $official->delete();    
         return redirect()->back()->with(['success' => 'official deleted!'], 201);

@@ -91,6 +91,7 @@ const submit = () => {
               v-model="form.role"
               class="form-select"
               :class="{ 'is-invalid': form.errors.role }"
+              disabled
             >
               <option value="" disabled>Select Role</option>
               <!-- <option value="admin">Admin</option> -->

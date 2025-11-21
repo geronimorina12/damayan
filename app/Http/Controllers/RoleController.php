@@ -26,9 +26,21 @@ class RoleController extends Controller
             'user' => $user
         ]);
     }
+    public function viewUser(User $user)
+    {
+        return Inertia::render('admin/roleManagementPage/View', [
+            'user' => $user
+        ]);
+    }
       public function editOfficial(OfficialModel $official)
     {
         return Inertia::render('admin/roleManagementPage/EditOfficial', [
+            'official' => $official
+        ]);
+    }
+     public function viewOfficial(OfficialModel $official)
+    {
+        return Inertia::render('admin/roleManagementPage/ViewOfficial', [
             'official' => $official
         ]);
     }
