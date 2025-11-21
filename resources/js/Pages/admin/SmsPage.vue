@@ -124,11 +124,11 @@ const handleSendFundUpdates = () => {
                 <h5 class="modal-title">Confirm Send</h5>
               </div>
               <div class="modal-body">
-                <p>There's no fund collected as for now, are you sure you want to send?</p>
+                <p>There's no fund collected as for now.</p>
               </div>
               <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" @click="cancelSend">Cancel</button>
-                <button type="button" class="btn btn-primary" @click="confirmSend">Send Anyway</button>
+                <button type="button" class="btn btn-secondary" @click="cancelSend">Ok</button>
+                <!-- <button type="button" class="btn btn-primary" @click="confirmSend">Send Anyway</button> -->
               </div>
             </div>
           </div>
