@@ -187,7 +187,7 @@ const centerActivePagination = () => {
               <td>{{ member?.first_name }} {{ member?.middle_name }} {{ member?.last_name }}</td>
               <td>{{ member.age }}</td>
               <td>{{ member.contact_number }}</td>
-              <td>{{ member.purok }}</td>
+              <td class="purok">{{ member.purok }}</td>
               <td>
                 <Link 
                   :href="route('viewMemberInfo', {id: member?.id})" 
@@ -255,7 +255,10 @@ const centerActivePagination = () => {
   white-space: nowrap;
   flex-shrink: 0;
 }
-
+.purok{
+  text-align: left;
+  padding-left: 1rem;
+}
 /* On smaller screens, align to start for easy scroll */
 @media (max-width: 768px) {
   .pagination-controls {

@@ -88,6 +88,7 @@ if (!$deceasedName) {
         'reminders' => "Hello! You still have an unpaid Damayan contribution. Please settle as soon as possible. If already paid, please ignore this message. Thank you",
         'fundUpdates' => $fundUpdates,
         'members' => memberModel::select('id', 'first_name', 'last_name')->get()->toArray(),
+        'fundAmount' => $currentFund,
     ]);
 }
 

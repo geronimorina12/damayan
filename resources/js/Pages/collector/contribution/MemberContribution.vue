@@ -290,7 +290,7 @@ const togglePayment = (mem) => {
                     title="Mark member as paid"
                     :class="{ disabled: mem.purok.slice(-1) !== getCurrentCollector?.purok }"
                   >
-                    Mark as Paid
+                    Paid
                   </button>
                   <button
                     v-else

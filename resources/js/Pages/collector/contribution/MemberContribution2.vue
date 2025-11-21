@@ -251,8 +251,8 @@ const togglePayment = (mem) => {
                   }"
                   @click="togglePayment(mem)"
                 >
-                  <span v-if="isPaid(mem.id)">✔ Paid</span>
-                  <span v-else>Mark as Paid</span>
+                  <span v-if="isPaid(mem.id)">✔</span>
+                  <span v-else>Paid</span>
                 </button>
               </td>
 
@@ -290,7 +290,7 @@ const togglePayment = (mem) => {
                     title="Mark member as paid"
                     :class="{ disabled: mem.purok.slice(-1) !== getCurrentCollector?.purok }"
                   >
-                    Mark as Paid
+                    Paid
                   </button>
                   <button
                     v-else
@@ -298,7 +298,7 @@ const togglePayment = (mem) => {
                     @click="unPaidFunc(mem.id)"
                     title="Mark member as unpaid"
                   >
-                    <i class="bi bi-check-lg"></i> Paid
+                    <i class="bi bi-check-lg"></i> 
                   </button>
                 </div>
               </div>

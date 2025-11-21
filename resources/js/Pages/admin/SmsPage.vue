@@ -1,5 +1,5 @@
 <script setup>
-import { ref, defineProps, watch } from 'vue'
+import { ref, defineProps, computed } from 'vue'
 import { router, Head, Link } from '@inertiajs/vue3'
 import AdminLayout from '@/Layouts/AdminLayout.vue'
 
@@ -9,35 +9,49 @@ const props = defineProps({
   reminders: { type: Object, default: () => ({}) },
   fundUpdates: { type: Object, default: () => ({}) },
   members: { type: Array, default: () => [] },
+  fundAmount: { type: Number, default: 0 }
 })
 
-const getDeathReport = ref({})
-const getScheduleContribution = ref({})
-const getReminders = ref({})
-const getFundUpdates = ref({})
-const getMembers = ref([]);
+// Use computed properties instead of ref + watch
+const getDeathReport = computed(() => props.deathReport)
+const getScheduleContribution = computed(() => props.scheduleContribution)
+const getReminders = computed(() => props.reminders)
+const getFundUpdates = computed(() => props.fundUpdates)
+const getMembers = computed(() => props.members)
+const getFundAmount = computed(() => props.fundAmount)
 
-watch(() => props.deathReport, (data) => { getDeathReport.value = data }, { immediate: true })
-watch(() => props.scheduleContribution, (data) => { getScheduleContribution.value = data }, { immediate: true })
-watch(() => props.reminders, (data) => { 
-  getReminders.value = data
-}, { immediate: true })
-watch(() => props.fundUpdates, (data) => { getFundUpdates.value = data }, { immediate: true })
-watch(() => props.members, (data) => { getMembers.value = data }, { immediate: true })
+// Modal state
+const showNoFundModal = ref(false)
+const pendingAction = ref(null)
 
-// Separated functions kada sms
+// Modal functions
+const confirmSend = () => {
+  if (pendingAction.value) pendingAction.value()
+  showNoFundModal.value = false
+  pendingAction.value = null
+}
 
+const cancelSend = () => {
+  showNoFundModal.value = false
+  pendingAction.value = null
+}
+
+const checkFundBeforeSending = (action) => {
+  if (getFundAmount.value === 0) {
+    showNoFundModal.value = true
+    pendingAction.value = action
+  } else {
+    action()
+  }
+}
+
+// SMS senders
 const sendDeathReport = () => {
   router.post(route('smsNotification.addDeathReport'), {
     message: getDeathReport.value.message
   }, {
-    onSuccess: () => {
-      alert('Death report sent successfully.')
-    },
-    onError: (errors) => {
-      console.error(errors)
-      alert('Failed to send death report.')
-    }
+    onSuccess: () => alert('Death report sent successfully.'),
+    onError: () => alert('Failed to send death report.')
   })
 }
 
@@ -61,11 +75,15 @@ function sendReminders() {
 
 function sendFundUpdates() {
   router.post(route('smsNotification.sendFundUpdates'), {
-    message: getFundUpdates,
+    message: getFundUpdates.value,
   }, {
     onSuccess: () => alert('Fund Updates sent successfully!'),
-    onError: () => alert('Error sending Fund Updates')
+    onError: (e) => console.log('Error sending Fund Updates', e)
   })
+}
+
+const handleSendFundUpdates = () => {
+  checkFundBeforeSending(sendFundUpdates)
 }
 </script>
 
@@ -77,22 +95,18 @@ function sendFundUpdates() {
         <h4 class="mb-4 fw-bold sticky-header text-start ps-2 pt-3">SMS</h4>
 
         <div class="scroll-content">
-
           <!-- Fund Updates -->
           <div class="mb-4 position-relative">
             <div>
               <label for="fundUpdates" class="form-label">Fund Updates</label>
             </div>
-            <textarea v-model="getFundUpdates" id="fundUpdates" class="form-control" disabled></textarea>
+
+            <textarea :value="getFundUpdates.message" id="fundUpdates" class="form-control" disabled></textarea>
 
             <div class="container-fluid d-flex flex-row align-items-center gap-3 justify-content-end mt-3">
+              <div></div>
               <div>
-                <!-- <Link :href="route('smsNotification.sendToAllSelected', {type: 'fundUpdates', message: getFundUpdates})" class="save-btn text-uppercase text-decoration-none">
-                  send to all selected
-                </Link> -->
-              </div>
-              <div>
-                <button class="save-btn text-uppercase" @click="sendFundUpdates">send</button>
+                <button class="save-btn text-uppercase" @click="handleSendFundUpdates">send</button>
               </div>
             </div>
           </div>
@@ -100,6 +114,27 @@ function sendFundUpdates() {
           <div class="container extra-space w-100"></div>
         </div>
       </div>
+
+      <!-- No Fund Modal -->
+      <div v-if="showNoFundModal" class="modal-backdrop show d-block">
+        <div class="modal d-block fade" tabindex="-1">
+          <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title">Confirm Send</h5>
+              </div>
+              <div class="modal-body">
+                <p>There's no fund collected as for now, are you sure you want to send?</p>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" @click="cancelSend">Cancel</button>
+                <button type="button" class="btn btn-primary" @click="confirmSend">Send Anyway</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
     </AdminLayout>
   </div>
 </template>
@@ -126,18 +161,12 @@ function sendFundUpdates() {
   padding-right: 5px;
 }
 
-.position-relative {
-  position: relative;
-}
-
 textarea.form-control {
   height: 120px;
   resize: none;
 }
 
 .save-btn {
-  position: relative;
-  right: 0;
   background-color: #16bd2f;
   border: none;
   color: white;
@@ -150,8 +179,73 @@ textarea.form-control {
   background-color: #0ad929;
 }
 
-.extra-space {
-  width: 100%;
-  height: 20%;
+/* FIXED — Modal solid white, no opacity */
+.modal.fade {
+  opacity: 1 !important;
 }
+
+.modal-backdrop {
+  background-color: rgba(0, 0, 0, 0.7) !important;
+  opacity: 0.7 !important;
+}
+
+.modal-content {
+  background-color: #ffffff !important;
+  opacity: 1 !important;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.modal-header,
+.modal-footer,
+.modal-body {
+  background: white !important;
+}
+
+.btn {
+  padding: 0.6rem 1.2rem;
+  border-radius: 6px;
+  cursor: pointer;
+  border: none;
+}
+
+/* REMOVE ALL TRANSPARENCY COMPLETELY */
+
+/* Disable Bootstrap fade opacity */
+.modal,
+.modal.fade,
+.modal.show {
+  opacity: 1 !important;
+}
+
+/* Solid white modal body */
+.modal-content,
+.modal-header,
+.modal-body,
+.modal-footer {
+  background-color: #ffffff !important;
+  opacity: 1 !important;
+  backdrop-filter: none !important;
+}
+
+/* Black background behind modal */
+.modal-backdrop.show {
+  background-color: rgba(0, 0, 0, 0.7) !important;
+  opacity: 1 !important;
+}
+
+/* Ensure container of modal is also solid */
+.modal-dialog,
+.modal-dialog-centered {
+  background: transparent !important;
+}
+
+/* Buttons */
+.btn {
+  padding: 0.6rem 1.2rem;
+  border-radius: 6px;
+  cursor: pointer;
+  border: none;
+}
+
 </style>

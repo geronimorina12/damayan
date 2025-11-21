@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\OfficialModel;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -11,31 +12,42 @@ use Inertia\Inertia;
 
 class OfficialController extends Controller
 {
-    public function index(){
-        $officials = OfficialModel::all();
-        $collectors = User::where('role', 'collector')->get();
 
-         // Combine both into one array (but keep them identifiable)
-        $combined = $officials->map(function ($item) {
-            $item->type = 'official';
-            return $item;
-        })->concat(
-            $collectors->map(function ($item) {
-                $item->type = 'collector';
-                return $item;
-            })
-        )->values(); // reindex the array
+public function index() {
+    $officials = OfficialModel::all();
+    $collectors = User::where('role', 'collector')->get();
 
-        if(Auth::user()->role == 'admin'){
-            return Inertia::render('admin/dashboard/official/Home', [
-            'officials' => $combined,
-            ]);
-        }else if(Auth::user()->role == 'collector'){
-            return Inertia::render('collector/dashboard/official/Home', [
-            'officials' => $combined,
-            ]);
+    $currentYear = Carbon::now()->year;
+
+    // Update official status if term_end equals current year
+    $officials->each(function ($official) use ($currentYear) {
+        if ($official->term_end && Carbon::parse($official->term_end)->year == $currentYear) {
+            $official->status = 0; // boolean false
         }
+    });
+
+    // Combine both into one array (but keep them identifiable)
+    $combined = $officials->map(function ($item) {
+        $item->type = 'official';
+        return $item;
+    })->concat(
+        $collectors->map(function ($item) {
+            $item->type = 'collector';
+            return $item;
+        })
+    )->values(); // reindex the array
+
+    if (Auth::user()->role == 'admin') {
+        return Inertia::render('admin/dashboard/official/Home', [
+            'officials' => $combined,
+        ]);
+    } else if (Auth::user()->role == 'collector') {
+        return Inertia::render('collector/dashboard/official/Home', [
+            'officials' => $combined,
+        ]);
     }
+}
+
     public function addOfficialRoute(){
         return Inertia::render('admin/dashboard/official/Add');
     }
