@@ -91,6 +91,17 @@ if (!$deceasedName) {
         'fundAmount' => $currentFund,
     ]);
 }
+    public function getMembers(){
+        $members = memberModel::select('id', 'first_name', 'last_name')->get()->toArray();
+        return response()->json(['members' => $members]);
+    }
+    public function getDeceased($id){
+        $deceased = memberModel::where('id', $id)->first();
+        if(!$deceased){
+            return response()->json(['message' => 'Member not found'], 404);
+        }
+        return response()->json(['deceased' => $deceased]);
+    }
 
         public function sendToAllSelected($type, $message, $deceased, $last)
         {

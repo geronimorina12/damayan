@@ -1,6 +1,11 @@
 <script setup>
 import { useForm, Link, router } from "@inertiajs/vue3";
 import { ref, defineProps, watch, computed, onMounted } from "vue";
+import axios from "axios"; 
+import SendToAllSelectedComponent from "../SendToAllSelectedComponent.vue";
+import { useTextStore } from '@/piniaStore/useTextStore'
+
+const store = useTextStore();
 
 const form = useForm({
   message: "",
@@ -19,27 +24,31 @@ const props = defineProps({
 
 const getDeceasedMember = ref({});
 const alertMessage = ref("");
-const alertType = ref(""); // 'success' or 'danger'
+const alertType = ref("");
 const showAlert = ref(false);
+let reminderWrapper = ref(true)
+let showCaret = ref(false);
+let closeCaret = ref(false);
+// NEW: Toggle SendToAllSelectedComponent visibility
+const showSendToAllSelected = ref(false);
 
-// Reactive validation for last night date
+// VALIDATION
 const lastNightError = ref("");
 const hasLastNightError = computed(() => !!lastNightError.value);
 
-// Computed property for showButtons that considers the error state
-const showButtons = computed(() => 
-  form.lastNight && 
-  form.startOfContribution && 
+const showButtons = computed(() =>
+  form.lastNight &&
+  form.startOfContribution &&
   !hasLastNightError.value
 );
 
-//  Set default date when component mounts
+// DEFAULT DATE
 onMounted(() => {
   const today = new Date();
-  form.startOfContribution = today.toISOString().split("T")[0]; // yyyy-mm-dd format
+  form.startOfContribution = today.toISOString().split("T")[0];
 });
 
-// Watch for selected member
+// WATCH: Selected member
 watch(
   () => props.deceasedMember,
   (newVal) => {
@@ -48,7 +57,7 @@ watch(
   { immediate: true }
 );
 
-// Validate last night date
+// VALIDATE
 const validateLastNight = (dateString) => {
   if (!dateString) {
     lastNightError.value = "";
@@ -57,11 +66,9 @@ const validateLastNight = (dateString) => {
 
   const selectedDate = new Date(dateString);
   const today = new Date();
-  
-  // Set both dates to midnight for accurate comparison
   selectedDate.setHours(0, 0, 0, 0);
   today.setHours(0, 0, 0, 0);
-  
+
   if (selectedDate <= today) {
     lastNightError.value = "The last night date cannot be set today or a past date.";
   } else {
@@ -69,15 +76,8 @@ const validateLastNight = (dateString) => {
   }
 };
 
-// Watch lastNight for changes and validate
-watch(
-  () => form.lastNight,
-  (newDate) => {
-    validateLastNight(newDate);
-  }
-);
-
-// Auto-generate message when both fields are filled
+watch(() => form.lastNight, validateLastNight);
+// AUTO MESSAGE
 watch(
   [() => form.lastNight, () => form.startOfContribution],
   ([last, start]) => {
@@ -92,14 +92,13 @@ watch(
   { immediate: true }
 );
 
-// Send reminders
+// BUTTON: Send to all
 function sendReminders() {
   if (!form.memberId) {
     showBootstrapAlert("Missing member ID. Please select a member first.", "danger");
     return;
   }
 
-  // Prevent sending if there's a validation error
   if (hasLastNightError.value) {
     showBootstrapAlert("Please fix the validation errors before sending.", "danger");
     return;
@@ -121,7 +120,15 @@ function sendReminders() {
   );
 }
 
-// Function to show bootstrap alert
+// NEW: When clicking "Send to all selected", use AXIOS and SHOW COMPONENT
+async function openSendToAllSelected() {
+  store.setText('Select Members')
+  showSendToAllSelected.value = true; // show the component
+  reminderWrapper.value = false; // hide the reminder wrapper
+  showCaret.value = true; // show the caret buttons
+}
+
+// ALERT
 function showBootstrapAlert(message, type) {
   alertMessage.value = message;
   alertType.value = type;
@@ -133,12 +140,70 @@ const formatDate = (dateString) => {
   const options = { year: "numeric", month: "long", day: "numeric" };
   return new Date(dateString).toLocaleDateString(undefined, options);
 };
+const hoverLeft = ref(false);
+const hoverRight = ref(false);
+
+const leftIconClass = computed(() => {
+  return hoverLeft.value ? 'bi bi-caret-left-fill' : 'bi bi-caret-left';
+});
+
+const rightIconClass = computed(() => {
+  return hoverRight.value ? 'bi bi-caret-right-fill' : 'bi bi-caret-right';
+});
+const toggleSelectMember = () => {
+  store.setText('Add Deceased Info.');
+  
+  reminderWrapper.value = true;
+  showSendToAllSelected.value = false;
+  
+  showCaret.value = true;
+};
+
+const toggleReminder = () => {
+  store.setText('Select Members');
+  
+  reminderWrapper.value = false;
+  showSendToAllSelected.value = true;
+  
+};
+
+
 </script>
 
 <template>
-  <div class="reminder-wrapper">
-    <div class="card shadow-sm p-4 rounded-4 bg-white border-0">
-      <!-- Bootstrap Alert -->
+
+  <div class="d-flex align-items-center gap-2" v-if="showCaret && !closeCaret">
+    <button 
+      class="caret-wrapper btn btn-outline-dark py-0"
+      @mouseenter="hoverLeft = true"
+      @mouseleave="hoverLeft = false"
+      @click="toggleSelectMember"
+      :disabled="reminderWrapper"
+    >
+      <i 
+        :class="leftIconClass" 
+        class="fs-4"
+      ></i>
+    </button>
+
+    <button
+      class="caret-wrapper btn btn-outline-dark py-0"
+      @mouseenter="hoverRight = true"
+      @mouseleave="hoverRight = false"
+      @click="toggleReminder"
+      :disabled="!reminderWrapper"
+    >
+      <i 
+        :class="rightIconClass" 
+        class="fs-4"
+      ></i>
+  </button>
+  </div>
+
+  <div class="reminder-wrapper" v-if="reminderWrapper">
+    <div class="card shadow-sm pt-0 p-4 rounded-4 bg-white border-0">
+
+      <!-- ALERT -->
       <transition name="fade">
         <div
           v-if="showAlert"
@@ -147,16 +212,11 @@ const formatDate = (dateString) => {
           role="alert"
         >
           {{ alertMessage }}
-          <button
-            type="button"
-            class="btn-close"
-            @click="showAlert = false"
-            aria-label="Close"
-          ></button>
+          <button type="button" class="btn-close" @click="showAlert = false"></button>
         </div>
       </transition>
 
-      <!-- Member name header -->
+      <!-- MEMBER INFO -->
       <div v-if="getDeceasedMember.first_name" class="mb-4 text-center">
         <h4 class="fw-bold text-primary mb-1">
           {{ getDeceasedMember.first_name }}
@@ -166,15 +226,15 @@ const formatDate = (dateString) => {
         <p class="text-muted mb-0">{{ getDeceasedMember.address }}</p>
       </div>
 
-      <!-- Input fields -->
+      <!-- INPUTS -->
       <div class="row g-3">
         <div class="col-md-6">
           <label class="form-label fw-semibold text-secondary">Enter last night:</label>
           <input 
-            type="date" 
-            class="form-control" 
+            type="date"
+            class="form-control"
             :class="{ 'is-invalid': hasLastNightError }"
-            v-model="form.lastNight" 
+            v-model="form.lastNight"
           />
           <div v-if="hasLastNightError" class="invalid-feedback d-block">
             {{ lastNightError }}
@@ -187,43 +247,30 @@ const formatDate = (dateString) => {
         </div>
       </div>
 
-            <!-- Message input -->
-        <transition name="fade">
-          <div
-            v-if="form.message && !hasLastNightError"
-            class="mt-4"
-          >
-            <label class="form-label fw-semibold text-secondary">Message:</label>
-            <textarea 
-              class="form-control"
-              v-model="form.message"
-              rows="4"
-              style="resize: vertical; min-height: 100px;"
-            ></textarea>
-          </div>
-        </transition>
-
-        
-      <!-- Action buttons -->
+      <!-- MESSAGE -->
       <transition name="fade">
-        <div
-          v-if="showButtons"
-          class="mt-4 d-flex flex-wrap gap-3 justify-content-center"
-        >
-          <Link
-            :href="
-              route('smsNotification.sendToAllSelectedV2', {
-                type: 'deathReport',
-                message: form.message,
-                deceased: getDeceasedMember?.id,
-                last: form.lastNight,
-              })
-            "
-            class="btn-modern text-decoration-none"
-          >
-            <i class="bi bi-people-fill me-2"></i>Send to all selected
-          </Link>
+        <div v-if="form.message && !hasLastNightError" class="mt-4">
+          <label class="form-label fw-semibold text-secondary">Message:</label>
+          <textarea
+            class="form-control"
+            v-model="form.message"
+            rows="4"
+            style="resize: vertical; min-height: 100px"
+          ></textarea>
+        </div>
+      </transition>
 
+      <!-- BUTTONS -->
+      <transition name="fade">
+        <div v-if="showButtons" class="mt-4 d-flex flex-wrap gap-3 justify-content-center">
+
+          <!-- NEW BUTTON USING AXIOS AND SHOW COMPONENT -->
+          <button class="btn-modern" @click="openSendToAllSelected">
+            <i class="bi bi-people-fill me-2"></i>
+            Send to all selected
+          </button>
+
+          <!-- OLD BUTTON -->
           <button class="btn-modern" @click="sendReminders">
             <i class="bi bi-send-fill me-2"></i>Send to all
           </button>
@@ -231,6 +278,20 @@ const formatDate = (dateString) => {
       </transition>
     </div>
   </div>
+
+  <!-- SHOW COMPONENT ONLY WHEN CLICKED -->
+  <transition name="fade">
+    <SendToAllSelectedComponent
+      v-if="showSendToAllSelected"
+      :members="[]"
+      :type="form.type"
+      :message="form.message"
+      :deceased="getDeceasedMember?.id"
+      :last="form.lastNight"
+      v-model:closeCaret="closeCaret"
+      class="mt-4"
+    />
+  </transition>
 </template>
 
 <style scoped>
@@ -247,9 +308,6 @@ const formatDate = (dateString) => {
   font-weight: 600;
   letter-spacing: 0.5px;
   transition: all 0.3s ease;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
 }
 .btn-modern:hover {
   background: linear-gradient(135deg, #0056b3, #003f88);
@@ -262,5 +320,9 @@ const formatDate = (dateString) => {
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;
+}
+.caret-wrapper {
+  cursor: pointer;
+  padding: 5px;
 }
 </style>

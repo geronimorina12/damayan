@@ -138,6 +138,7 @@ function sendToAllSelected() {
         </div>
       </div>
     </div>
+    
   </AdminLayout>
 </template>
 

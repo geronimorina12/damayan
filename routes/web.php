@@ -180,7 +180,8 @@ Route::prefix('smsNotification')->name('smsNotification.')->middleware('auth')->
 
     Route::post('/send-reminders', [SmsNotificationController::class, 'sendReminders'])->name('sendReminders');
     Route::post('/send-fund-updates', [SmsNotificationController::class, 'sendFundUpdates'])->name('sendFundUpdates');
-
+    Route::get('/members', [SmsNotificationController::class, 'getMembers'])->name('members');
+    Route::get('/deceased/{id}', [SmsNotificationController::class, 'getDeceased'])->name('deceased');
     Route::get('/sms-notification', [SmsNotificationController::class, 'index'])->name('index');
     Route::get('/sms-page', [SmsNotificationController::class, 'smsPage'])->name('smsPage');
     Route::get('/death-report/select', [SmsNotificationController::class, 'selectDeceased'])->name('selectDeceased');

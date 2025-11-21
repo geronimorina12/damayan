@@ -7,7 +7,9 @@ import Header from '@/Components/dashboard/admin/registeredMember/Header.vue'
 import Alert from '@/Components/dashboard/admin/registeredMember/Alert.vue'
 import IsDeceased from '@/Components/dashboard/admin/registeredMember/members/IsDeceased.vue'
 import EditMember from '@/Components/dashboard/admin/registeredMember/members/EditMember.vue'
+import { useTextStore } from '@/piniaStore/useTextStore'
 
+const store = useTextStore();
 const props = defineProps({
   members: {
     type: Object,
@@ -232,7 +234,7 @@ const closeDeceasedModal = () => {
     if (checkbox) checkbox.checked = false
     lastClickedDeceasedId.value = null
   }
-
+  store.setText('Add Deceased Info.')
  
 }
 
@@ -454,7 +456,7 @@ const displayPaginationLinks = computed(() => {
     <div v-if="showDeceasedModal" class="custom-modal-overlay" @click.self="closeDeceasedModal">
       <div class="custom-modal">
         <div class="custom-modal-header">
-          <h3>Add Deceased Info</h3>
+          <h3>{{ store.currentText || '' }}</h3>
           <span class="close-icon" @click="closeDeceasedModal">&times;</span>
         </div>
         <div class="custom-modal-body">
