@@ -10,14 +10,41 @@ const props = defineProps({
 })
 let getOfficials = ref([]);
 let selectedOfficial  = ref({});
-
 watch(
-() => props.officials,
-(newData) => {
-    getOfficials.value =  newData;
-},
-{immediate: true}
-)
+  () => props.officials,
+  newData => {
+    getOfficials.value = newData.map(o => {
+      const isCollector = (o.position === 'collector' || !o.position);
+
+      if (isCollector) {
+        const created = new Date(o.created_at);
+
+        if (!isNaN(created.getTime())) {
+          const termStart = created.toISOString();
+
+          const termEndDate = new Date(created);
+          termEndDate.setFullYear(termEndDate.getFullYear() + 2);
+
+          const termEnd = termEndDate.toISOString();
+
+          return {
+            ...o,
+            term_start: termStart,
+            term_end: termEnd,
+          };
+        }
+      }
+
+      return o;
+    });
+
+    console.log("processed officials:", getOfficials.value);
+  },
+  { immediate: true }
+);
+
+
+
 const toggleStatus = (official) => {
   router.patch(route('officials.status.toggle', {id: official.id}), {
     status: !official.status,
@@ -39,8 +66,16 @@ const addOfficial = () => {
   router.get(route('officials.addOfficialRoute'))
 }
 const formatDate = (dateString) => {
-  const options = { year: "numeric" };
-  return new Date(dateString).toLocaleDateString(undefined, options);
+  if (!dateString) return "N/A";
+
+  const date = new Date(dateString);
+
+  if (isNaN(date.getTime())) {
+    console.warn("Invalid date:", dateString);
+    return "Invalid Date";
+  }
+
+  return date.getFullYear(); // still returns only the year
 };
 
 </script>
@@ -69,8 +104,11 @@ const formatDate = (dateString) => {
                       <tbody>
                         <tr v-for="(official) in getOfficials" :key="official.id">
                           <td class="name-cell">{{ official.name }}</td>
-                          <td class="position-cell">{{ official.position }}</td>
-                          <td class="term-cell">{{ formatDate(official.term_start) }} - {{ formatDate(official.term_end) }}</td>
+                          <td class="position-cell">{{ official.position || 'collector' }}</td>
+                          <td class="term-cell">
+                            {{ formatDate(official.term_start) }} - {{ formatDate(official.term_end) }}
+                          </td>
+
                         </tr>
                       </tbody>
                     </table>
@@ -131,8 +169,9 @@ const formatDate = (dateString) => {
 
 .table-container {
   overflow-x: auto;
+  overflow-y: auto;
+  max-height: 400px; /* adjust height as needed */
 }
-
 .modern-table {
   width: 100%;
   border-collapse: collapse;
