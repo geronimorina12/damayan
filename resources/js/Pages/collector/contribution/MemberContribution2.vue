@@ -30,12 +30,10 @@ const getCurrentDeceasedMember = ref({});
 watch(() => props.member, (newData) => getMember.value = newData, { immediate: true });
 watch(() => props.selectedPurok, (newData) => getSelectedPurok.value = newData, { immediate: true });
 watch(() => props.collectors, (newData) => getCollectors.value = newData, { immediate: true });
-watch(() => props.paidMembersId, (newData) => 
-{
-  getPaidMembersId.value = newData
-  console.log('Paid Members ID updated:', newData || 'No data');
-}
-, { immediate: true });
+watch(() => props.paidMembersId, (newData) => {
+  getPaidMembersId.value = Array.isArray(newData) ? newData : [];
+}, { immediate: true });
+
 watch(() => props.currentCollector, (newData) => getCurrentCollector.value = newData, { immediate: true });
 watch(() => props.currentDeceasedMembers, (newData) => getCurrentDeceasedMembers.value = newData ? Object.values(newData) : [], { immediate: true });
 watch(() => props.currentDeceasedMember, (newData) => getCurrentDeceasedMember.value = newData, { immediate: true });
@@ -167,11 +165,12 @@ const closeReportModal = () => showReportModal.value = false;
 
 // Determines if member is paid - FIXED: Handle both string and number IDs
 const isPaid = (id) => {
-  // Convert both to string for consistent comparison, or use loose equality
-  return getPaidMembersId.value.some(paidId => 
-    paidId == id || String(paidId) === String(id)
-  );
+  return Array.isArray(getPaidMembersId.value)
+    ? getPaidMembersId.value.some(paidId => paidId == id)
+    : false;
 };
+
+
 
 // Unified toggle function
 const togglePayment = (mem) => {
