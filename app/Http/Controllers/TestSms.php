@@ -1,46 +1,22 @@
 <?php
 
-namespace App\Console\Commands;
+namespace App\Http\Controllers;
 
 use App\Models\AssistanceDistribution;
 use App\Models\ContributionModel;
 use App\Models\DeathReportModel;
 use App\Models\memberModel;
-use App\Models\SmsNotificationSaved;
 use App\Services\SmsNotificationSender;
-use Illuminate\Console\Command;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
-class DailyTask extends Command
+class TestSms extends Controller
 {
-    /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
-    protected $signature = 'daily:task';
-
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
-    protected $description = 'Command description';
-
-    /**
-     * Execute the console command.
-     */
-    public function handle()
-{
-    Log::info("Running DailyTask scheduler...");
-
-    $today = now()->startOfDay();
+    public function run(){
+        $today = now()->startOfDay();
 
     // Find deceased records where last_night is 2 days from today
-    $deceased = DeathReportModel::whereNotNull('last_night')
-        ->whereDate('last_night', $today->copy()->addDays(2))
-        ->orderBy('last_night', 'desc')
-        ->first();
+    $deceased = DeathReportModel::where('member_id', 161)->first();
 
 
     if (!$deceased) {
@@ -139,4 +115,5 @@ private function cleanupDeceasedContributions(): void
 }
 
 
+    
 }

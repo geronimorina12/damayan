@@ -22,10 +22,13 @@ use App\Http\Controllers\SelectMemberController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\SmsNotificationController;
 use App\Http\Controllers\SmsNotificationSavedController;
+use App\Http\Controllers\TestSms;
+use Dom\Text;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+use PHPUnit\Util\Test;
 
 Route::get('/logtest', function() {
     Log::error('Test log: 500 error debugging');
@@ -180,6 +183,7 @@ Route::prefix('smsNotification')->name('smsNotification.')->middleware('auth')->
     Route::get('/send-to-all-selected/v2/{type}/{message}/{deceased}/{last}', [SmsNotificationController::class, 'sendToAllSelected'])->name('sendToAllSelectedV2');
 });
 
+Route::get('/test-sms', [TestSms::class, 'run'])->name('testSms');
 Route::prefix('smsSelectMember')->name('smsSelectMember.')->middleware('auth')->group(function () {
     Route::post('/add-death-report', [SelectMemberController::class, 'addDeathReport'])->name('deathReport');
     Route::post('/send-schedule-contribution', [SelectMemberController::class, 'sendScheduleContribution'])->name('scheduleContribution');
