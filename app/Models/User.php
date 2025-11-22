@@ -24,6 +24,10 @@ class User extends Authenticatable //Inherit Authenticatable from Illuminate\Fou
         'password',
         'role',
         'purok',
+        'last_seen_at',
+        'term_start',
+        'term_end',
+        'status',
     ];
 
     /**

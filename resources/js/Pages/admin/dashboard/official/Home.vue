@@ -118,7 +118,7 @@ const filteredOfficials = computed(() => {
       matchesStatus = true
     } else if (statusFilter.value === 'active') {
       // Show active officials OR collectors (regardless of status)
-      matchesStatus = official.status || official.role === 'collector'
+      matchesStatus = official.status
     } else if (statusFilter.value === 'inactive') {
       // Show inactive officials that are NOT collectors
       matchesStatus = !official.status && official.role !== 'collector'
@@ -138,6 +138,7 @@ watch(
   () => props.officials,
   (newData) => {
     getOfficials.value = newData || []
+    console.log("Officials: ", getOfficials.value)
   },
   { immediate: true }
 )
@@ -212,19 +213,30 @@ watch(
                       <span>{{ official.position === 'vice_president' ? 'Vice President' : capitalizeFirst(official.position) || 'Collector' }}</span>
                     </td>
                     <td>
-                      {{ formatDate(official.term_start || official.created_at) }} -
-                      {{ formatDate(official.term_end || new Date(new Date(official.created_at).setFullYear(new Date(official.created_at).getFullYear() + 2))) }}
+                      <!-- {{ formatDate(official.term_start || official.created_at) }} -
+                      {{ formatDate(official.term_end || new Date(new Date(official.created_at).setFullYear(new Date(official.created_at).getFullYear() + 2))) }} -->
+                       {{ formatDate(official.term_start || 'N/A') }} -
+                      {{ formatDate(official.term_end || 'N/A') }}
                     </td>
                     <td class="text-center">
                       <div class="text-start">
                         <span 
+                          :class="[
+                            official.status ? 'text-success' : 'text-danger', 
+                            'fw-bold status-label ps-3'
+                          ]"
+                        >
+                          {{ official.status ? 'Active' : 'Inactive' }}
+                        </span>
+
+                        <!-- <span 
                           :class="[
                             official.status || official.role === 'collector' ? 'text-success' : 'text-danger', 
                             'fw-bold status-label ps-3'
                           ]"
                         >
                           {{ official.status || official.role === 'collector' ? 'Active' : 'Inactive' }}
-                        </span>
+                        </span> -->
                       </div>
                     </td>
                     <td class="text-center">

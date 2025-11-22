@@ -142,8 +142,13 @@ public function editCollector(Request $request, $id)
         'name' => $validated['name'],
         'email' => $validated['email'],
         'created_at' => $validated['term_start'],
+        'status' => $validated['status'],
+        'term_start' => $validated['term_start'],
+        'term_end' => $validated['term_end'],
     ]);
-
+    $official->save();
+    Log::info(['official: ' => $official]);
+    Log::info(['validate: ' => $validated]);
     return redirect()->back()->with('success', 'Official updated successfully.');
 }
 

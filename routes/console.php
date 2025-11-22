@@ -12,3 +12,6 @@ Artisan::command('inspire', function () {
 Artisan::command('daily:task', function () {
     $this->call(\App\Console\Commands\DailyTask::class);
 });
+Artisan::command('is:active', function () {
+    $this->call(\App\Console\Commands\IsActive::class);
+});
