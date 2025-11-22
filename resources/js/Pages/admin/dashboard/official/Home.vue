@@ -67,7 +67,6 @@ const deleteOfficial = (id) => {
     id
   )
 }
-
 // Actual deletion logic
 const performDeleteOfficial = (id) => {
   router.delete(route('officials.delete', { id: id }), {
@@ -121,7 +120,7 @@ const filteredOfficials = computed(() => {
       matchesStatus = official.status
     } else if (statusFilter.value === 'inactive') {
       // Show inactive officials that are NOT collectors
-      matchesStatus = !official.status && official.role !== 'collector'
+      matchesStatus = !official.status
     }
 
     return matchesSearch && matchesStatus

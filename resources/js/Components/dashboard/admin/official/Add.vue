@@ -1,6 +1,6 @@
 <script setup>
 import { useForm, Head } from '@inertiajs/vue3'
-import { ref, watch, computed, defineModel } from 'vue'
+import { ref, watch, computed, defineModel, onMounted } from 'vue'
 import * as bootstrap from 'bootstrap'
 import Override from './Override.vue'
 
@@ -14,6 +14,8 @@ const collectors = ref(0);
 const parentMessage = defineModel('parentMessage')
 const officials = ref({});
 const showAsk = ref(false);
+let getInactiveCollectors = ref(0);
+let getActiveCollectors = ref(0);
 const form = useForm({
   first_name: '',
   middle_initial: '',
@@ -214,7 +216,43 @@ const maxTermStart = computed(() => {
 
 const minTermEnd = computed(() => today); // today
 
+const fetchInactiveCollectorsCount = async () => {
+    try {
+        const response = await fetch('/inactive-collectors-count', {
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            credentials: 'same-origin'
+        });
 
+        console.log("STATUS:", response.status); // ← ADD THIS
+
+        if (!response.ok) {
+            const text = await response.text();
+            console.log("RESPONSE BODY:", text); // ← ADD THIS
+            throw new Error('Network response was not ok');
+        }
+
+        const data = await response.json();
+        getInactiveCollectors.value = data.inactive_collectors;
+        getActiveCollectors.value = data.active_collectors;
+        validateCollectorCount();
+    } catch (error) {
+        console.error('Error fetching inactive collectors count:', error);
+    }
+};
+
+const validateCollectorCount = () => {
+    if (getInactiveCollectors.value >= 1 && getActiveCollectors.value < 4) {
+        return true;
+    }
+    return false;
+}
+onMounted(() => {
+    fetchInactiveCollectorsCount();
+});
 </script>
 
 <template>
@@ -259,7 +297,7 @@ const minTermEnd = computed(() => today); // today
               <option value="secretary">Secretary</option>
               <option value="treasurer">Treasurer</option>
               <option value="auditor">Auditor</option>
-              <option value="purok_leader" v-if="collectors < 4">Purok Leader</option>
+              <option value="purok_leader" v-if="validateCollectorCount()">Purok Leader</option>
             </select>
           </div>
 
@@ -296,7 +334,7 @@ const minTermEnd = computed(() => today); // today
                       <input
                         type="checkbox"
                         v-model="isCollector"
-                        :disabled="collectors >= 4"
+                        :disabled="!validateCollectorCount()"
                       />
                       <span class="toggle-slider"></span>
                     </label>
@@ -305,7 +343,7 @@ const minTermEnd = computed(() => today); // today
                   </div>
                     <div>
                        <label class="form-check-label" for="collector">Register as Collector
-                        <p class="text-danger" v-if="collectors >= 4">
+                        <p class="text-danger" v-if="validateCollectorCount() === false">
                           Purok leader / Collector limit has been reached.
                         </p>
                        </label>

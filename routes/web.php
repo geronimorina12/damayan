@@ -217,6 +217,6 @@ Route::prefix('filterContribution')->name('filterContribution.')->middleware('au
 });
 Route::get('/collectors/count', [CollectorController::class, 'collectorCount'])->name('collector.count');
 Route::get('/officials/count', [OfficialController::class, 'officialCount'])->name('official.count');
-
+Route::get('/inactive-collectors-count', [OfficialController::class, 'getInactiveCollectorsCount']);
 
 require __DIR__.'/auth.php';
