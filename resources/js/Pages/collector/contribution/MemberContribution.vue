@@ -52,7 +52,10 @@ watch(() => props.paidMembersId, (newData) => {
   getPaidMembersId.value = Array.isArray(newData) ? newData : [];
 }, { immediate: true });
 
-watch(() => props.currentCollector, (newData) => getCurrentCollector.value = newData, { immediate: true });
+watch(() => props.currentCollector, (newData) => {
+  getCurrentCollector.value = newData || {};
+  console.log("Current Collector:", getCurrentCollector.value);
+}, { immediate: true });
 watch(() => props.currentDeceasedMembers, (newData) => getCurrentDeceasedMembers.value = newData ? Object.values(newData) : [], { immediate: true });
 watch(() => props.currentDeceasedMember, (newData) => getCurrentDeceasedMember.value = newData, { immediate: true });
 
@@ -270,7 +273,7 @@ const togglePayment = (mem) => {
                   @click="togglePayment(mem)"
                 >
                   <span v-if="isPaid(mem.id)">✔ Paid</span>
-                  <span v-else>Mark as Paid</span>
+                  <span v-else>Paid</span>
                 </button>
               </td>
 

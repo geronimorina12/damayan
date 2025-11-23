@@ -240,11 +240,14 @@ private function sendAndLog(string $message, string $number, int $notificationId
     }
 
     $mem = $query->paginate(10);
-
+    $lastChar = substr($purok, -1);
     // Additional data
     $collectors = User::select('id', 'name', 'purok')
         ->where('role', 'collector')
         ->get();
+    $currentCollector = User::select('id', 'name', 'purok')
+        ->where('id', Auth::id())
+        ->first();
 
     $currentDeceasedMembers = DeathReportModel::where('iscurrent', true)->get();
 
@@ -259,6 +262,7 @@ private function sendAndLog(string $message, string $number, int $notificationId
             'collectors' => $collectors,
             'currentDeceasedMembers' => $currentDeceasedMembers,
             'currentDeceasedMember' => $currentDeceasedMember,
+            'currentCollector' => $currentCollector,
         ]);
     }
 
@@ -268,6 +272,7 @@ private function sendAndLog(string $message, string $number, int $notificationId
         'collectors' => $collectors,
         'currentDeceasedMembers' => $currentDeceasedMembers,
         'currentDeceasedMember' => $currentDeceasedMember,
+        'currentCollector' => $currentCollector,
     ]);
 }
 

@@ -134,7 +134,11 @@ public function toggleDeceased($id, $purok)
     $contributions = $contributionsQuery->get();
     Log::info("Fetched " . $contributions->count() . " contributions for deceased ID: $id");
     $collectors = User::select('id', 'name', 'purok')->where('role', 'collector')->get();
-
+    $collector = User::select('id', 'name', 'purok')
+    ->where('role', 'collector')
+    ->where('purok', $purok)
+    ->get();
+    
     $currentDeceasedMembers = DeathReportModel::where('iscurrent', true)->get();
 
     $currentDeceasedMember = DeathReportModel::where('member_id', $id)
@@ -146,10 +150,12 @@ public function toggleDeceased($id, $purok)
         'members' => $mem,
         // Keep activePurok consistent with what your frontend expects.
         // If frontend expects the DB format ("Purok 2"), send $purokFormatted; if it expects the raw input, send $purok.
-        'activePurok' => $purokFormatted ?? $purok,
+        'activePurok' => $purok,
         'activeStatus' => 'all',
         'currentDeceasedMembers' => $currentDeceasedMembers,
         'currentDeceasedMember' => $currentDeceasedMember ?: null,
+        'currentCollector' => $collector,
+        'collectors' => $collectors,
     ]);
 }
 

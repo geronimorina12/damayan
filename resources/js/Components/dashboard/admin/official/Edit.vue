@@ -147,6 +147,23 @@ const termStartMax = computed(() => `${currentYear - 3}-12-31`)
 
 // Term End: only dates with year greater than today
 const termEndMin = computed(() => `${currentYear + 1}-01-01`)
+
+watch(() => form.term_start, (newValue) => {
+  if (!newValue) return;
+
+  const selected = new Date(newValue);
+  const twoYearsFromNow = new Date();
+  twoYearsFromNow.setFullYear(twoYearsFromNow.getFullYear() + 2);
+
+  // Compare only year-month-day
+  const isTwoYears = selected.toISOString().slice(0, 10) === twoYearsFromNow.toISOString().slice(0, 10);
+
+  // If term_start is exactly 2 years from now → enable status toggle again
+  if (isTwoYears) {
+    form.status = 1; // active
+  }
+});
+
 </script>
 
 
@@ -281,16 +298,17 @@ const termEndMin = computed(() => `${currentYear + 1}-01-01`)
                     <label class="toggle-switch">
                       <input
                         type="checkbox"
-                        :checked="form.status"
                         v-model="form.status"
+                        :disabled="form.status == 0"
                       >
+
                       <span class="toggle-slider"></span>
                     </label>
                   </div>
                 </div>
-
                 <div>Status</div>
           </div>
+          <p class="text-danger" v-if="form.status == 0"> This official has ended their term.</p>
 
           <!-- Submit Button -->
           <button
