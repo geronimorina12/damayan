@@ -35,6 +35,7 @@ const getCurrentDeceasedMember = ref({});
 // WATCHERS
 watch(() => props.contributions, (newContributions) => {
     getContributions.value = newContributions;
+    console.log("Updated contributions:", toRaw(newContributions));
     getAmmount.value = parseInt(
         newContributions.reduce((total, con) => total + parseFloat(con.amount), 0)
     );

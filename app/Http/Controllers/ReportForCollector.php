@@ -42,10 +42,21 @@ class ReportForCollector extends Controller
     }
 public function toggleStatus($status, $purok) 
 {
-    // Filter contributions by MEMBER purok
-    $contributions = ContributionModel::whereHas('memberContribution', function ($q) use ($purok) {
-            if ($purok !== 'all') {
-                $q->where('purok', $purok);
+    // Normalize purok input
+    $clean = strtolower(trim((string)$purok));
+    $isAll = $clean === 'all';
+
+    // Convert purok4 → Purok 4 (DB format)
+    $purokFormatted = null;
+    if (!$isAll) {
+        $purokFormatted = preg_replace('/(purok)\s*(\d+)/i', 'Purok $2', $clean);
+        $purokFormatted = ucwords($purokFormatted);
+    }
+
+    // Get contributions filtered by member's purok
+    $contributions = ContributionModel::whereHas('memberContribution', function ($q) use ($isAll, $purokFormatted) {
+            if (!$isAll && $purokFormatted) {
+                $q->where('purok', $purokFormatted);
             }
         })
         ->with(['memberContribution' => function ($query) {
@@ -54,77 +65,94 @@ public function toggleStatus($status, $purok)
         ->latest('created_at')
         ->get();
 
-    // Count all members
-    $membersCount = memberModel::count();
+    // Filter members too (consistent with toggle() and toggleDeceased())
+    $membersQuery = memberModel::orderBy('first_name', 'asc');
 
-    // All paid members IDs
-    $contributionsIds = ContributionModel::pluck('member_id')->toArray(); 
+    if (!$isAll && $purokFormatted) {
+        $membersQuery->where('purok', $purokFormatted);
+    }
+
+    $members = $membersQuery->get();  // Always return array, no paginator
+
+    // Get IDs of paid members
+    $contributionsIds = ContributionModel::pluck('member_id')->toArray();
+
+    // Count all members (not filtered)
+    $membersCount = memberModel::count();
 
     return Inertia::render('collector/report/Index', [
         'contributions' => $contributions,
-        'activePurok' => $purok,
+        'members' => $members,                // <-- Added members!
+        'activePurok' => $purokFormatted ?? $purok,
+        'activeStatus' => $status,
         'membersCount' => $membersCount,
-        'activeStatus' => $status,  // now return status properly
         'contributionsIds' => $contributionsIds,
     ]);
 }
+
 public function toggleDeceased($id, $purok)
 {
     Log::info("Toggling deceased for ID: $id and Purok: $purok");
 
-    $mem = memberModel::with(['contributions' => function ($query) use ($id) {
-        $query->where('deceased_id', $id);
-    }])
-    ->orderBy('first_name', 'asc')
-    ->get();
-    
-    $selectedPurok = $purok;
+    // Normalize purok input
+    $clean = strtolower(trim((string)$purok));
+    $isAll = $clean === 'all';
 
-    $collectors = User::select('id', 'name', 'purok')
-        ->where('role', 'collector')
-        ->get();
+    // Build DB format only when not "all"
+    $purokFormatted = null;
+    if (!$isAll) {
+        // e.g. "purok2" or "purok 2" -> "Purok 2"
+        $purokFormatted = preg_replace('/(purok)\s*(\d+)/i', 'Purok $2', $clean);
+        $purokFormatted = ucwords($purokFormatted);
+    }
+
+    Log::info("isAll: " . ($isAll ? 'true' : 'false') . ", purokFormatted: " . ($purokFormatted ?? 'null'));
+
+    // Members: include contributions for this deceased_id, AND filter members by purok if not ALL
+    $membersQuery = memberModel::with(['contributions' => function ($q) use ($id) {
+        $q->where('deceased_id', $id);
+    }])->orderBy('first_name', 'asc');
+
+    if (!$isAll && $purokFormatted) {
+        $membersQuery->where('purok', $purokFormatted);
+    }
+
+    $mem = $membersQuery->get(); // returns only members matching the purok when applicable
+
+    // Contributions: filter contributions for this deceased. If not ALL, only contributions whose member has that purok
+    $contributionsQuery = ContributionModel::where('deceased_id', $id)
+        ->whereHas('memberContribution', function ($q) use ($isAll, $purokFormatted) {
+            if (!$isAll && $purokFormatted) {
+                $q->where('purok', $purokFormatted);
+            }
+        })
+        ->with(['memberContribution' => function ($query) {
+            $query->select('id', 'first_name', 'middle_name', 'last_name', 'purok', 'contact_number');
+        }])
+        ->latest('created_at');
+
+    $contributions = $contributionsQuery->get();
+    Log::info("Fetched " . $contributions->count() . " contributions for deceased ID: $id");
+    $collectors = User::select('id', 'name', 'purok')->where('role', 'collector')->get();
 
     $currentDeceasedMembers = DeathReportModel::where('iscurrent', true)->get();
-    
-    // Fix: Handle null case
+
     $currentDeceasedMember = DeathReportModel::where('member_id', $id)
         ->latest('created_at')
         ->first();
 
-        //  $contributions = ContributionModel::where('purok', $purok)
-        // ->where('deceased_id', $deceasedId)
-        // ->with(['memberContribution' => function ($query) {
-        //     $query->select('id', 'first_name','middle_name', 'last_name', 'purok', 'contact_number');
-        // }])
-        // ->latest('created_at')
-        // ->get();
-
-        
-    $contributions = ContributionModel::
-    where('deceased_id', $id)
-    ->whereHas('memberContribution', function ($q) use ($purok) {
-        if ($purok !== 'all') {
-            $q->where('purok', $purok);
-        }
-    })
-    ->with(['memberContribution' => function ($query) {
-        $query->select('id', 'first_name', 'middle_name', 'last_name', 'purok', 'contact_number');
-    }])
-    ->latest('created_at')
-    ->get();
-
-    $members = memberModel::all();
-    $contributionsIds = ContributionModel::pluck('member_id')->toArray(); 
-
     return Inertia::render('collector/report/Index', [
         'contributions' => $contributions,
         'members' => $mem,
-        'activePurok' => $selectedPurok,
-        'activeStatus' => 'all',  
+        // Keep activePurok consistent with what your frontend expects.
+        // If frontend expects the DB format ("Purok 2"), send $purokFormatted; if it expects the raw input, send $purok.
+        'activePurok' => $purokFormatted ?? $purok,
+        'activeStatus' => 'all',
         'currentDeceasedMembers' => $currentDeceasedMembers,
-        'currentDeceasedMember' => $currentDeceasedMember ?: null, 
+        'currentDeceasedMember' => $currentDeceasedMember ?: null,
     ]);
 }
+
      public function togglePaid($status = 'paid', $purok) 
     {
         // Removed status filter, only filter by purok
@@ -148,6 +176,7 @@ public function toggleDeceased($id, $purok)
     }
 public function togglePurok($status, $purok, $deceasedId)
 {
+    
     $dead = DeathReportModel::where('member_id' , $deceasedId);
     if (!$dead) {
         dd("Deceased member not found." . $deceasedId);

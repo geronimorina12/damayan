@@ -27,7 +27,25 @@ let getCurrentCollector = ref({});
 const getCurrentDeceasedMembers = ref([]);
 const getCurrentDeceasedMember = ref({});
 
-watch(() => props.member, (newData) => getMember.value = newData, { immediate: true });
+watch(() => props.member, (newData) => {
+  if (!newData) {
+    getMember.value = [];
+  } 
+  // If paginated, pagination format sends: { data: [...] }
+  else if (Array.isArray(newData.data)) {
+    getMember.value = newData.data;
+  } 
+  // If already an array (collector side)
+  else if (Array.isArray(newData)) {
+    getMember.value = newData;
+  } 
+  else {
+    getMember.value = [];
+  }
+
+  console.log("Normalized Member data:", getMember.value);
+}, { immediate: true });
+
 watch(() => props.selectedPurok, (newData) => getSelectedPurok.value = newData, { immediate: true });
 watch(() => props.collectors, (newData) => getCollectors.value = newData, { immediate: true });
 watch(() => props.paidMembersId, (newData) => {

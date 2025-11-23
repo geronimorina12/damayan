@@ -84,6 +84,7 @@ const prevName = () => {
 
 // navigate to next distinct member
 const nextName = () => {
+  console.log("purok:", props.purok);
   const idx = currentIndex.value;
   if (idx === -1) return;
 

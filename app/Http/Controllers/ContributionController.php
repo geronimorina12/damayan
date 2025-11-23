@@ -215,49 +215,62 @@ private function sendAndLog(string $message, string $number, int $notificationId
 
   public function toggle($id, $purok)
 {
-    // Log::info("Purok: " . $purok ?: "null");
-    $cleaned = trim($purok);
-    
-    // Add space between "purok" and the number using regex
-    $formatted = preg_replace('/(purok)(\d+)/i', '$1 $2', $cleaned);
-    
-    // Capitalize the first letter of each word
-    $formatted = ucwords(strtolower($formatted));
-   $mem = memberModel::where('purok', $formatted)->with(['contributions' => function ($query) use ($id) {
-        $query->where('deceased_id', $id);
-    }])
-    ->orderBy('first_name', 'asc')
-    ->paginate(10);
-    $selectedPurok = $purok;
+    Log::info("purok received: " . $purok);
+    Log::info("id received: " . $id);
 
+    $clean = strtolower(trim($purok));
+
+    // CASE 1: PUROK = "all" → no purok filtering
+    $isAll = $clean === 'all';
+
+    // CASE 2: convert purok4 → Purok 4
+    if (!$isAll) {
+        $purokFormatted = preg_replace('/(purok)\s*(\d+)/i', 'Purok $2', $clean);
+        $purokFormatted = ucwords($purokFormatted); // final DB format
+    }
+
+    // Base query always filters contributions for this deceased_id
+    $query = memberModel::with(['contributions' => function ($q) use ($id) {
+        $q->where('deceased_id', $id);
+    }])->orderBy('first_name', 'asc');
+
+    // Only add purok WHERE when not ALL
+    if (!$isAll) {
+        $query->where('purok', $purokFormatted);
+    }
+
+    $mem = $query->paginate(10);
+
+    // Additional data
     $collectors = User::select('id', 'name', 'purok')
         ->where('role', 'collector')
         ->get();
 
-         $currentDeceasedMembers = DeathReportModel::where('iscurrent', true)
-     ->get();
-     $currentDeceasedMember = DeathReportModel::where('member_id', $id)
-     ->latest('created_at')
-     ->first();
+    $currentDeceasedMembers = DeathReportModel::where('iscurrent', true)->get();
 
-    if(Auth::user()->role === 'admin'){
+    $currentDeceasedMember = DeathReportModel::where('member_id', $id)
+        ->latest('created_at')
+        ->first();
+
+    if (Auth::user()->role === 'admin') {
         return Inertia::render('admin/dashboard/contribution/MemberContribution', [
-        'member' => $mem,
-        'selectedPurok' => $selectedPurok,
-        'collectors' => $collectors,
-        'currentDeceasedMembers' => $currentDeceasedMembers,
-        'currentDeceasedMember' => $currentDeceasedMember,
-    ]);
-    }else{
-        return Inertia::render('collector/contribution/MemberContribution', [
-            'member' => $mem->items(),
-            'selectedPurok' => $selectedPurok,
+            'member' => $mem,
+            'selectedPurok' => $purok,
             'collectors' => $collectors,
             'currentDeceasedMembers' => $currentDeceasedMembers,
             'currentDeceasedMember' => $currentDeceasedMember,
         ]);
     }
+
+    return Inertia::render('collector/contribution/MemberContribution', [
+        'member' => $mem,
+        'selectedPurok' => $purok,
+        'collectors' => $collectors,
+        'currentDeceasedMembers' => $currentDeceasedMembers,
+        'currentDeceasedMember' => $currentDeceasedMember,
+    ]);
 }
+
 
 public function sendReminderBeforeLastNight()
 {

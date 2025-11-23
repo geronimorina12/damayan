@@ -28,14 +28,18 @@ const filterMembers = () => {
   } else {
     getMembers.value = props.members
   }
+  console.log("Filtered members in table:", getMembers.value)
 }
 
-// reactive search logic
+// reactive search logic - FIXED: Use getMembers directly
 const filteredMembers = computed(() => {
   const query = searchQuery.value.trim().toLowerCase()
-  if (!query) return getMembers.value
+  if (!query) {
+    console.log("No search query, showing all filtered members:", getMembers.value.length)
+    return getMembers.value
+  }
 
-  return getMembers.value.filter(m => {
+  const results = getMembers.value.filter(m => {
     const fullName = `${m.first_name} ${m.middle_name || ''} ${m.last_name}`.toLowerCase()
     const contact = m.contact_number?.toLowerCase() || ''
     const purok = m.purok?.toLowerCase() || ''
@@ -45,6 +49,9 @@ const filteredMembers = computed(() => {
       purok.includes(query)
     )
   })
+  
+  console.log("Search results:", results.length)
+  return results
 })
 
 // simulate loading spinner while typing
@@ -58,8 +65,9 @@ watch(searchQuery, () => {
 })
 
 watch(
-  () => [props.members, localStatus.value],
+  () => [props.members, localStatus.value, props.contributionsIds],
   () => {
+    console.log("Props changed - filtering members")
     filterMembers()
   },
   { immediate: true, deep: true }
@@ -67,9 +75,10 @@ watch(
 
 const toggleStatus = (status) => {
   console.log("Status:", status)
-  console.log("Purok:", getPurok.value)  // <-- always correct
+  console.log("Purok:", getPurok.value)
 
   localStatus.value = status
+  searchQuery.value = '' // Clear search when changing status
 
   if (getPurok.value === 'all') {
     filterMembers()
@@ -83,10 +92,30 @@ const toggleStatus = (status) => {
   )
 }
 
+// Debug function to check what's happening
+const debugData = () => {
+  console.log("=== DEBUG INFO ===")
+  console.log("localStatus:", localStatus.value)
+  console.log("getMembers length:", getMembers.value.length)
+  console.log("filteredMembers length:", filteredMembers.value.length)
+  console.log("searchQuery:", searchQuery.value)
+  console.log("props.members length:", props.members.length)
+  console.log("props.contributionsIds length:", props.contributionsIds.length)
+  console.log("===================")
+}
+
+// Call debug when component mounts or status changes
+watch(localStatus, debugData)
+watch(filteredMembers, () => {
+  console.log("filteredMembers updated:", filteredMembers.value.length)
+})
 </script>
 
 <template>
   <div>
+    <!-- DEBUG BUTTON (remove in production) -->
+    <!-- <button @click="debugData" class="btn btn-sm btn-warning mb-2">Debug Data</button> -->
+
     <!-- STATUS TOGGLE + SEARCH -->
     <div class="container-fluid d-flex gap-3 align-items-center mb-3 justify-content-between">
       <div class="d-flex gap-3">
@@ -124,7 +153,7 @@ const toggleStatus = (status) => {
     </div>
 
     <!-- MEMBERS TABLE -->
-    <div class="table-responsive table-container">
+    <div class="table-responsive table-container" :class="{ 'has-scroll': filteredMembers.length > 5 }">
       <table class="table" v-if="filteredMembers.length > 0">
         <thead>
           <tr>
@@ -137,12 +166,12 @@ const toggleStatus = (status) => {
 
         <tbody>
           <tr v-for="member in filteredMembers" :key="member.id">
-            <td class="bg-light">
-              {{ member.first_name }} {{ member.middle_name }} {{ member.last_name }}
+            <td class="bg-light pb-3">
+              {{ member.first_name }} {{ member.middle_name || '' }} {{ member.last_name }}
             </td>
-            <td class="bg-light">{{ member.contact_number }}</td>
-            <td class="bg-light">{{ member.purok }}</td>
-            <td class="bg-light text-center">
+            <td class="bg-light pb-3">{{ member.contact_number }}</td>
+            <td class="bg-light pb-3">{{ member.purok }}</td>
+            <td class="bg-light text-center pb-3">
               <span
                 class="bg-success rounded px-2 py-1 text-light"
                 v-if="props.contributionsIds.includes(member.id)"
@@ -162,6 +191,7 @@ const toggleStatus = (status) => {
 
       <div v-else class="text-center p-3">
         <p class="text-muted">No members found.</p>
+        <p class="text-muted small" v-if="searchQuery">Try clearing your search query</p>
       </div>
     </div>
   </div>
@@ -185,11 +215,26 @@ const toggleStatus = (status) => {
   overflow-y: auto;
   overflow-x: auto;
 }
+/* Force overflow scroll when there are many rows */
+.table-container.has-scroll {
+  overflow-y: scroll !important;
+}
 .spinner-sm {
   width: 1rem;
   height: 1rem;
 }
 .search-box{
   width: 300px;
+}
+
+/* Add padding bottom to table cells */
+table tbody tr td {
+  padding-bottom: 1.5rem !important;
+  vertical-align: middle;
+}
+
+/* Alternative: Add padding to the entire table container */
+.table-container {
+  padding-bottom: 30rem;
 }
 </style>

@@ -2,6 +2,7 @@
 import { useForm } from '@inertiajs/vue3'
 import { defineProps, ref, watch } from 'vue'
 import * as bootstrap from 'bootstrap';
+import { computed } from 'vue';
 
 const props = defineProps({
   official: {
@@ -139,7 +140,13 @@ function closeModal() {
   // Remove "modal-open" class from body
   document.body.classList.remove('modal-open')
 }
+const currentYear = new Date().getFullYear()
 
+// Term Start: only up to 3 years before now
+const termStartMax = computed(() => `${currentYear - 3}-12-31`)
+
+// Term End: only dates with year greater than today
+const termEndMin = computed(() => `${currentYear + 1}-01-01`)
 </script>
 
 
@@ -242,7 +249,7 @@ function closeModal() {
             />
           </div>
 
-          <!-- Term Dates -->
+                    <!-- Term Start -->
           <div class="mb-3">
             <label for="term_start" class="form-label fw-semibold">Term Start</label>
             <input
@@ -250,10 +257,12 @@ function closeModal() {
               type="date"
               id="term_start"
               class="form-control"
+              :min="termStartMax"
               required
             />
           </div>
 
+          <!-- Term End -->
           <div class="mb-3">
             <label for="term_end" class="form-label fw-semibold">Term End</label>
             <input
@@ -261,6 +270,7 @@ function closeModal() {
               type="date"
               id="term_end"
               class="form-control"
+              :min="termEndMin"
               required
             />
           </div>
