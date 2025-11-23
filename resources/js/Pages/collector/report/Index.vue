@@ -156,17 +156,17 @@ const closeReportModal = () => showReportModal.value = false;
 
 .custom-modal-overlay {
   position: fixed;
-  height: 100vh;
-  overflow-y: scroll;
   inset: 0;
   background-color: rgba(0,0,0,0.5);
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
   z-index: 9999;
-  padding-top: 10rem;
-  padding-bottom: 1rem;
+  padding-top: 2rem;
+  padding-bottom: 2rem;
+  overflow-y: auto; /* allow overlay scrolling */
 }
+
 .custom-modal {
   background: white;
   border-radius: 10px;
@@ -175,7 +175,12 @@ const closeReportModal = () => showReportModal.value = false;
   padding: 20px;
   position: relative;
   animation: fadeIn 0.2s ease-in-out;
+
+  /* NEW: allow modal content to scroll */
+  max-height: 90vh;
+  overflow-y: auto;
 }
+
 .close-btn {
   position: absolute;
   top: 0;

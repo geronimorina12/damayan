@@ -27,7 +27,6 @@ const fetchContributions = async (id, purok) => {
     isLoading.value = true;
     const res = await axios.get(`/collector/contributions/${id}/${purok}`);
     contributions.value = res.data.contributions || [];
-    console.log(" Contributions fetched:", contributions.value);
   } catch (error) {
     console.error(" Error fetching contributions:", error);
   } finally {
@@ -45,7 +44,6 @@ watch(
 watch(() => props.deceased,
  (data) => {
   getDeceased.value = data
-    console.log("deceased: ", getDeceased.value)
  }, {immediate: true}
 )
 onMounted(() => {
