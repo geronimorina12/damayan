@@ -16,6 +16,8 @@ const form = useForm({
   email: props.official.email || '',
   position: props.official.position || '',
   password: '',
+  term_start: props.official.term_start || '',
+  term_end: props.official.term_end || '',
 });
 
 const showSuccessAlert = ref(false);
@@ -38,7 +40,8 @@ const submit = () => {
   <AdminLayout>
     <Head title="Edit User" />
 
-    <div class="container py-5">
+    <div class="main-container">
+      <div class="container py-5">
       <div class="card rounded-4 p-4 border-0">
         <h4 class="mb-4 text-primary">Edit</h4>
 
@@ -57,7 +60,7 @@ const submit = () => {
           ></button>
         </div>
 
-        <form @submit.prevent="submit">
+        <form @submit.prevent="submit" class="pb-5">
           <div class="mb-3">
             <label for="name" class="form-label">Name</label>
             <input
@@ -120,6 +123,29 @@ const submit = () => {
             <div class="invalid-feedback">{{ form.errors.password }}</div>
           </div>
 
+           <div class="mb-3">
+            <label for="term_start" class="form-label fw-semibold">Term Start</label>
+            <input
+              v-model="form.term_start"
+              type="date"
+              id="term_start"
+              class="form-control"
+              required
+            />
+          </div>
+
+          <!-- Term End -->
+          <div class="mb-3">
+            <label for="term_end" class="form-label fw-semibold">Term End</label>
+            <input
+              v-model="form.term_end"
+              type="date"
+              id="term_end"
+              class="form-control"
+              required
+            />
+          </div>
+
           <div class="d-flex justify-content-end gap-2 mt-4">
             <Link :href="route('role.index')" class="btn btn-secondary">Cancel</Link>
             <button type="submit" class="btn btn-primary" :disabled="form.processing">
@@ -128,6 +154,7 @@ const submit = () => {
           </div>
         </form>
       </div>
+    </div>
     </div>
   </AdminLayout>
 </template>
@@ -142,5 +169,10 @@ select {
   max-width: 700px;
   margin: auto;
   background-color: #ffffff;
+}
+.main-container{
+  width: 100%;
+  height: 100vh;
+  overflow-y: scroll;
 }
 </style>

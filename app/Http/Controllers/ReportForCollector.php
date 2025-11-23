@@ -235,6 +235,15 @@ $currentDeceasedMembers = DeathReportModel::where('iscurrent', true)->get();
      public function getContributions($id, $purok)
         {
             try {
+                if($purok === 'all'){
+                    $contributions = ContributionModel::where('deceased_id', $id)
+                ->with('memberContribution')
+                ->get();
+
+                return response()->json([
+                    'contributions' => $contributions
+                ], 200);
+                }
                 $contributions = ContributionModel::where('deceased_id', $id)
                 ->where('purok', $purok)
                 ->with('memberContribution')

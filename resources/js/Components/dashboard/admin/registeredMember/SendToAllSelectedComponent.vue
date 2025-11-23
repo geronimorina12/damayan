@@ -242,7 +242,6 @@ const cancel = () => {
             <tr>
               <th>Select</th>
               <th>Name</th>
-              <th>Age</th>
             </tr>
           </thead>
           <tbody>
@@ -251,7 +250,6 @@ const cancel = () => {
                 <input type="checkbox" :value="member" v-model="selectedMembers" />
               </td>
               <td>{{ member.first_name }} {{ member.last_name }}</td>
-              <td>{{ member.age }}</td>
             </tr>
             <tr v-if="filteredMembers.length === 0">
               <td colspan="3" class="text-center">No members found.</td>

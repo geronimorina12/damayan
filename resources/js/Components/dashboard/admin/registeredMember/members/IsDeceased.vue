@@ -166,7 +166,12 @@ const toggleReminder = () => {
   showSendToAllSelected.value = true;
   
 };
-
+// Reactive min date (tomorrow)
+const minDate = computed(() => {
+  const tomorrow = new Date()
+  tomorrow.setDate(tomorrow.getDate() + 1)
+  return tomorrow.toISOString().split('T')[0]
+})
 
 </script>
 
@@ -235,6 +240,7 @@ const toggleReminder = () => {
             class="form-control"
             :class="{ 'is-invalid': hasLastNightError }"
             v-model="form.lastNight"
+            :min="minDate"
           />
           <div v-if="hasLastNightError" class="invalid-feedback d-block">
             {{ lastNightError }}

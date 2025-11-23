@@ -109,6 +109,7 @@ watch(localStatus, debugData)
 watch(filteredMembers, () => {
   console.log("filteredMembers updated:", filteredMembers.value.length)
 })
+
 </script>
 
 <template>
@@ -118,7 +119,7 @@ watch(filteredMembers, () => {
 
     <!-- STATUS TOGGLE + SEARCH -->
     <div class="container-fluid d-flex gap-3 align-items-center mb-3 justify-content-between">
-      <div class="d-flex gap-3">
+      <!-- <div class="d-flex gap-3">
         <h5
           class="choice"
           :class="{ 'text-success': localStatus === 'paid' }"
@@ -133,12 +134,13 @@ watch(filteredMembers, () => {
         >
           UNPAID
         </h5>
-      </div>
-
-      <div class="search-box position-relative">
+      </div> -->
+ 
+      <div class="d-flex justify-content-end container-fluid">
+        <div class="search-box position-relative">
         <input
           type="text"
-          class="form-control"
+          class="form-control search-input"
           placeholder="Search by name, contact, or purok..."
           v-model="searchQuery"
         />
@@ -149,6 +151,7 @@ watch(filteredMembers, () => {
         >
           <span class="visually-hidden">Loading...</span>
         </div>
+      </div>
       </div>
     </div>
 
@@ -195,6 +198,9 @@ watch(filteredMembers, () => {
       </div>
     </div>
   </div>
+
+  
+
 </template>
 
 <style scoped>

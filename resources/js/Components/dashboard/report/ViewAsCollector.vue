@@ -94,7 +94,7 @@ const downloadAsPDF = () => {
     </svg>
   </button>
 
-  <!-- ✅ PDF Content only -->
+  <!-- PDF Content only -->
   <div ref="pdfContent" class="document-container">
     <div class="header">
       <div class="organization-name">BULAN P.R.O.T.E.C DAMAYAN FEDERATION</div>
@@ -113,7 +113,7 @@ const downloadAsPDF = () => {
         Collector Name: <span class="fw-bold">{{ contributions[0]?.collector || '' }}</span>
       </div>
       <div>
-        Purok: <span class="fw-bold">{{ contributions[0]?.purok.charAt(contributions[0]?.purok?.length - 1) || '' }}</span>
+        Purok: <span class="fw-bold">{{ contributions[0]?.purok?.charAt(contributions[0]?.purok?.length - 1) || 'all' }}</span>
       </div>
     </div>
     <div class="table-container">
@@ -134,8 +134,8 @@ const downloadAsPDF = () => {
               {{ member?.member_contribution?.first_name || 'Member' }}
               {{ member?.member_contribution?.last_name || '' }}
             </td>
-            <td>{{ member.status }}</td>
-            <td>₱{{ Math.floor(member.amount).toLocaleString() }}</td>
+            <td>{{ member.status || '' }}</td>
+            <td>₱{{ Math.floor(member.amount).toLocaleString()  || '' }}</td>
           </tr>
         </tbody>
       </table>

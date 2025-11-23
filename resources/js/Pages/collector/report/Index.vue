@@ -6,7 +6,7 @@ import SubHeaderForCollectorReport from '@/Components/dashboard/SubHeaderForColl
 import ReportTable from '@/Components/dashboard/ReportTable.vue';
 import PurokComponentForCollectorReport from '@/Components/dashboard/contribution/PurokComponentForCollectorReport.vue';
 import Toggle from '@/Components/dashboard/report/Toggle.vue';
-
+import ViewAsCollector from '@/Components/dashboard/report/ViewAsCollector.vue';
 const props = defineProps({
     contributions: { type: Array, default: () => [] },
     activePurok: { type: String, default: () => 'all' },
@@ -84,6 +84,13 @@ const getUnpaidMembers = computed(() => {
 });
 
 const getMembersCount = computed(() => getMembers.value.length);
+const showReportModal = ref(false);
+const openReportModal = () => {
+    showReportModal.value = true;
+    console.log("Report Modal Opened");
+}
+const closeReportModal = () => showReportModal.value = false;
+
 </script>
 
 <template>
@@ -102,7 +109,9 @@ const getMembersCount = computed(() => getMembers.value.length);
               :purok="getActivePurok"
             />
           </div>
-
+       <div class="action-buttons">
+          <button class="btn btn-dark view-report" @click="openReportModal">View Reports</button>
+        </div>
             <div class="purok-container container-fluid d-flex justify-content-end align-items-center">
                 <PurokComponentForCollectorReport
                     :activePurok="getActivePurok"
@@ -124,6 +133,311 @@ const getMembersCount = computed(() => getMembers.value.length);
                 :contributionsIds="getContributionsIds"
                 :members="getMembers"
             />
+            
+            <!-- Report Modal -->
+            <div 
+            v-if="showReportModal" 
+            class="custom-modal-overlay"
+            @click.self="closeReportModal"
+            >
+            <div class="custom-modal">
+                <button class="close-btn" @click="closeReportModal">×</button>
+                <ViewAsCollector 
+                :deceased="getCurrentDeceasedMember"
+                :purok="getActivePurok"
+                />
+            </div>
+            </div>
         </CollectorLayout>
     </div>
 </template>
+
+<style scoped>
+
+.custom-modal-overlay {
+  position: fixed;
+  height: 100vh;
+  overflow-y: scroll;
+  inset: 0;
+  background-color: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding-top: 10rem;
+  padding-bottom: 1rem;
+}
+.custom-modal {
+  background: white;
+  border-radius: 10px;
+  width: 70%;
+  max-width: 900px;
+  padding: 20px;
+  position: relative;
+  animation: fadeIn 0.2s ease-in-out;
+}
+.close-btn {
+  position: absolute;
+  top: 0;
+  right: 15px;
+  font-size: 20px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 2.5rem;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* Desktop Table Styles */
+.desktop-view {
+  display: block;
+}
+.table-responsive {
+  max-height: 600px;
+  min-height: 400px;
+  overflow-y: auto;
+}
+.table-wrapper {
+  margin-top: 1rem;
+}
+
+/* Mobile Card Styles */
+.mobile-view {
+  display: none;
+}
+.mobile-cards-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 0 8px;
+  margin-top: 1rem;
+}
+.mobile-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e9ecef;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.mobile-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+.mobile-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #f1f3f4;
+}
+.mobile-member-id {
+  font-weight: 600;
+  color: #4a6fa5;
+  font-size: 0.9rem;
+}
+.mobile-purok {
+  background: #e9ecef;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+.mobile-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.mobile-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.mobile-field label {
+  font-size: 0.8rem;
+  color: #6c757d;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.mobile-value {
+  font-size: 0.95rem;
+  color: #2c3e50;
+  font-weight: 500;
+}
+.mobile-actions {
+  margin-top: 8px;
+  display: flex;
+  justify-content: flex-end;
+}
+.mobile-pay-btn, .mobile-paid-btn {
+  min-width: 120px;
+  font-size: 0.85rem;
+  padding: 6px 12px;
+}
+.action-buttons {
+  margin: 1rem 0;
+  display: flex;
+  justify-content: flex-end;
+  padding: 0 8px;
+}
+.status-btn {
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-weight: 600;
+  transition: 0.25s ease;
+  border: none;
+}
+
+.status-unpaid {
+  background: #dc3545;
+  color: white;
+}
+
+.status-unpaid:hover {
+  background: #b02a37;
+}
+
+.status-paid {
+  background: #198754;
+  color: white;
+}
+
+.status-paid:hover {
+  background: #157347;
+}
+
+.status-btn.disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.mobile-btn {
+  width: 100%;
+  margin-top: 6px;
+}
+
+/* Responsive Breakpoints */
+@media (max-width: 1024px) {
+  .desktop-view table th,
+  .desktop-view table td {
+    padding: 0.5rem 0.3rem;
+    font-size: 0.9rem;
+  }
+  .search-container {
+    min-width: 40%;
+  }
+}
+
+@media (max-width: 768px) {
+  .desktop-view {
+    display: none;
+  }
+  .mobile-view {
+    display: block;
+  }
+  .main-container {
+    height: auto;
+    min-height: 100vh;
+    padding-bottom: 20px;
+  }
+  .header-container {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+  }
+  .page-title h6 {
+    text-align: center;
+    margin: 0;
+    font-size: 1.5rem !important;
+  }
+  .search-container {
+    min-width: 100%;
+    margin-top: 0.5rem !important;
+    margin-bottom: 0.5rem !important;
+  }
+  .action-buttons {
+    justify-content: center;
+  }
+  .view-report {
+    width: 100%;
+    max-width: 200px;
+  }
+  .custom-modal {
+    width: 90%;
+    padding: 15px;
+  }
+}
+
+@media (max-width: 576px) {
+  .mobile-card {
+    padding: 12px;
+  }
+  .mobile-card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .mobile-member-id, .mobile-purok {
+    font-size: 0.85rem;
+  }
+  .mobile-value {
+    font-size: 0.9rem;
+  }
+  .mobile-actions {
+    justify-content: stretch;
+  }
+  .mobile-pay-btn, .mobile-paid-btn {
+    flex: 1;
+    min-width: auto;
+  }
+  .mobile-cards-container {
+    padding: 0 4px;
+  }
+}
+
+@media (max-width: 380px) {
+  .mobile-card {
+    padding: 10px;
+  }
+  .mobile-field label {
+    font-size: 0.75rem;
+  }
+  .mobile-value {
+    font-size: 0.85rem;
+  }
+  .mobile-pay-btn, .mobile-paid-btn {
+    font-size: 0.8rem;
+    padding: 5px 8px;
+  }
+}
+
+/* Landscape mobile optimization */
+@media (max-height: 600px) and (orientation: landscape) {
+  .table-responsive {
+    max-height: 400px;
+    min-height: 300px;
+  }
+  .mobile-cards-container {
+    max-height: 50vh;
+    overflow-y: auto;
+  }
+  .main-container {
+    height: auto;
+  }
+}
+
+/* Print Styles */
+@media print {
+  .mobile-view, .desktop-view {
+    display: block !important;
+  }
+  .action-buttons, .search-container, .view-report {
+    display: none;
+  }
+}
+</style>

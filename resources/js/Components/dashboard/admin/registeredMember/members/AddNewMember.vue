@@ -169,6 +169,10 @@ const maxBirthDate = computed(() => {
 const show = defineModel('show')
 const closeModal = ref(false)
 modalStore.triggerCloseMemberModal();
+
+const maxDate = computed(() => {
+  return new Date().toISOString().split('T')[0]
+})
 </script>
 
 <template>
@@ -352,19 +356,16 @@ modalStore.triggerCloseMemberModal();
               required 
             />
           </div>
-          <div class="col-md-6">
-            <label class="form-label small">Birthdate</label>
-            <input 
-              type="date" 
-              class="form-control" 
-              :class="{ 'is-invalid': birthDateError }"
-              v-model="beneficiarytemp.birth_date" 
-              required 
-            />
-            <div v-if="birthDateError" class="invalid-feedback d-block">
-              {{ birthDateError }}
-            </div>
-          </div>
+    <div class="col-md-6">
+  <label class="form-label small">Birthdate</label>
+  <input 
+    type="date" 
+    class="form-control" 
+    v-model="beneficiarytemp.birth_date" 
+    :max="maxDate"
+    required 
+  />
+</div>
 
           <div class="col-12 d-flex justify-content-end gap-2 mt-3">
             <button type="button" class="btn btn-secondary" @click="showAddBeneficiaryForm = false">

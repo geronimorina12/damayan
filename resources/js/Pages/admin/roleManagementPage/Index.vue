@@ -79,9 +79,9 @@ const action1Func = (userId, role) => {
 
 const editFunc = () => {
   if (userRole.value === "admin" || userRole.value === "collector") {
-    router.get(route("role.viewUser", { user: userIdClicked.value }));
+    router.get(route("role.edit", { user: userIdClicked.value }));
   } else {
-    router.get(route("role.official.view", { official: userIdClicked.value }));
+    router.get(route("role.official.edit", { official: userIdClicked.value }));
   }
 };
 
@@ -164,7 +164,10 @@ const formatDate = (dateString) => {
                   <tr v-for="(user, index) in filteredUsers" :key="index">
                     <td>{{ user.name }}</td>
                     <td>{{ user.email || "N/A" }}</td>
-                    <td>{{ user?.role || user?.position }}</td>
+                    <td>
+                      <span v-if="user.position === 'vice_president'">vice President</span>
+                      <span v-else>{{ user?.role || user?.position }}</span>
+                    </td>
                     <td>{{ getUserAcess(user.role, user.position) }}</td>
                     <td>
                       <button class="btn btn-sm btn-light">
@@ -227,7 +230,7 @@ const formatDate = (dateString) => {
                 @click="editFunc()"
               >
                 <i class="fas fa-edit"></i>
-                <span>View</span>
+                <span>Edit</span>
               </button>
               <button
                 type="button"

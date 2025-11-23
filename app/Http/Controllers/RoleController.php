@@ -52,11 +52,16 @@ class RoleController extends Controller
             'email' => 'required|email|max:255|unique:users,email,' . $user->id,
             'role' => 'required|',
             'password' => 'nullable|string|min:6',
+            'term_start' => 'nullable|date',
+            'term_end' => 'nullable|date|after_or_equal:term_start',
         ]);
 
         $user->name = $validated['name'];
         $user->email = $validated['email'];
         $user->role = $validated['role'];
+
+        $user->term_start = $validated['term_start'];
+        $user->term_end = $validated['term_end'];
 
         if (!empty($validated['password'])) {
             $user->password = Hash::make($validated['password']);
@@ -74,13 +79,16 @@ class RoleController extends Controller
             'email' => 'required|email|max:255|unique:officials,email,' . $official->id,
             'position' => 'required|',
             'password' => 'nullable|string|min:6',
+            'term_start' => 'nullable|date',
+            'term_end' => 'nullable|date|after_or_equal:term_start',
         ]);
 
         if($validated['position'] === 'president'){
         $official->name = $validated['name'];
         $official->email = $validated['email'];
         $official->position = $validated['position'];
-
+        $official->term_start = $validated['term_start'];
+        $official->term_end = $validated['term_end'];
         // Update also the admin credentials since c president mismo ang admin
         $admin = User::where('role', 'admin')->first();
         $admin->update([
