@@ -212,7 +212,7 @@ watch(() => form.term_start, (newDate) => {
         <!-- Form -->
         <form @submit.prevent="submit">
           <!-- Full Name -->
-          <label class="form-label fw-semibold">Full Nameeee</label>
+          <label class="form-label fw-semibold">Full Name</label>
           <div class="row mb-3">
             <div class="col-md-4 mb-2 mb-md-0">
               <input
