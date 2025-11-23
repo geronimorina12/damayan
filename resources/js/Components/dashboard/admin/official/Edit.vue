@@ -300,7 +300,6 @@ watch(() => form.term_start, (newDate) => {
                       <input
                         type="checkbox"
                         v-model="form.status"
-                        :disabled="form.term_start && new Date(form.term_start).getFullYear() < currentYear"
                       >
 
                       <span class="toggle-slider"></span>
@@ -309,9 +308,6 @@ watch(() => form.term_start, (newDate) => {
                 </div>
                 <div>Status</div>
           </div>
-          <p class="text-danger"
-   v-if="form.term_start && new Date(form.term_start).getFullYear() < currentYear"> This official has ended their term.</p>
-
           <!-- Submit Button -->
           <button
             type="submit"
