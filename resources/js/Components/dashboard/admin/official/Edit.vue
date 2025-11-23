@@ -275,7 +275,6 @@ watch(() => form.term_start, (newDate) => {
               type="date"
               id="term_start"
               class="form-control"
-              :min="termStartMax"
               required
             />
           </div>
@@ -288,7 +287,6 @@ watch(() => form.term_start, (newDate) => {
               type="date"
               id="term_end"
               class="form-control"
-              :min="termEndMin"
               required
             />
           </div>
