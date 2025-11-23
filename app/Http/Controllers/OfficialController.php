@@ -35,6 +35,7 @@ public function index() {
     $officials->each(function ($official) use ($currentYear) {
         if ($official->term_end && Carbon::parse($official->term_end)->year == $currentYear) {
             $official->status = 0; // boolean false
+            $official->save();
         }
     });
 

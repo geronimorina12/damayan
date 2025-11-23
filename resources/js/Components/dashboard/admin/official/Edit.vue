@@ -148,21 +148,22 @@ const termStartMax = computed(() => `${currentYear - 3}-12-31`)
 // Term End: only dates with year greater than today
 const termEndMin = computed(() => `${currentYear + 1}-01-01`)
 
-watch(() => form.term_start, (newValue) => {
-  if (!newValue) return;
+// Enable or disable status based on term_start year
+watch(() => form.term_start, (newDate) => {
+  if (!newDate) return;
 
-  const selected = new Date(newValue);
-  const twoYearsFromNow = new Date();
-  twoYearsFromNow.setFullYear(twoYearsFromNow.getFullYear() + 2);
+  const year = new Date(newDate).getFullYear();
+  const currentYear = new Date().getFullYear();
 
-  // Compare only year-month-day
-  const isTwoYears = selected.toISOString().slice(0, 10) === twoYearsFromNow.toISOString().slice(0, 10);
-
-  // If term_start is exactly 2 years from now → enable status toggle again
-  if (isTwoYears) {
+  // If term_start is this year or greater → allow editing status
+  if (year >= currentYear) {
     form.status = 1; // active
+  } else {
+    // If term_start is in the past → disable status and show warning
+    form.status = 0;
   }
 });
+
 
 </script>
 
@@ -211,7 +212,7 @@ watch(() => form.term_start, (newValue) => {
         <!-- Form -->
         <form @submit.prevent="submit">
           <!-- Full Name -->
-          <label class="form-label fw-semibold">Full Name</label>
+          <label class="form-label fw-semibold">Full Nameeee</label>
           <div class="row mb-3">
             <div class="col-md-4 mb-2 mb-md-0">
               <input
@@ -299,7 +300,7 @@ watch(() => form.term_start, (newValue) => {
                       <input
                         type="checkbox"
                         v-model="form.status"
-                        :disabled="form.status == 0"
+                        :disabled="form.term_start && new Date(form.term_start).getFullYear() < currentYear"
                       >
 
                       <span class="toggle-slider"></span>
@@ -308,7 +309,8 @@ watch(() => form.term_start, (newValue) => {
                 </div>
                 <div>Status</div>
           </div>
-          <p class="text-danger" v-if="form.status == 0"> This official has ended their term.</p>
+          <p class="text-danger"
+   v-if="form.term_start && new Date(form.term_start).getFullYear() < currentYear"> This official has ended their term.</p>
 
           <!-- Submit Button -->
           <button
