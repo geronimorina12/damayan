@@ -218,9 +218,9 @@ const togglePayment = (mem) => {
         />
         </div>
        
-        <div class="action-buttons">
+        <!-- <div class="action-buttons">
           <button class="btn btn-dark view-report" @click="openReportModal">View Reports</button>
-        </div>
+        </div> -->
 
         <!-- Desktop Table View -->
         <div class="table-wrapper mt-3 desktop-view" v-if="filteredMembers.length > 0">

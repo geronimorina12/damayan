@@ -84,7 +84,13 @@ const editFunc = () => {
     router.get(route("role.official.edit", { official: userIdClicked.value }));
   }
 };
-
+const viewFunc = () => {
+  if (userRole.value === "admin" || userRole.value === "collector") {
+    router.get(route("role.viewUser", { user: userIdClicked.value }));
+  } else {
+    router.get(route("role.official.view", { official: userIdClicked.value }));
+  }
+};
 const deleteFunc = () => {
   if (confirm("Are you sure you want to delete this user?")) {
     router.delete(route("role.deleteUser", { user: userIdClicked.value }), {
@@ -228,10 +234,23 @@ const formatDate = (dateString) => {
                 class="btn btn-edit text-dark"
                 data-bs-dismiss="modal"
                 @click="editFunc()"
+                v-if="userRole == 'admin' || userRole == 'president'"
               >
                 <i class="fas fa-edit"></i>
                 <span>Edit</span>
               </button>
+
+              <button
+                type="button"
+                class="btn btn-edit text-dark"
+                data-bs-dismiss="modal"
+                @click="viewFunc()"
+                v-else
+              >
+                <i class="fas fa-eye"></i>
+                <span>View</span>
+              </button>
+
               <button
                 type="button"
                 class="btn btn-delete text-dark"

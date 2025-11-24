@@ -128,11 +128,11 @@ const closeReportModal = () => showReportModal.value = false;
                 :unpaidMembers="getUnpaidMembers"
             />
 
-            <ReportTable 
+            <!-- <ReportTable 
                 :activeStatus="getActiveStatus"
                 :contributionsIds="getContributionsIds"
                 :members="getMembers"
-            />
+            /> -->
             
             <!-- Report Modal -->
             <div 
