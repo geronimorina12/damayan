@@ -49,23 +49,34 @@ class SmsNotificationController extends Controller
     // 1. If we HAVE a distribution → get that member
     // ---------------------------------------------
     if ($distributions) {
-        $deceased = DeathReportModel::where('member_id', $distributions->report_id)
+
+        // IMPORTANT: If report_id refers to death_report.id, use "id"
+        $deceased = DeathReportModel::where('id', $distributions->report_id)
             ->with(['member:id,first_name,last_name'])
             ->first();
-        $currentFund = 0;
-        $currentFund = AssistanceDistribution::where('report_id', $deceased->member_id)
-            ->sum('total_amount');
-        if ($deceased && $deceased->member) {
-            $deceasedName = $deceased->member->first_name . " " . $deceased->member->last_name;
+
+        if ($deceased) {
+
+            // Only get fund if a death report is found
+            $currentFund = AssistanceDistribution::where('report_id', $deceased->id)
+                ->sum('total_amount');
+
+            // If member exists, use member's full name
+            if ($deceased->member) {
+                $deceasedName = $deceased->member->first_name . " " . $deceased->member->last_name;
+            } else {
+                // fallback to death report's deceased_name if no member linked
+                $deceasedName = $deceased->deceased_name;
+            }
         }
     }
 
     // ---------------------------------------------------------
-    // 2. If NO distribution → use the LATEST DeathReport record
+    // 2. If NO distribution OR still no name → use latest report
     // ---------------------------------------------------------
     if (!$deceasedName) {
         $latestDeath = DeathReportModel::with(['member:id,first_name,last_name'])
-            ->latest() // Get the most recent death report
+            ->latest()
             ->first();
 
         Log::info("Latest Death Report fetched: " . ($latestDeath ? json_encode($latestDeath) : 'None'));
@@ -74,13 +85,14 @@ class SmsNotificationController extends Controller
             if ($latestDeath->member) {
                 $deceasedName = $latestDeath->member->first_name . " " . $latestDeath->member->last_name;
             } else {
-                // fallback to the deceased_name in the death report
                 $deceasedName = $latestDeath->deceased_name;
             }
         }
     }
 
-    // Final fallback if no deceased name is found at all
+    // ---------------------------------------------------------
+    // Final fallback
+    // ---------------------------------------------------------
     if (!$deceasedName) {
         $deceasedName = "the deceased member";
         Log::warning("No deceased name found in DeathReportModel");
@@ -98,6 +110,7 @@ class SmsNotificationController extends Controller
         'fundAmount' => $currentFund,
     ]);
 }
+
     public function getMembers(){
         $members = memberModel::select('id', 'first_name', 'last_name')->get()->toArray();
         return response()->json(['members' => $members]);
