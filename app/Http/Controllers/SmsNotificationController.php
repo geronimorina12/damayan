@@ -74,7 +74,7 @@ class SmsNotificationController extends Controller
     // 2. If NO distribution OR still no name → use latest report
     // ---------------------------------------------------------
     if (!$deceasedName) {
-        $latestDeath = DeathReportModel::with(['member:member_id,first_name,last_name'])
+        $latestDeath = DeathReportModel::with(['member:id,first_name,last_name'])
             ->latest()
             ->first();
 
