@@ -50,15 +50,14 @@ class SmsNotificationController extends Controller
     // ---------------------------------------------
     if ($distributions) {
 
-        // IMPORTANT: If report_id refers to death_report.id, use "id"
-        $deceased = DeathReportModel::where('id', $distributions->report_id)
+        $deceased = DeathReportModel::where('member_id', $distributions->report_id)
             ->with(['member:id,first_name,last_name'])
             ->first();
 
         if ($deceased) {
 
             // Only get fund if a death report is found
-            $currentFund = AssistanceDistribution::where('report_id', $deceased->id)
+            $currentFund = AssistanceDistribution::where('report_id', $deceased->member_id)
                 ->sum('total_amount');
 
             // If member exists, use member's full name
@@ -75,7 +74,7 @@ class SmsNotificationController extends Controller
     // 2. If NO distribution OR still no name → use latest report
     // ---------------------------------------------------------
     if (!$deceasedName) {
-        $latestDeath = DeathReportModel::with(['member:id,first_name,last_name'])
+        $latestDeath = DeathReportModel::with(['member:member_id,first_name,last_name'])
             ->latest()
             ->first();
 
