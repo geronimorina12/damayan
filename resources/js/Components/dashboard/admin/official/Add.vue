@@ -245,7 +245,7 @@ const fetchInactiveCollectorsCount = async () => {
 };
 
 const validateCollectorCount = () => {
-    if (getInactiveCollectors.value >= 1 && getActiveCollectors.value < 4) {
+    if (getInactiveCollectors.value >= 1 || collectors.value < 4) {
         return true;
     }
     return false;

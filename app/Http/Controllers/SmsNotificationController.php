@@ -58,26 +58,31 @@ class SmsNotificationController extends Controller
         }
     }
 
-    // --------------------------------------------------------
-    // 2. If NO distribution → use the FIRST DeathReport record
-    // --------------------------------------------------------
-if (!$deceasedName) {
-    $firstDeath = DeathReportModel::with(['member:id,first_name,last_name'])
-        ->orderBy('created_at', 'asc')
-        ->first();
+    // ---------------------------------------------------------
+    // 2. If NO distribution → use the LATEST DeathReport record
+    // ---------------------------------------------------------
+    if (!$deceasedName) {
+        $latestDeath = DeathReportModel::with(['member:id,first_name,last_name'])
+            ->latest() // Get the most recent death report
+            ->first();
 
-    Log::info("First Death Report fetched: " . ($firstDeath ? $firstDeath : 'None'));
+        Log::info("Latest Death Report fetched: " . ($latestDeath ? json_encode($latestDeath) : 'None'));
 
-    if ($firstDeath) {
-        if ($firstDeath->member) {
-            $deceasedName = $firstDeath->member->first_name . " " . $firstDeath->member->last_name;
-        } else {
-            // fallback to the deceased_name in the death report
-            $deceasedName = $firstDeath->deceased_name;
+        if ($latestDeath) {
+            if ($latestDeath->member) {
+                $deceasedName = $latestDeath->member->first_name . " " . $latestDeath->member->last_name;
+            } else {
+                // fallback to the deceased_name in the death report
+                $deceasedName = $latestDeath->deceased_name;
+            }
         }
     }
-}
 
+    // Final fallback if no deceased name is found at all
+    if (!$deceasedName) {
+        $deceasedName = "the deceased member";
+        Log::warning("No deceased name found in DeathReportModel");
+    }
 
     // Final SMS text
     $fundUpdates = "Total money disbursed so far for {$deceasedName} is {$currentFund}. Thank you for your continuous support.";

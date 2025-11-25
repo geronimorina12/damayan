@@ -296,6 +296,19 @@ const displayPaginationLinks = computed(() => {
   // Otherwise show real pagination links
   return props.members.links
 })
+const showPagination = computed(() => {
+  // Hide pagination when searching AND no results
+  if (searchQuery.value.trim() !== "" && getMembers.value.length === 0) {
+    return false
+  }
+
+  // Hide pagination if original data has no pages
+  if (!props.members.links || props.members.links.length <= 1) {
+    return false
+  }
+
+  return true
+})
 
 </script>
 
@@ -412,19 +425,19 @@ const displayPaginationLinks = computed(() => {
           </table>
         </div>
 
-        <div class="pagination-wrapper mt-3 mb-5">
-          <div class="pagination-controls">
-            <button
-              v-for="(link, index) in displayPaginationLinks"
-              :key="index"
-              class="btn pagination-btn"
-              :class="link.active ? 'btn-primary' : 'btn-outline-primary'"
-              @click="goToPage(link.url)"
-              v-html="link.label"
-            />
+       <div v-if="showPagination" class="pagination-wrapper mt-3 mb-5">
+      <div class="pagination-controls">
+        <button
+          v-for="(link, index) in displayPaginationLinks"
+          :key="index"
+          class="btn pagination-btn"
+          :class="link.active ? 'btn-primary' : 'btn-outline-primary'"
+          @click="goToPage(link.url)"
+          v-html="link.label"
+        />
+      </div>
+    </div>
 
-          </div>
-        </div>
       </div>
     </div>
 

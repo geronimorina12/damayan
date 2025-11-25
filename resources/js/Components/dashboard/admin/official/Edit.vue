@@ -164,7 +164,12 @@ watch(() => form.term_start, (newDate) => {
   }
 });
 
-
+const statusBoolean = computed({
+  get: () => Boolean(form.status),
+  set: (value) => {
+    form.status = value ? 1 : 0
+  }
+})
 </script>
 
 
@@ -291,21 +296,21 @@ watch(() => form.term_start, (newDate) => {
             />
           </div>
 
-          <div class="container px-0 px-0 d-flex flex-row justify-content-start align-items-center gap-2 mb-2">
-             <div class="status-cell">
-                  <div class="status-toggle">
-                    <label class="toggle-switch">
-                      <input
-                        type="checkbox"
-                        v-model="form.status"
-                      >
-
-                      <span class="toggle-slider"></span>
-                    </label>
-                  </div>
-                </div>
-                <div>Status</div>
+          
+        <div class="container px-0 px-0 d-flex flex-row justify-content-start align-items-center gap-2 mb-2">
+          <div class="status-cell">
+            <div class="status-toggle">
+              <label class="toggle-switch">
+                <input
+                  type="checkbox"
+                  v-model="statusBoolean" 
+                >
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
           </div>
+          <div>Status</div>
+        </div>
           <!-- Submit Button -->
           <button
             type="submit"

@@ -22,8 +22,14 @@ const groupedContributions = computed(() => {
 
   contributions.value.forEach((item) => {
     if (!item.collector) return;
-    if (!groups[item.collector]) groups[item.collector] = 0;
-    groups[item.collector] += parseFloat(item.amount);
+
+    // Normalize name (fix double spaces, trim etc.)
+    const collector = item.collector
+      .replace(/\s+/g, " ") // collapse multiple spaces
+      .trim();
+
+    if (!groups[collector]) groups[collector] = 0;
+    groups[collector] += parseFloat(item.amount);
   });
 
   return Object.keys(groups).map((collector) => ({
@@ -31,6 +37,7 @@ const groupedContributions = computed(() => {
     collected: groups[collector],
   }));
 });
+
 
 // Filter
 const filteredData = computed(() => {

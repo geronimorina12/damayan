@@ -6,17 +6,18 @@ import AdminLayout from '@/Layouts/AdminLayout.vue'
 const props = defineProps({
   deathReport: { type: Object, default: () => ({}) },
   scheduleContribution: { type: Object, default: () => ({}) },
-  reminders: { type: Object, default: () => ({}) },
-  fundUpdates: { type: Object, default: () => ({}) },
+  reminders: { type: String, default: '' }, // Changed to String
+  fundUpdates: { type: String, default: '' }, // Changed to String
   members: { type: Array, default: () => [] },
   fundAmount: { type: Number, default: 0 }
 })
+console.log('Props received in SmsPage:', props)
 
 // Use computed properties instead of ref + watch
 const getDeathReport = computed(() => props.deathReport)
 const getScheduleContribution = computed(() => props.scheduleContribution)
 const getReminders = computed(() => props.reminders)
-const getFundUpdates = computed(() => props.fundUpdates)
+const getFundUpdates = computed(() => props.fundUpdates) // This is now a string
 const getMembers = computed(() => props.members)
 const getFundAmount = computed(() => props.fundAmount)
 
@@ -66,7 +67,7 @@ function sendScheduleContribution() {
 
 function sendReminders() {
   router.post(route('smsNotification.sendReminders'), {
-    message: getReminders.value.message,
+    message: getReminders.value, // Removed .message since it's a string
   }, {
     onSuccess: () => alert('Reminders sent successfully!'),
     onError: () => alert('Error sending Reminders')
@@ -75,7 +76,7 @@ function sendReminders() {
 
 function sendFundUpdates() {
   router.post(route('smsNotification.sendFundUpdates'), {
-    message: getFundUpdates.value,
+    message: getFundUpdates.value, // Removed .message since it's a string
   }, {
     onSuccess: () => alert('Fund Updates sent successfully!'),
     onError: (e) => console.log('Error sending Fund Updates', e)
@@ -101,7 +102,8 @@ const handleSendFundUpdates = () => {
               <label for="fundUpdates" class="form-label">Fund Updates</label>
             </div>
 
-            <textarea :value="getFundUpdates.message" id="fundUpdates" class="form-control" disabled></textarea>
+            <!-- Removed .message since getFundUpdates is a string -->
+            <textarea :value="getFundUpdates" id="fundUpdates" class="form-control" disabled></textarea>
 
             <div class="container-fluid d-flex flex-row align-items-center gap-3 justify-content-end mt-3">
               <div></div>
@@ -128,7 +130,6 @@ const handleSendFundUpdates = () => {
               </div>
               <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" @click="cancelSend">Ok</button>
-                <!-- <button type="button" class="btn btn-primary" @click="confirmSend">Send Anyway</button> -->
               </div>
             </div>
           </div>

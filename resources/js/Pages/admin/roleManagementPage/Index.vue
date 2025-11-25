@@ -237,7 +237,7 @@ const formatDate = (dateString) => {
                 v-if="userRole == 'admin' || userRole == 'president'"
               >
                 <i class="fas fa-edit"></i>
-                <span>Edit</span>
+                <span>Update</span>
               </button>
 
               <button

@@ -104,7 +104,10 @@ const formatDate = (dateString) => {
                       <tbody>
                         <tr v-for="(official) in getOfficials" :key="official.id">
                           <td class="name-cell">{{ official.name }}</td>
-                          <td class="position-cell">{{ official.position || 'collector' }}</td>
+                          <td class="position-cell">
+                            <span v-if="official.position == 'vice_president'">vice president</span>
+                            <span v-else>{{ official.position || 'collector' }}</span>
+                          </td>
                           <td class="term-cell">
                             {{ formatDate(official.term_start) }} - {{ formatDate(official.term_end) }}
                           </td>

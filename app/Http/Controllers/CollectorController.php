@@ -49,6 +49,9 @@ class CollectorController extends Controller
     }
     public function collectorCount(){
         $collectors = User::where('role', 'collector')->count();
+        // $collectorsData = User::where('role', 'collector')->get();
+        // Log::info(['collector count'=>$collectors]);
+        // Log::info(['collector data'=>$collectorsData->name]);
         return response()->json(['collectors' => $collectors],200);
     }
 }

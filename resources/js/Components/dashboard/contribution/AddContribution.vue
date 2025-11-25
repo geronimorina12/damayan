@@ -99,6 +99,24 @@ const submit = () => {
         },
     });
 };
+const purokSelected = ref(false);
+watch(
+  () => form.purok,
+  (newPurok) => {
+    if (!newPurok) return;
+
+    purokSelected.value = true; // ✔ mark that user selected a purok
+
+    const purokNumber = parseInt(newPurok.replace("purok", ""), 10);
+
+    const collector = getCollectors.value.find(
+      (c) => Number(c.purok) === purokNumber
+    );
+
+    form.collector = collector ? collector.name : "";
+  }
+);
+
 </script>
 
 <template>
@@ -111,6 +129,7 @@ const submit = () => {
                             <h4 class="mb-0">Create Contribution</h4>
                         </div>
 
+                        
                         <div class="card-body p-4">
                             <!-- Alert -->
                             <div
@@ -122,6 +141,22 @@ const submit = () => {
                             </div>
 
                             <form @submit.prevent="submit">
+
+                                    <!-- Deceased Member -->
+                                <div class="mb-3">
+                                    <label class="form-label">Select Deceased Member</label>
+                                    <select v-model="form.deceased_id" class="form-control">
+                                        <option disabled value="">-- Select Deceased Member --</option>
+                                        <option
+                                            v-for="deceased in getDeceasedMembersData"
+                                            :key="deceased.id"
+                                            :value="deceased.member_id"
+                                        >
+                                            {{ deceased.deceased_name }}
+                                        </option>
+                                    </select>
+                                </div>
+
                                 <!-- Member Dropdown -->
                                 <div class="mb-3">
                                     <label class="form-label">Member Name</label>
@@ -181,23 +216,12 @@ const submit = () => {
                                     />
                                 </div>
 
-                                <div class="text-danger" v-else>No Collector for that purok.</div>
+                                <div class="text-danger" v-if="purokSelected && !form.collector">
+    No Collector for that purok.
+</div>
 
-                                <!-- Deceased Member -->
-                                <div class="mb-3">
-                                    <label class="form-label">Select Deceased Member</label>
-                                    <select v-model="form.deceased_id" class="form-control">
-                                        <option disabled value="">-- Select Deceased Member --</option>
-                                        <option
-                                            v-for="deceased in getDeceasedMembersData"
-                                            :key="deceased.id"
-                                            :value="deceased.member_id"
-                                        >
-                                            {{ deceased.deceased_name }}
-                                        </option>
-                                    </select>
-                                </div>
 
+                            
                                 <!-- Submit -->
                                 <div class="d-flex justify-content-end">
                                     <button
