@@ -52,7 +52,9 @@ class SmsNotificationController extends Controller
         $deceased = DeathReportModel::where('member_id', $distributions->report_id)
             ->with(['member:id,first_name,last_name'])
             ->first();
-
+        $currentFund = 0;
+        $currentFund = AssistanceDistribution::where('report_id', $deceased->deceased_id)
+            ->sum('total_amount');
         if ($deceased && $deceased->member) {
             $deceasedName = $deceased->member->first_name . " " . $deceased->member->last_name;
         }
