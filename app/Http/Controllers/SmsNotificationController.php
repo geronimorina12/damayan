@@ -38,7 +38,8 @@ class SmsNotificationController extends Controller
     $scheduleContribution = SmsNotificationSaved::where('type', 'scheduleContribution')->latest()->first();
     $reminders = SmsNotificationSaved::where('type', 'reminders')->latest()->first();
 
-    $currentFund = AssistanceDistribution::sum('total_amount');
+    // $currentFund = AssistanceDistribution::sum('total_amount');
+    
 
     // Latest assistance distribution (may be null)
     $distributions = AssistanceDistribution::latest()->first();
@@ -48,17 +49,16 @@ class SmsNotificationController extends Controller
     // ---------------------------------------------
     // 1. If we HAVE a distribution → get that member
     // ---------------------------------------------
-    if ($distributions) {
+    // if ($distributions) {
 
-        $deceased = DeathReportModel::where('member_id', $distributions->report_id)
-            ->with(['member:id,first_name,last_name'])
+        $deceased = DeathReportModel::with(['member:id,first_name,last_name'])
             ->first();
 
         if ($deceased) {
 
             // Only get fund if a death report is found
-            $currentFund = AssistanceDistribution::where('report_id', $deceased->member_id)
-                ->sum('total_amount');
+            $currentFund = ContributionModel::where('deceased_id', $deceased->member_id)
+                ->sum('amount');
 
             // If member exists, use member's full name
             if ($deceased->member) {
@@ -68,7 +68,7 @@ class SmsNotificationController extends Controller
                 $deceasedName = $deceased->deceased_name;
             }
         }
-    }
+    // }
 
     // ---------------------------------------------------------
     // 2. If NO distribution OR still no name → use latest report
