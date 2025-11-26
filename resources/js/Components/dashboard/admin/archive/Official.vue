@@ -134,12 +134,14 @@ const showTransactionInfo = async (official) => {
 }
 
 const getContributionsList = async (id) => {
+  console.log('Fetching contributions for official ID:', id)
   try {
     const response = await axios.get(`/contribution/list/${id}`)
     contributions.value = Array.isArray(response.data)
       ? response.data
       : [response.data]
     totalAmount.value = contributions.value.reduce((sum, c) => sum + Number(c.amount || 0), 0)
+    console.log('Contributions fetched:', contributions.value || 'No data')
   } catch (error) {
     console.error('Error fetching contributions:', error)
     showAlert('Error', 'Unable to fetch contribution data.')

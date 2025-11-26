@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\ArchiveContributions;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class ArchiveContribution extends Controller
 {
@@ -28,11 +30,18 @@ class ArchiveContribution extends Controller
             'message' => 'Archived contribution added successfully!'
         ], 201);
     }
-     public function getContributions()
-    {
-        $contributions = ArchiveContributions::all();
-        if($contributions){
-            return response()->json($contributions);
-        }
+    public function getContributions($id)
+{
+    $user = User::onlyTrashed()->find($id);
+
+    if (!$user) {
+        Log::info('user not found');
+        return response()->json(['error' => 'User not found'], 404);
     }
+
+    $contributions = ArchiveContributions::where('collector', $user->name)->get();
+
+    return response()->json($contributions);
+}
+
 }
