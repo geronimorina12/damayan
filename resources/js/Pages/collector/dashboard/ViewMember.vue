@@ -19,6 +19,10 @@ watch(
   },
   { immediate: true }
 );
+const formatDate = (dateString) => {
+    const options = { year: "numeric", month: "long", day: "numeric" };
+    return new Date(dateString).toLocaleDateString(undefined, options);
+};
 </script>
 
 <template>
@@ -71,6 +75,7 @@ watch(
               </tr>
             </tbody>
           </table>
+               <p class="text-muted">Registered at: {{ formatDate(getMember.created_at) }}</p>
         </div>
       </div>
 
