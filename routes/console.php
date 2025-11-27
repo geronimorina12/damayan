@@ -8,10 +8,14 @@ Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
 
-// Schedule::command('daily:task')->daily();
 Artisan::command('daily:task', function () {
     $this->call(\App\Console\Commands\DailyTask::class);
 });
+
 Artisan::command('is:active', function () {
     $this->call(\App\Console\Commands\IsActive::class);
 });
+
+// ⬇⬇ The new schedule for Laravel 11
+Schedule::command('daily:task')->daily();
+Schedule::command('is:active')->daily();
