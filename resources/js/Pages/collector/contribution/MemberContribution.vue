@@ -26,6 +26,8 @@ let selectedCollector = ref('');
 let getCurrentCollector = ref({});
 const getCurrentDeceasedMembers = ref([]);
 const getCurrentDeceasedMember = ref({});
+// Add this with other ref declarations
+const showSuccessModal = ref(false);
 
 watch(() => props.member, (newData) => {
   if (!newData) {
@@ -109,7 +111,13 @@ const preparePayment = (memberId, memberPurok, contact_number) => {
     },
     {
       onSuccess: () => {
-        alert('Schedule Contribution sent successfully!');
+        // Show success modal instead of alert
+        showSuccessModal.value = true;
+        
+        // Close the modal after 3 seconds automatically
+        setTimeout(() => {
+          showSuccessModal.value = false;
+        }, 3000);
       },
       onError: () => {
         alert('Error sending Schedule Contribution');
@@ -118,6 +126,9 @@ const preparePayment = (memberId, memberPurok, contact_number) => {
   );
 };
 
+const closeSuccessModal = () => {
+  showSuccessModal.value = false;
+};
 // Confirm payment and update UI
 const confirmPayment = () => {
   form.member_id = selectedMemberId.value;
@@ -386,6 +397,31 @@ const togglePayment = (mem) => {
         />
       </div>
     </div>
+
+    <!-- Success Payment Modal -->
+<div 
+  v-if="showSuccessModal" 
+  class="success-modal-overlay"
+  @click="closeSuccessModal"
+>
+  <div class="success-modal" @click.stop>
+    <div class="success-modal-icon">
+      <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" fill="currentColor" class="bi bi-check-circle" viewBox="0 0 16 16">
+        <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+        <path d="M10.97 4.97a.235.235 0 0 0-.02.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-1.071-1.05z"/>
+      </svg>
+    </div>
+    <h3 class="success-modal-title">Payment Successful!</h3>
+    <p class="success-modal-message">
+      Schedule Contribution has been sent successfully to the member.
+    </p>
+    <div class="success-modal-actions">
+      <button class="btn btn-success" @click="closeSuccessModal">
+        OK
+      </button>
+    </div>
+  </div>
+</div>
   </CollectorLayout>
 </template>
 
@@ -579,7 +615,130 @@ const togglePayment = (mem) => {
   width: 100%;
   margin-top: 6px;
 }
+/* Success Modal Styles */
+.success-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10000;
+  animation: fadeIn 0.3s ease;
+}
 
+.success-modal {
+  background: white;
+  border-radius: 16px;
+  padding: 40px 30px;
+  text-align: center;
+  max-width: 400px;
+  width: 90%;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: slideUp 0.4s ease;
+  position: relative;
+}
+
+.success-modal-icon {
+  margin-bottom: 24px;
+  color: #28a745;
+  animation: scaleIn 0.5s ease 0.1s both;
+}
+
+.success-modal-icon svg {
+  filter: drop-shadow(0 4px 8px rgba(40, 167, 69, 0.3));
+}
+
+.success-modal-title {
+  color: #28a745;
+  margin-bottom: 16px;
+  font-weight: 700;
+  font-size: 1.8rem;
+}
+
+.success-modal-message {
+  color: #495057;
+  margin-bottom: 30px;
+  font-size: 1.1rem;
+  line-height: 1.5;
+}
+
+.success-modal-actions {
+  display: flex;
+  justify-content: center;
+}
+
+.success-modal-actions .btn {
+  padding: 10px 30px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  border-radius: 50px;
+  min-width: 120px;
+  transition: all 0.3s ease;
+}
+
+.success-modal-actions .btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(40, 167, 69, 0.3);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Responsive styles for the modal */
+@media (max-width: 768px) {
+  .success-modal {
+    padding: 30px 20px;
+    max-width: 320px;
+  }
+  .success-modal-title {
+    font-size: 1.5rem;
+  }
+  .success-modal-message {
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .success-modal {
+    padding: 25px 15px;
+    max-width: 280px;
+  }
+  .success-modal-title {
+    font-size: 1.3rem;
+  }
+  .success-modal-icon svg {
+    width: 48px;
+    height: 48px;
+  }
+}
 /* Responsive Breakpoints */
 @media (max-width: 1024px) {
   .desktop-view table th,

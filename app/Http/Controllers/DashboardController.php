@@ -21,6 +21,8 @@ class DashboardController extends Controller
         return redirect()->route('login');
       }
 
+      $this->filterMemberStatus();
+      
       $currentDeceasedMemberId = DeathReportModel::where('iscurrent', true)
       ->latest('created_at') 
       ->value('member_id');
@@ -169,6 +171,22 @@ public function search(Request $request)
     return response()->json([
         'members' => $members,
     ]);
+}
+
+ public function filterMemberStatus()
+{
+    // Get all members
+    $members = memberModel::select('id')->get();
+    
+    // Get all member IDs from contributions
+    $contributedMemberIds = ContributionModel::pluck('member_id')->unique()->toArray();
+    
+    // Update status for each member
+    foreach ($members as $member) {
+        $status = in_array($member->id, $contributedMemberIds) ? 'active' : 'inactive';
+        
+        MemberModel::where('id', $member->id)->update(['status' => $status]);
+    }
 }
 
 }
